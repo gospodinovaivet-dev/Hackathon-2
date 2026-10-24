@@ -147,6 +147,7 @@ const Food = {
       const info = {
         condition: s.condition || "", confidence: s.confidence || "high", note: s.note || "",
         container: s.container || e?.container || "",
+        photoKey: e?.photoKey || s.photoKey || null,
         category: CATEGORY_IDS.includes(s.category) && s.category !== "unknown" ? s.category : (e?.category || s.category || ""),
         box: s.box || null   // where it is in this photo; only used to draw the circles, not saved
       };

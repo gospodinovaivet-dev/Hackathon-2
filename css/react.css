@@ -1,0 +1,52 @@
+/* React application layout over the shared Strawberry Matcha design tokens. */
+:root { color-scheme: light; }
+.react-header { position:relative; z-index:1; max-width: 1120px; margin: auto; padding: 0 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.brand { background:none; border:0; color:inherit; font:800 28px var(--font-display); cursor:pointer; }
+.header-actions { display:flex; gap:14px; align-items:center; }
+.header-actions .btn { background:var(--sky); }
+.account-name { font-weight:800; }
+.eyebrow { display:block; font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:12px; }
+.pink-text { color:#a84665; }
+.auth-layout { display:grid; grid-template-columns:1.15fr 1fr; gap:60px; align-items:center; padding:50px 0; }
+.auth-intro h1 { font-size:clamp(42px,6vw,66px); max-width:9ch; }
+.auth-intro .lead { font-size:18px; margin-top:20px; }
+.auth-photos { display:flex; gap:12px; margin-top:30px; }
+.auth-photos .product-photo { width:calc((100% - 24px) / 3); }
+.auth-card { padding:30px; gap:18px; }
+.notice { padding:14px 18px; background:var(--mint); color:var(--ink); border-radius:18px; }
+.workspace-toolbar { display:flex; flex-wrap:wrap; gap:18px; align-items:end; margin-bottom:30px; }
+.workspace-toolbar nav { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+.workspace-toolbar label { min-width:150px; }
+.workspace-toolbar [aria-current="page"] { background:var(--green); color:var(--green-ink); border-color:var(--green); }
+.section-heading { margin-bottom:24px; }
+.product-copy p, .product-copy h3 { margin:0 0 4px; }
+.product-photo.large { width:100%; max-width:260px; justify-self:center; }
+.fridge-map.card { width:100%; justify-items:stretch; gap:10px; }
+.fridge-map h2 { margin-bottom:6px; }
+.fridge-map .zone[aria-pressed="true"] { outline:3px solid var(--green); outline-offset:2px; }
+.food-editor { width:min(680px,100%); max-height:90vh; overflow:auto; }
+.review-list { grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr)); }
+.review-food .product-info h2 { margin-bottom:8px; }
+.narrow-card { max-width:540px; margin:40px auto; }
+.history-row { grid-template-columns:auto minmax(0,1fr) auto; align-items:center; }
+.app-footer { text-align:center; margin:50px 0 0; font-size:13px; color:var(--muted); }
+.alert-item { margin-bottom:20px; justify-content:space-between; flex-wrap:wrap; }
+button:disabled { cursor:wait; opacity:.6; }
+button:focus-visible, summary:focus-visible { outline:3px solid var(--green); outline-offset:3px; }
+@media(min-width:1100px) { .eat-layout { grid-template-columns:320px minmax(0,1fr); } }
+@media(max-width:700px) {
+ .auth-layout { grid-template-columns:1fr; gap:25px; padding-top:10px; }
+ .auth-intro h1 { max-width:12ch; font-size:42px; }
+ .auth-photos { max-width:320px; }
+ .react-header { position:relative; z-index:1; padding:0 16px; }
+ .brand { font-size:23px; padding:0; }
+ .account-name { display:none; }
+ .workspace-toolbar nav { order:3; flex-basis:100%; }
+ .workspace-toolbar > .btn { margin-left:auto; }
+ .history-row { grid-template-columns:auto minmax(0,1fr); }
+ .history-row > .pill { grid-column:2; justify-self:start; }
+ .auth-card { padding:22px; }
+}
+
+.fridge-panel { min-width:0; width:100%; }
+.type-filters { min-width:0; grid-template-columns:repeat(3,minmax(0,1fr)); }

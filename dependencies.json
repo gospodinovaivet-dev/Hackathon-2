@@ -1,0 +1,28 @@
+{
+  "libraries": [
+    {
+      "name": "Supabase JavaScript SDK",
+      "version": "2.49.8",
+      "file": "supabase.js",
+      "url": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"
+    },
+    {
+      "name": "QRCode.js",
+      "version": "1.0.0",
+      "file": "qrcode.min.js",
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+    },
+    {
+      "name": "React",
+      "version": "18.3.1",
+      "file": "react.js",
+      "url": "https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"
+    },
+    {
+      "name": "React DOM",
+      "version": "18.3.1",
+      "file": "react-dom.js",
+      "url": "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"
+    }
+  ]
+}

@@ -1,144 +1,193 @@
 # ChillCheck
 
-ChillCheck is a smart-fridge app prototype that helps people remember what is in their fridge and use food before it goes to waste. Instead of searching behind containers or checking every label, users get an **Eat Me First** list, organised by expiry date, food type and shelf.
+ChillCheck helps households remember what is in the fridge and use food before it goes to waste. An **Eat Me First** list highlights urgent items, shelf/category filters make them easy to find, and recipe ideas help use what is already there.
 
-The intended workflow is **close the fridge door → take a shelf photo → recognise food → review the dates → eat the most urgent items first**. The current hackathon MVP demonstrates this workflow in a browser with example scans and simulated sensor readings. Real photo recognition requires a compatible Claude artifact environment.
+The app is being migrated from a vanilla JavaScript hackathon prototype to **React + Supabase**. The Strawberry Matcha palette, realistic product/recipe photos and Balkan leftovers examples are preserved—including rice-stuffed peppers in a reused ice cream tub.
 
-## The idea and who it helps
+## Current features
 
-Busy households often forget leftovers or buy food they already have. ChillCheck makes these items visible, suggests recipes and lets users correct names and dates. A future retailer version could help staff find older stock across multiple fridges and reduce expiry waste.
+- Real Supabase email/password sign-up, sign-in and sign-out.
+- Fridge creation and owner-scoped inventory stored in PostgreSQL.
+- Add/edit food, quantities, expiry dates, shelf, category, cooking date and container notes.
+- Eat Me First groups, food-type filters and shelf navigation.
+- Example scan review with editable names/dates and explicit keep/remove choices for missing items.
+- Atomic scan saving and eaten/discarded actions, with food history.
+- Example recipes with photos and example food information.
+- Responsive React UI, error messages and loading states.
 
-The app also considers everyday packaging surprises. In Balkan households, an ice cream tub may contain **rice-stuffed peppers**, soup or cookies. ChillCheck asks users to check uncertain contents and treats recognised cooked leftovers according to the food inside, rather than the original packaging date.
+The React app does not use the Claude artifact link. Live AI photo recognition, generated recipes, photo storage and real hardware integration are still future steps. Recipes and scan detections are clearly labelled examples. Generated food photos are illustrative, not camera evidence. The original prototype remains available at `legacy.html` for reference.
 
-## What the prototype includes
+## Technology choices
 
-- A demo pairing screen and a fridge overview with product photos.
-- **Eat Me First**: expired, eat-soon, safe and unknown-date groups; dates can be edited and finished items removed.
-- An interactive fridge map and food-type filters, including cooked meals.
-- Example scans with pasta, vegetable soup, rice-stuffed peppers in an ice cream tub, and an opaque container whose contents need confirmation.
-- Recipe suggestions, example recipe photos and a food information screen.
-- Simulated temperature and door readings with in-app alerts.
-- Browser storage so the food list survives a page refresh.
-- Optional photo, receipt and printed-date recognition, AI recipes and account-based data sync when the host provides the required Claude capabilities.
+| Technology | What and why |
+| --- | --- |
+| React 18.3.1 + React DOM | Component-based UI with state-driven rendering. Pinned browser builds run without npm or JSX compilation. |
+| JavaScript + `React.createElement` | Keeps startup compatible with environments where npm installation is disabled. No build step is required to develop locally. |
+| CSS Grid/Flexbox and custom properties | Responsive layouts and a shared Strawberry Matcha theme. |
+| Supabase Auth | Accounts, password authentication and persistent sessions. |
+| Supabase PostgreSQL + Row Level Security | Persistent inventory and owner-based access enforced in the database. |
+| PostgreSQL functions | Save scan reviews and record eaten/discarded actions atomically. |
+| Supabase JavaScript SDK | Browser API client; the only frontend credential is a publishable key. |
+| Python 3 standard library | Downloads browser libraries and serves the app locally without npm or pip dependencies. |
+| Node.js (optional) | Generates a self-contained HTML bundle using built-in modules only. |
+| Git / GitHub | Source control. |
 
-The local pairing form is a demo, not real authentication or a hardware connection. Multi-fridge retailer dashboards, staff roles, physical cameras, buzzers and device connectivity are future work. Generated food photos are illustrative; they are not evidence of a scanned item's freshness.
-
-## Technologies and why they fit
-
-| Technology | What it does | Why it fits this MVP |
-| --- | --- | --- |
-| HTML5 | Defines screens, forms and semantic controls | Keeps the interface straightforward and runnable directly in a browser. |
-| CSS | Responsive layouts, light/dark themes and the Strawberry Matcha palette | Grid, Flexbox and custom properties provide consistent styling without a UI framework. |
-| Vanilla JavaScript | Navigation, food rules, filters, scan review and rendering | Keeps the prototype small, with no framework setup or package-install step. Responsibilities are split into focused files. |
-| Browser `localStorage` | Saves the local profile, paired-device details and food list | Provides persistence for the demo without requiring a database server. Local state belongs to the browser and site address being used. |
-| Canvas and SVG | Prepare scan images, draw detection overlays and provide fallback recipe illustrations | Built-in browser graphics avoid extra image-processing dependencies. |
-| Claude host capabilities | Optional AI image recognition, recipe generation and user data sync | Allow the prototype to demonstrate AI features when the embedding host provides them. These capabilities are not supplied by the local server. |
-| Node.js built-in `fs` and `path` modules | Bundle the app and images into one HTML file | A small build script makes the prototype easy to share without a bundler or npm dependencies. |
-| Python's `http.server` | Serves the app locally during development | A simple way to open all project files under one local URL; it is not an application backend. |
-| Google Fonts and QRCode.js | Typography and the phone-link QR code | Add visual polish and phone handoff; these assets load from external services. |
-
-The planned hardware concept uses cameras and an LED light, a controller such as an ESP32-S3, a magnetic door sensor, a temperature sensor and a buzzer. None of this hardware is required to run the browser demo.
+Food records are no longer stored in browser localStorage in the React app. Supabase Auth may persist its session there. Old prototype data is not automatically imported or uploaded.
 
 ## Prerequisites
 
-For the recommended local setup:
+- Python **3.9+** and a modern browser.
+- A Supabase project with email authentication enabled.
+- Internet access for initial library downloads and hosted database operations.
+- Git, or a downloaded ZIP of the repository.
+- Optional Node.js to generate the shareable bundle.
 
-- A modern browser such as Chrome, Edge, Firefox or Safari.
-- **Python 3** to run the local HTTP server.
-- **Git** to clone the repository, or download and extract its ZIP instead.
+You do not need npm, pip packages, Docker or a locally installed database to run the app. `requirements.txt` documents the standard-library-only Python setup; `dependencies.json` pins browser libraries. Optional fonts load from Google Fonts, with system-font fallbacks.
 
-Optional:
-
-- **Node.js** to run `build.js` after changing source files or camera photos. No `npm install` is needed; the build uses only Node's built-in modules.
-- Internet access for Google Fonts, the QR-code library and host-provided AI features. The local example workflow does not require an AI account or API key.
-- A compatible Claude artifact host with the relevant capabilities enabled for real AI scans and sync. Starting the local server alone does not enable these features.
-
-## How to start the app
-
-### 1. Get the repository
+## 1. Get the app
 
 ```sh
 git clone https://github.com/gospodinovaivet-dev/Hackathon-2.git
 cd Hackathon-2
 ```
 
-If you already have the project, open a terminal in the existing `Hackathon-2` folder instead.
+If already cloned, open a terminal in the folder containing `index.html` and `scripts/`.
 
-### 2. Start the local server
+## 2. Set up the database
 
-On macOS or Linux:
+In your Supabase project's SQL Editor:
+
+1. Run `supabase/inspect.sql` first. If the application tables already exist, inspect them before applying the initial migration; do not delete existing data.
+2. For a fresh project, run `supabase/migrations/202610240001_initial_schema.sql` once.
+3. Run `supabase/migrations/202610240002_inventory_operations.sql` once. This adds atomic inventory functions.
+4. Run `supabase/verify.sql` to inspect table grants and policies.
+
+The schema contains `profiles`, `fridges`, `food_items`, `scans`, `scan_items` and `food_events`. This version uses owner-only access; shared household membership is not implemented yet. See [database setup and tests](supabase/README.md).
+
+Enable email/password authentication. Add your local app URL to Auth redirect URLs. For the default port, use:
+
+```text
+http://127.0.0.1:8080/index.local.html
+```
+
+If you use port 8081, add that exact URL too. Keep email confirmation enabled and use an address you can access when creating an account. Configure production email delivery and deployed URLs before releasing to other users.
+
+## 3. Configure `.env`
+
+Copy `.env.example` to `.env` if it does not exist. Set:
+
+```dotenv
+SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_YOUR_KEY
+```
+
+The existing names `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are also supported; this does not mean the app uses Next.js. Conflicting aliases are rejected. Process environment variables take precedence over `.env`, then the legacy `supabase.config.local.json` fallback.
+
+Only these two public values enter the generated browser page. Never put a database password, secret/service-role key or AI API key in browser configuration. `.env` is ignored by Git. Empty configuration shows a setup message; real sign-in needs a configured project.
+
+## 4. Start with one command
+
+macOS / Linux:
 
 ```sh
-python3 -m http.server 8080 --bind 127.0.0.1
+python3 scripts/start.py
 ```
 
-On Windows with the Python launcher:
+Windows:
 
 ```powershell
-py -3 -m http.server 8080 --bind 127.0.0.1
+py -3 scripts/start.py
 ```
 
-### 3. Open the app
+The script downloads/caches pinned browser libraries in `vendor/`, generates `index.local.html`, starts a local server and opens the app. The default URL is [http://127.0.0.1:8080/](http://127.0.0.1:8080/). The startup server maps `/` to the configured React page.
 
-Visit **[http://127.0.0.1:8080/](http://127.0.0.1:8080/)** in your browser. Keep the terminal running while using the app. Press **Ctrl+C** in that terminal to stop the server.
+Useful alternatives:
 
-For a quick preview, you can also open `index.html` directly. The local server is preferable because browser file-access and storage behaviour can differ for `file://` pages.
+```sh
+python3 scripts/start.py --port 8081
+python3 scripts/start.py --no-browser
+python3 scripts/setup.py
+python3 scripts/setup.py --refresh
+```
 
-## Try the demo
+Keep the terminal open; **Ctrl+C** stops the server. Restart after HTML or `.env` changes. Changes to JS/CSS can be viewed with a page refresh.
 
-1. Select **Fill in demo details**, then **Pair fridge**. The example device code is `CC-A7F3-2291`.
-2. Select **Check inside**. With no camera photos configured, this runs an example scan. If a photo picker appears, choose **Example data**.
-3. Review the names and dates, including the warning for the rice-stuffed peppers in the reused ice cream tub, then save the list.
-4. Open **Eat Me First**. Try the shelf map and **Cooked meals** filter, change a date or mark an item as eaten.
-5. Open **Recipes** to see the example dishes and photos. In a regular local browser, these are examples rather than newly generated AI results.
-6. Run another example scan to see how existing, missing and new items are reviewed.
+Use this startup server instead of a plain `python -m http.server`: it blocks dotfiles, local configuration and directory listings. A plain static server does not apply these protections.
 
-To reset the demo, use **Unpair fridge** and confirm with the second click. This clears the saved profile and food list.
+## 5. Try it
 
-## Build the shareable version
+1. Create an account, confirm your email, then sign in.
+2. Name and create your fridge.
+3. Add a food item. Refresh and verify it is still there.
+4. Select **Try example scan**, review the detections and save. The ice cream tub example asks you to confirm what is inside.
+5. Try **My fridge** filters, edit a date, or mark food as eaten/discarded.
+6. Open **History**, **Recipes** or **Food & you**.
+7. Sign in with the same account in another browser to load the saved fridge. Another account must not see it.
 
-From the project root:
+The account form is real authentication, not the old demo pairing form. Do not use the old demo device code as a password. Data reloads on sign-in, fridge selection and writes; live cross-tab subscriptions are not implemented yet.
+
+## Optional shareable build
+
+After running setup:
 
 ```sh
 node build.js
 ```
 
-This refreshes `js/photos.js` and writes **`dist/chillcheck.html`**, embedding the app's CSS, JavaScript and local food/camera images. With the local server running, open [http://127.0.0.1:8080/dist/chillcheck.html](http://127.0.0.1:8080/dist/chillcheck.html).
+This writes `dist/chillcheck.html`, including React, CSS, app code and food images. It is an unconfigured preview with sign-in disabled.
 
-Run the build again after changing source files or images if you want the bundled version to include those changes. External fonts and QRCode.js remain external dependencies; the bundle does not add AI support to a normal browser.
+To export your local public Supabase configuration as well:
 
-## Add camera photos
+```sh
+node build.js --configured
+```
 
-1. Create a `photos/` folder in the project root.
-2. Add fridge images in JPG, JPEG, PNG, WebP or GIF format.
-3. Run `node build.js` and refresh the app.
-4. Select **Check inside** to choose a camera image.
-
-The folder stands in for the planned fridge camera. Analysing these images requires the host's AI image capability. **Example data** remains available without it. The separate `assets/products/` folder holds illustrative product and recipe photos, not camera input.
+This writes the gitignored `dist/chillcheck.local.html`. It contains the project URL and publishable key, never server secrets. The configured bundle loads the pinned Supabase SDK from its CDN because that library requires a script URL; the normal local app uses the downloaded SDK. Add the exact hosted bundle URL to Auth redirects before using signup there. Internet is still needed for Supabase; a single HTML file is not an offline database.
 
 ## Project structure
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` | App screens and script entry point. |
-| `css/styles.css` | Layout, responsive styling and themes. |
-| `js/app.js` | Navigation, review flow, fridge map and UI events. |
-| `js/food.js`, `js/dates.js` | Food categories, expiry rules, date helpers and example scans. |
-| `js/store.js` | Local state and optional host-provided sync. |
-| `js/scanner.js` | AI scan integration and scan-response processing. |
-| `js/products.js`, `assets/products/` | Product/recipe photography, mappings and generation prompts. |
-| `js/recipes.js`, `js/dish.js`, `js/health.js` | Recipes, fallback illustrations and food information. |
-| `js/sensors.js`, `js/ui.js` | Simulated sensor display and shared UI helpers. |
-| `photos/`, `js/photos.js` | Optional camera input and its generated manifest. |
-| `build.js`, `dist/chillcheck.html` | Build script and generated shareable app. |
-| `archive/` | Earlier prototypes. |
+| `index.html` | React entry-point template. |
+| `index.local.html` | Generated, ignored entry point with public Supabase configuration. |
+| `src/app.js` | React screens and interaction state. |
+| `src/api.js` | Supabase queries, field mappings and RPC calls. |
+| `src/data.js`, `src/nutrition-data.js` | Product-photo mapping, example recipes and food information. |
+| `js/food.js`, `js/dates.js` | Shared food/expiry rules, scan examples and date helpers. |
+| `css/styles.css`, `css/react.css` | Shared design system and React layouts. |
+| `assets/products/` | Product/recipe photos and generation prompts. |
+| `supabase/migrations/` | Versioned database schema and functions. |
+| `supabase/tests/` | Database access/transaction tests. |
+| `scripts/` | npm-free setup/server and configuration tests. |
+| `tests/` | Browser workflow test and isolated backend double. |
+| `legacy.html`, other `js/` files | Original prototype, retained for reference. |
+
+## Checks
+
+Configuration/server checks require only Python:
+
+```sh
+python3 -m unittest discover -s scripts -p 'test_*.py'
+```
+
+Database tests run against a disposable PostgreSQL/Supabase environment; see `supabase/README.md`. Browser checks use Playwright if available in your development environment; it is not an app runtime dependency. Set `PLAYWRIGHT_MODULE` to its module path and optionally `CHROME_PATH` and `APP_URL`, then run `node tests/browser.cjs` with a supported Node version. These checks use a local backend test double and do not create real users or modify hosted data.
 
 ## Troubleshooting
 
-- **Port 8080 is already in use:** use port `8081` in the server command and open `http://127.0.0.1:8081/`.
-- **The page shows a directory listing or a 404:** start the server from the folder containing `index.html`.
-- **Python is not found:** install Python 3 and reopen the terminal; on Windows, try the `py -3` command above.
-- **AI scanning is unavailable:** this is expected in a regular local browser. Use **Example data**; real scans depend on the host integration.
-- **Changes do not appear:** refresh the page. If viewing `dist/chillcheck.html`, run `node build.js` first.
-- **Saved items seem missing:** use the same browser, hostname and port as before. `localhost`, `127.0.0.1` and different ports have separate browser storage.
-- **Phone handoff opens a different app copy:** the QR link uses the configured Claude artifact URL in `js/app.js`; it does not expose or mirror your local server.
+- **Port busy:** use `--port 8081` and register its Auth redirect URL.
+- **DNS/download failure:** allow HTTPS access to `cdn.jsdelivr.net` and `cdnjs.cloudflare.com`, then rerun setup. Downloads are cached once successful.
+- **Sign-in disabled:** verify `.env`, rerun setup and open the startup server's configured page.
+- **Email confirmation:** open the confirmation email before signing in. Check Supabase's email delivery configuration if no email arrives.
+- **Missing function error when saving a scan or finishing food:** apply migration `202610240002_inventory_operations.sql`.
+- **Permission errors:** verify the signed-in account and table policies; do not disable Row Level Security to work around them.
+- **Expected automatic camera recognition:** not implemented in the React version yet. The next phase adds private uploads and a server-side AI function.
+
+
+### Database-backed mock items and photos
+
+1. After migrations 001 and 002, run `supabase/migrations/202610240003_mock_catalog.sql` in Supabase SQL Editor. It seeds two example scans (including soup and rice-stuffed peppers in an ice cream tub), three recipes, and 15 photo records. It also adds photo references to inventory and history and backfills matching existing items.
+2. From the repository folder run `python3 scripts/upload_mock_photos.py`. At its hidden prompt enter the project's secret/service-role key. The script uses it only in memory to upload the checked-in images; never put this admin key in frontend code or a `NEXT_PUBLIC_` setting. Rerunning uploads replaces the same demo files safely. Alternatively create a public `mock-photos` bucket in Supabase Storage and upload all 15 JPGs from `assets/products/` at the bucket root.
+3. Restart `python3 scripts/start.py --port 8081`, sign in and select a fridge. Click **Try example scan**, review the dates and contents, then **Confirm and save**. This writes actual `food_items` rows with `photo_key` references for that fridge. Repeating a scan matches existing items instead of intentionally seeding duplicates. No demo inventory is silently added to other accounts.
+4. Refresh and check that your items and photo references remain. Recipes and example scan templates now load from database tables; image bytes are served from Supabase Storage. The local pictures remain available for the signed-out welcome screen.
+
+Catalog tables are read-only for signed-in users; only an administrator can seed/change them. The public bucket contains shared illustrations only, never private fridge photos. Inventory retains the existing owner-only policies. Migration 003 must be applied before using this version of the app. The Python uploader requires no npm or pip dependencies.

@@ -1,0 +1,4 @@
+# Python 3.9+ is required. No third-party Python packages are needed.
+# Browser libraries are listed in dependencies.json.
+# Install them with: python3 scripts/setup.py
+# Or install and start together: python3 scripts/start.py

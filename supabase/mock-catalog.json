@@ -1,0 +1,378 @@
+{
+  "photos": [
+    {
+      "id": "breakfast-bowl",
+      "object_path": "breakfast-bowl.jpg"
+    },
+    {
+      "id": "cheddar",
+      "object_path": "cheddar.jpg"
+    },
+    {
+      "id": "chicken",
+      "object_path": "chicken.jpg"
+    },
+    {
+      "id": "container",
+      "object_path": "container.jpg"
+    },
+    {
+      "id": "cookies",
+      "object_path": "cookies.jpg"
+    },
+    {
+      "id": "creamy-pasta",
+      "object_path": "creamy-pasta.jpg"
+    },
+    {
+      "id": "eggs",
+      "object_path": "eggs.jpg"
+    },
+    {
+      "id": "milk",
+      "object_path": "milk.jpg"
+    },
+    {
+      "id": "omelette",
+      "object_path": "omelette.jpg"
+    },
+    {
+      "id": "pasta",
+      "object_path": "pasta.jpg"
+    },
+    {
+      "id": "soup",
+      "object_path": "soup.jpg"
+    },
+    {
+      "id": "spinach",
+      "object_path": "spinach.jpg"
+    },
+    {
+      "id": "stuffed-peppers",
+      "object_path": "stuffed-peppers.jpg"
+    },
+    {
+      "id": "tomatoes",
+      "object_path": "tomatoes.jpg"
+    },
+    {
+      "id": "yogurt",
+      "object_path": "yogurt.jpg"
+    }
+  ],
+  "scans": [
+    [
+      {
+        "name": "Leftover vegetable soup",
+        "kind": "cooked",
+        "qty": "1 box \u00b7 2 portions",
+        "shelf": "Top shelf",
+        "daysLeft": 2,
+        "seenDaysAgo": 1,
+        "container": "clear glass soup box with cream lid",
+        "condition": "carrot and potato pieces visible in broth",
+        "confidence": "high",
+        "note": "Homemade leftovers. Check when the soup was cooked and adjust the date.",
+        "photoKey": "soup"
+      },
+      {
+        "name": "Rice-stuffed peppers",
+        "kind": "cooked",
+        "qty": "6 peppers",
+        "shelf": "Middle shelf",
+        "daysLeft": 1,
+        "seenDaysAgo": 2,
+        "container": "vanilla ice cream tub with pink lid",
+        "condition": "cooked peppers and rice visible inside the open tub",
+        "confidence": "low",
+        "note": "Reused ice cream tub: these are rice-stuffed peppers, not ice cream. Confirm the contents and when they were cooked; the tub's printed date does not apply.",
+        "photoKey": "stuffed-peppers"
+      },
+      {
+        "name": "Chicken breast",
+        "kind": "packaged",
+        "qty": "500 g",
+        "shelf": "Bottom shelf",
+        "printedDate": "",
+        "daysLeft": -1,
+        "seenDaysAgo": 3,
+        "condition": "grey patches on the meat",
+        "confidence": "high",
+        "photoKey": "chicken"
+      },
+      {
+        "name": "Leftover pasta",
+        "kind": "cooked",
+        "qty": "1 box",
+        "shelf": "Top shelf",
+        "daysLeft": 2,
+        "seenDaysAgo": 2,
+        "condition": "home-cooked, in a glass box",
+        "confidence": "high",
+        "photoKey": "pasta"
+      },
+      {
+        "name": "Baby spinach",
+        "kind": "fresh",
+        "qty": "200 g",
+        "shelf": "Crisper drawer",
+        "daysLeft": 1,
+        "seenDaysAgo": 4,
+        "condition": "a few leaves turning dark",
+        "confidence": "high",
+        "photoKey": "spinach"
+      },
+      {
+        "name": "Milk 3.6%",
+        "kind": "packaged",
+        "qty": "1 L",
+        "shelf": "Door rack",
+        "printedDate": "",
+        "dateText": "2?.1?.2?",
+        "daysLeft": 2,
+        "seenDaysAgo": 3,
+        "condition": "sealed carton, date partly hidden",
+        "confidence": "medium",
+        "photoKey": "milk"
+      },
+      {
+        "name": "Greek yogurt",
+        "kind": "packaged",
+        "qty": "2 cups",
+        "shelf": "Middle shelf",
+        "printedIn": 4,
+        "daysLeft": 4,
+        "seenDaysAgo": 6,
+        "condition": "sealed, looks fine",
+        "confidence": "high",
+        "photoKey": "yogurt"
+      },
+      {
+        "name": "Tomatoes",
+        "kind": "fresh",
+        "qty": "6 pcs",
+        "shelf": "Crisper drawer",
+        "daysLeft": 5,
+        "seenDaysAgo": 1,
+        "condition": "firm and bright red",
+        "confidence": "high",
+        "photoKey": "tomatoes"
+      },
+      {
+        "name": "Eggs",
+        "kind": "fresh",
+        "qty": "10 pcs",
+        "shelf": "Middle shelf",
+        "daysLeft": 12,
+        "seenDaysAgo": 5,
+        "condition": "carton closed",
+        "confidence": "medium",
+        "photoKey": "eggs"
+      },
+      {
+        "name": "Cheddar",
+        "kind": "packaged",
+        "qty": "250 g",
+        "shelf": "Middle shelf",
+        "printedIn": 18,
+        "daysLeft": 18,
+        "seenDaysAgo": 8,
+        "condition": "sealed block",
+        "confidence": "high",
+        "photoKey": "cheddar"
+      }
+    ],
+    [
+      {
+        "name": "Leftover vegetable soup",
+        "kind": "cooked",
+        "qty": "1 box \u00b7 2 portions",
+        "shelf": "Top shelf",
+        "daysLeft": 2,
+        "seenDaysAgo": 1,
+        "container": "clear glass soup box with cream lid",
+        "condition": "carrot and potato pieces visible in broth",
+        "confidence": "high",
+        "note": "Homemade leftovers. Check when the soup was cooked and adjust the date.",
+        "photoKey": "soup"
+      },
+      {
+        "name": "Rice-stuffed peppers",
+        "kind": "cooked",
+        "qty": "6 peppers",
+        "shelf": "Middle shelf",
+        "daysLeft": 1,
+        "seenDaysAgo": 2,
+        "container": "vanilla ice cream tub with pink lid",
+        "condition": "cooked peppers and rice visible inside the open tub",
+        "confidence": "low",
+        "note": "Reused ice cream tub: these are rice-stuffed peppers, not ice cream. Confirm the contents and when they were cooked; the tub's printed date does not apply.",
+        "photoKey": "stuffed-peppers"
+      },
+      {
+        "name": "Chicken breast",
+        "kind": "packaged",
+        "qty": "500 g",
+        "shelf": "Bottom shelf",
+        "daysLeft": -1,
+        "condition": "grey patches on the meat",
+        "confidence": "high",
+        "photoKey": "chicken"
+      },
+      {
+        "name": "Baby spinach",
+        "kind": "fresh",
+        "qty": "150 g",
+        "shelf": "Crisper drawer",
+        "daysLeft": 1,
+        "condition": "more leaves turning dark",
+        "confidence": "high",
+        "photoKey": "spinach"
+      },
+      {
+        "name": "Milk 3.6%",
+        "kind": "packaged",
+        "qty": "0.5 L",
+        "shelf": "Door rack",
+        "daysLeft": 2,
+        "condition": "opened carton",
+        "confidence": "medium",
+        "photoKey": "milk"
+      },
+      {
+        "name": "Greek yogurt",
+        "kind": "packaged",
+        "qty": "1 cup",
+        "shelf": "Middle shelf",
+        "daysLeft": 4,
+        "condition": "sealed, looks fine",
+        "confidence": "high",
+        "photoKey": "yogurt"
+      },
+      {
+        "name": "Cookies",
+        "kind": "other",
+        "qty": "1 tub",
+        "shelf": "Top shelf",
+        "daysLeft": 20,
+        "container": "vanilla ice cream tub",
+        "condition": "cookies visible through the lid gap",
+        "confidence": "low",
+        "note": "An ice cream tub outside the freezer, holding cookies",
+        "photoKey": "cookies"
+      },
+      {
+        "name": "Unknown container",
+        "kind": "cooked",
+        "qty": "1 box",
+        "shelf": "Middle shelf",
+        "daysLeft": 3,
+        "container": "blue opaque box, white lid",
+        "condition": "can't see inside",
+        "confidence": "low",
+        "note": "Contents unknown. Type what's inside, and the app will remember this box.",
+        "photoKey": "container"
+      },
+      {
+        "name": "Tomatoes",
+        "kind": "fresh",
+        "qty": "5 pcs",
+        "shelf": "Crisper drawer",
+        "daysLeft": 5,
+        "condition": "firm and bright red",
+        "confidence": "high",
+        "photoKey": "tomatoes"
+      },
+      {
+        "name": "Eggs",
+        "kind": "fresh",
+        "qty": "8 pcs",
+        "shelf": "Middle shelf",
+        "daysLeft": 12,
+        "condition": "carton closed",
+        "confidence": "medium",
+        "photoKey": "eggs"
+      },
+      {
+        "name": "Cheddar",
+        "kind": "packaged",
+        "qty": "200 g",
+        "shelf": "Middle shelf",
+        "daysLeft": 18,
+        "condition": "opened, edges dry",
+        "confidence": "high",
+        "photoKey": "cheddar"
+      }
+    ]
+  ],
+  "recipes": [
+    {
+      "name": "Spinach and tomato omelette",
+      "photo": "omelette",
+      "minutes": 10,
+      "servings": 1,
+      "kcal": 340,
+      "uses": [
+        "Eggs",
+        "Baby spinach",
+        "Tomatoes",
+        "Cheddar"
+      ],
+      "pantry": [
+        "Olive oil",
+        "Salt",
+        "Pepper"
+      ],
+      "steps": [
+        "Beat 3 eggs with a pinch of salt and pepper.",
+        "Wilt a handful of spinach in a pan with a little oil.",
+        "Add the eggs, sliced tomato and 20 g grated cheddar.",
+        "Cook until the eggs are set, fold and serve."
+      ]
+    },
+    {
+      "name": "Leftover pasta with creamy spinach",
+      "photo": "creamy-pasta",
+      "minutes": 12,
+      "servings": 2,
+      "kcal": 520,
+      "uses": [
+        "Leftover pasta",
+        "Baby spinach",
+        "Milk 3.6%",
+        "Cheddar"
+      ],
+      "pantry": [
+        "Garlic",
+        "Butter"
+      ],
+      "steps": [
+        "Melt a knob of butter with a chopped garlic clove.",
+        "Add 100 ml milk and 40 g grated cheddar; stir.",
+        "Add the spinach and leftover pasta.",
+        "Heat thoroughly and season."
+      ]
+    },
+    {
+      "name": "Honey yogurt breakfast bowl",
+      "photo": "breakfast-bowl",
+      "minutes": 5,
+      "servings": 1,
+      "kcal": 280,
+      "uses": [
+        "Greek yogurt"
+      ],
+      "pantry": [
+        "Honey",
+        "Oats",
+        "Fresh berries"
+      ],
+      "steps": [
+        "Spoon yogurt into a bowl.",
+        "Top with oats and berries.",
+        "Drizzle with honey."
+      ]
+    }
+  ]
+}
