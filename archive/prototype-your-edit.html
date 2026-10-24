@@ -1,0 +1,1242 @@
+<title>ChillCheck</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app header with page tabs; Home = actions, fridge LEDs beside the food list, then the storage map; Insights = run-out forecast and AI advice. Stacks on phones */
+:root {
+  --ice: #EDF3F5;
+  --panel: #FFFFFF;
+  --ink: #11222C;
+  --muted: #587079;
+  --line: #D2DEE3;
+  --accent: #0D6A86;
+  --accent-ink: #FFFFFF;
+  --safe: #23935A;
+  --soon: #C99400;
+  --bad: #D2423A;
+  --fridge: #F7FAFB;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ice: #0C151A; --panel: #142228; --ink: #E3EDF1; --muted: #8DA3AC;
+    --line: #253841; --accent: #52B8D8; --accent-ink: #062029;
+    --safe: #3CC47D; --soon: #F0BE2E; --bad: #FF6B60; --fridge: #101C22;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ice: #0C151A; --panel: #142228; --ink: #E3EDF1; --muted: #8DA3AC;
+  --line: #253841; --accent: #52B8D8; --accent-ink: #062029;
+  --safe: #3CC47D; --soon: #F0BE2E; --bad: #FF6B60; --fridge: #101C22;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--ice);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1000px; margin: 0 auto; display: grid; gap: 28px; }
+.page { display: grid; gap: 28px; }
+
+/* Header */
+header { display: grid; gap: 18px; }
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+.brand svg { color: var(--accent); }
+.tabs { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--panel); border: 1.5px solid var(--line); }
+.tab { font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; border: 0; border-radius: 8px; padding: 8px 16px; background: transparent; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--ice); }
+.hello { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; text-wrap: balance; max-width: 22ch; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1.15; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.fridge-id { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); font-size: 14px; }
+.fridge-id b { color: var(--ink); font-weight: 700; }
+.mono { font-family: var(--font-data); font-size: 13px; font-variant-numeric: tabular-nums; }
+.sync { display: inline-flex; align-items: center; gap: 6px; }
+.sync::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--safe); }
+
+.topnav { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.tabs { overflow-x: auto; max-width: 100%; }
+.tab { white-space: nowrap; }
+
+/* Buttons */
+.btn {
+  font: inherit; font-weight: 700; cursor: pointer; border-radius: 14px; padding: 16px 18px;
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  border: 1.5px solid var(--line); background: var(--panel); color: var(--ink);
+  transition: transform .12s ease, border-color .12s ease;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .6; cursor: progress; }
+.btn:focus-visible, .shelf:focus-visible, .chip:focus-visible, .tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary small { color: inherit; opacity: .8; }
+.btn svg { flex: none; }
+.btn.compact { padding: 12px 16px; display: inline-flex; }
+
+/* Summary chips */
+.summary { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--panel); color: var(--ink); font-size: 14px;
+}
+.chip[aria-pressed="true"] { border-color: var(--ink); }
+.chip .n { font-family: var(--font-data); font-weight: 500; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dot.safe { background: var(--safe); } .dot.soon { background: var(--soon); } .dot.bad { background: var(--bad); }
+
+/* Main grid */
+.main { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; margin: 0 0 10px; display: flex; justify-content: space-between; gap: 8px; }
+
+/* Fridge with LEDs */
+.fridge { background: var(--fridge); border: 2px solid var(--line); border-radius: 26px; padding: 14px; display: grid; gap: 8px; }
+.fridge-top { display: flex; justify-content: space-between; align-items: center; padding: 2px 6px 6px; font-size: 13px; color: var(--muted); }
+.temp { font-family: var(--font-data); color: var(--ink); font-size: 15px; }
+.shelf {
+  font: inherit; color: inherit; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  padding: 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--panel); text-align: left;
+}
+.shelf[aria-pressed="true"] { border-color: var(--ink); }
+.shelf .name { font-weight: 700; }
+.shelf .meta { font-size: 13px; color: var(--muted); }
+.led { width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 0 14px 2px color-mix(in srgb, var(--c) 55%, transparent); }
+.led.safe { --c: var(--safe); } .led.soon { --c: var(--soon); } .led.bad { --c: var(--bad); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--c) 14%, transparent), 0 0 20px 4px color-mix(in srgb, var(--c) 60%, transparent); } }
+.door { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; padding: 10px 14px; border-radius: 12px; border: 1.5px dashed var(--line); font-size: 14px; }
+.door .state { font-weight: 700; color: var(--safe); }
+
+/* Food list */
+.list { display: grid; gap: 8px; }
+.item {
+  display: grid; grid-template-columns: 6px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 16px 12px 0; background: var(--panel); border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden;
+}
+.item .bar { align-self: stretch; background: var(--c); }
+.safe { --c: var(--safe); } .soon { --c: var(--soon); } .bad { --c: var(--bad); }
+.item .title { font-weight: 700; }
+.item .sub { font-size: 13px; color: var(--muted); }
+.item .when { text-align: right; }
+.item .days { font-family: var(--font-data); font-size: 15px; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; margin-top: 2px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); white-space: nowrap; }
+.empty { color: var(--muted); padding: 20px; border: 1.5px dashed var(--line); border-radius: 12px; text-align: center; }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Storage map */
+.storage { display: grid; gap: 16px; }
+.storage-head { display: grid; gap: 6px; }
+.storage-head p { margin: 0; color: var(--muted); max-width: 62ch; }
+.storage-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.map {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.42fr); gap: 8px;
+  background: var(--fridge); border: 2px solid var(--line); border-radius: 26px; padding: 14px;
+}
+.map-body { display: grid; gap: 8px; }
+.zone {
+  --t: 10%;
+  border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px;
+  background: color-mix(in srgb, var(--accent) var(--t), var(--panel));
+  border: 1.5px solid color-mix(in srgb, var(--accent) calc(var(--t) + 8%), var(--line));
+}
+.zone .zt { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.zone .zn { font-weight: 700; }
+.zone .zc { font-family: var(--font-data); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.zone .zw { font-size: 13px; }
+.zone .zx { font-size: 12px; color: var(--muted); }
+.zone.crisper { border-style: dashed; }
+.map-door { display: grid; }
+.map-door .zone { align-content: start; height: 100%; }
+.scale { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); grid-column: 1 / -1; padding: 4px 4px 0; }
+.scale .ramp { flex: 1; height: 6px; border-radius: 3px; background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 34%, var(--panel)), color-mix(in srgb, var(--accent) 4%, var(--panel))); border: 1px solid var(--line); }
+.moves { display: grid; gap: 8px; }
+.move { display: grid; gap: 4px; padding: 14px 16px; border-radius: 12px; background: var(--panel); border: 1.5px solid var(--line); }
+.move .path { font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.move .why { font-size: 14px; color: var(--muted); }
+.rules { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+.rules b { color: var(--ink); }
+
+/* Insights */
+.forecast { display: grid; gap: 8px; }
+.frow {
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1.6fr); gap: 14px; align-items: center;
+  padding: 12px 16px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 12px;
+}
+.frow.head { background: transparent; border-color: transparent; padding-block: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.frow .title { font-weight: 700; }
+.frow .sub { font-size: 13px; color: var(--muted); }
+.frow .verdict { font-size: 14px; }
+.frow .verdict b { color: var(--c); }
+.ai { display: grid; gap: 16px; padding: 22px; border-radius: 20px; background: var(--panel); border: 1.5px solid var(--line); }
+.ai-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.ai-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; max-width: 56ch; }
+.ai-summary { margin: 0; font-size: 17px; max-width: 65ch; }
+.tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.tip { display: grid; gap: 8px; align-content: start; padding: 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--fridge); }
+.tip .ti { font-weight: 700; font-family: var(--font-display); font-size: 18px; }
+.tip p { margin: 0; font-size: 14px; }
+.tip .ben { font-size: 14px; color: var(--muted); }
+.tip .ben b { color: var(--safe); font-weight: 700; }
+.badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.status-line { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* Expired alert */
+.alert { display: grid; gap: 10px; padding: 16px 18px; border-radius: 16px; background: color-mix(in srgb, var(--c) 10%, var(--panel)); border: 1.5px solid color-mix(in srgb, var(--c) 45%, var(--line)); }
+.alert h2 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+.alert-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--c) 25%, var(--line)); }
+.alert-row .title { font-weight: 700; }
+.alert-row .sub { color: var(--muted); font-size: 14px; }
+.alert p { margin: 0; color: var(--muted); }
+
+/* Fridge camera */
+.cam-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.viewer { display: grid; gap: 12px; }
+.viewer canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 18px; background: #1B2226; }
+.cam-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.howto { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; }
+.toggle { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; cursor: pointer; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1.5px solid var(--line); }
+.toggle input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+.hw { display: grid; gap: 6px; padding: 14px 16px; border-radius: 12px; border: 1.5px dashed var(--line); font-size: 14px; color: var(--muted); }
+.hw b { color: var(--ink); }
+
+/* Receipt scan */
+.scan-grid { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.receipt-img { display: block; width: 100%; max-width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 14px; border: 1.5px solid var(--line); background: var(--panel); }
+.found { display: grid; gap: 8px; }
+.fitem { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; }
+.fitem input { width: 20px; height: 20px; accent-color: var(--accent); }
+.fitem .title { font-weight: 700; }
+.fitem .sub { font-size: 13px; color: var(--muted); }
+
+/* Recipes */
+.prefs { display: flex; flex-wrap: wrap; gap: 8px; }
+.ask-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.field {
+  font: inherit; flex: 1 1 260px; min-width: 0; padding: 12px 14px; border-radius: 12px;
+  border: 1.5px solid var(--line); background: var(--fridge); color: var(--ink);
+}
+.field:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.uses { display: flex; flex-wrap: wrap; gap: 6px; }
+.ing { font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); }
+.ing.soon { border-color: color-mix(in srgb, var(--soon) 60%, var(--line)); background: color-mix(in srgb, var(--soon) 14%, var(--panel)); }
+.ing.pantry { border-style: dashed; color: var(--muted); }
+.ing.buy { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.mode { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--fridge); border: 1.5px solid var(--line); width: fit-content; max-width: 100%; }
+.recipes { display: grid; gap: 14px; }
+.recipe { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; padding: 16px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 18px; }
+.recipe figure { margin: 0; display: grid; gap: 6px; align-content: start; }
+.recipe canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 1; border-radius: 14px; }
+.recipe figcaption { font-size: 12px; color: var(--muted); }
+.rbody { display: grid; gap: 10px; align-content: start; }
+.rbody h3 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.rbody .why { margin: 0; color: var(--muted); font-size: 14px; }
+.rmeta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-data); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rmeta b { color: var(--ink); font-weight: 500; }
+.recipe details summary { cursor: pointer; font-weight: 700; font-size: 14px; color: var(--accent); }
+.recipe details summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.recipe ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; max-width: 65ch; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--ink); color: var(--ice); padding: 12px 18px; border-radius: 12px; font-size: 14px; max-width: calc(100% - 32px);
+}
+
+@media (max-width: 760px) {
+  .main, .storage-grid, .cam-grid, .scan-grid { grid-template-columns: minmax(0, 1fr); }
+  .receipt-img { max-width: 220px; }
+  .frow { grid-template-columns: minmax(0, 1fr) auto; }
+  .frow.head { display: none; }
+  .frow .verdict { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .recipe { grid-template-columns: minmax(0, 1fr); }
+  .recipe canvas { max-width: 260px; }
+}
+@media (max-width: 420px) {
+  .map { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
+        ChillCheck
+      </div>
+      <div class="topnav">
+        <div class="tabs" role="tablist" aria-label="Pages">
+          <button class="tab" role="tab" id="tab-home" aria-selected="true" aria-controls="page-home" type="button">EatMeFisrt</button>
+          <button class="tab" role="tab" id="tab-cam" aria-selected="false" aria-controls="page-cam" type="button">Fridge cam</button>
+          <button class="tab" role="tab" id="tab-recipes" aria-selected="false" aria-controls="page-recipes" type="button">Recipes</button>
+          <button class="tab" role="tab" id="tab-insights" aria-selected="false" aria-controls="page-insights" type="button">Insights</button>
+        </div>
+        <button class="btn primary compact" id="scan-btn" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          Scan receipt
+        </button>
+        <input type="file" id="scan-input" accept="image/*" capture="environment" hidden>
+      </div>
+    </div>
+    <div class="hello">
+      <h1 id="greeting">Hi Pesho</h1>
+      <div class="fridge-id">
+        <span>Fridge <b>CC-400 Duo</b></span>
+        <span class="mono">ID A7F3-2291</span>
+        <span class="sync">Updated at 08:14</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <main class="page" id="page-home" role="tabpanel" aria-labelledby="tab-home">
+    <section class="alert" id="expired" aria-live="polite"></section>
+
+    <div class="summary" id="summary" aria-label="Filter by status"></div>
+
+    <div class="main">
+      <section aria-labelledby="fridge-label">
+        <p class="label" id="fridge-label"><span>Your fridge</span><span>Tap a section</span></p>
+        <div class="fridge">
+          <div class="fridge-top"><span>Inside</span><span class="temp">4.0 °C</span></div>
+          <div id="shelves" style="display:grid;gap:8px"></div>
+          <div class="door">
+            <span>Door</span>
+            <span><span class="state">Closed</span> <span class="note mono">opened 07:52 for 18 s</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="list-label">
+        <p class="label" id="list-label"><span id="list-title">Everything, soonest first</span><span id="list-count"></span></p>
+        <div class="list" id="list"></div>
+        <p class="note" style="margin-top:10px">Example items. Your list fills in after your first scan.</p>
+      </section>
+    </div>
+
+    <section class="storage" aria-labelledby="storage-title">
+      <div class="storage-head">
+        <p class="label" style="margin:0">Where things go</p>
+        <h2 id="storage-title">Each part of the fridge has its own temperature</h2>
+        <p>The bottom shelf is the coldest and the door is the warmest. Put each food where it lasts longest.</p>
+      </div>
+      <div class="storage-grid">
+        <div class="map" aria-label="Fridge storage map">
+          <div class="map-body">
+            <div class="zone" style="--t:8%">
+              <div class="zt"><span class="zn">Top shelf</span><span class="zc">4–5 °C</span></div>
+              <span class="zw">Leftovers, hummus, ready-to-eat food, drinks</span>
+            </div>
+            <div class="zone" style="--t:16%">
+              <div class="zt"><span class="zn">Middle shelf</span><span class="zc">3–4 °C</span></div>
+              <span class="zw">Milk, yogurt, eggs, cheese</span>
+            </div>
+            <div class="zone" style="--t:28%">
+              <div class="zt"><span class="zn">Bottom shelf</span><span class="zc">1–3 °C</span></div>
+              <span class="zw">Raw meat and fish, sealed, on a plate</span>
+              <span class="zx">Lowest, so drips can't fall on other food</span>
+            </div>
+            <div class="zone crisper" style="--t:12%">
+              <div class="zt"><span class="zn">Crisper drawer</span><span class="zc">humid</span></div>
+              <span class="zw">Vegetables, salad leaves, fruit</span>
+              <span class="zx">Keep apples apart from greens</span>
+            </div>
+          </div>
+          <div class="map-door">
+            <div class="zone" style="--t:3%">
+              <div class="zt"><span class="zn">Door</span><span class="zc">5–7 °C</span></div>
+              <span class="zw">Sauces, jam, juice, butter</span>
+              <span class="zx">Warms up every time you open it. No milk or eggs here.</span>
+            </div>
+          </div>
+          <div class="scale"><span>Coldest</span><span class="ramp"></span><span>Warmest</span></div>
+        </div>
+
+        <div class="moves">
+          <p class="label" style="margin:0"><span>Move these</span><span id="move-count"></span></p>
+          <div id="moves" class="moves"></div>
+          <ul class="rules">
+            <li><b>Don't overfill.</b> Cold air needs space to move.</li>
+            <li><b>Older food to the front.</b> You'll eat it first.</li>
+            <li><b>Let hot food cool</b> before it goes in, but within 2 hours.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FRIDGE CAM -->
+  <main class="page" id="page-cam" role="tabpanel" aria-labelledby="tab-cam" hidden>
+    <div class="storage-head">
+      <p class="label" style="margin:0">Inside your fridge</p>
+      <h2>See your shelves from anywhere</h2>
+      <p>One tap turns on the fridge light and takes a fresh photo. The fridge also takes one by itself every time the door closes.</p>
+    </div>
+    <div class="cam-grid">
+      <div class="viewer">
+        <div class="summary" role="group" aria-label="Camera">
+          <button class="chip" id="cam-shelves" type="button" aria-pressed="true">Cam 1 · Shelves</button>
+          <button class="chip" id="cam-door" type="button" aria-pressed="false">Cam 2 · Door racks</button>
+        </div>
+        <canvas id="cam-canvas" role="img" aria-label="Photo from inside the fridge"></canvas>
+        <div class="cam-controls">
+          <button class="btn primary compact" id="live-look" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg>
+            Take a live look
+          </button>
+          <span class="status-line" id="cam-status"></span>
+        </div>
+        <p class="note"><span id="cam-found"></span> Demo image drawn from your food list. In the real fridge this is the camera's photo.</p>
+      </div>
+      <aside class="moves">
+        <p class="label" style="margin:0">What one tap does</p>
+        <ol class="howto">
+          <li>Your phone sends “take photo” to the fridge.</li>
+          <li>The fridge turns its inside light on for 2 seconds.</li>
+          <li>Both cameras take a photo.</li>
+          <li>The photos upload and the AI updates your food list.</li>
+        </ol>
+        <label class="toggle" for="auto-snap"><input type="checkbox" id="auto-snap" checked> Take a photo every time the door closes</label>
+        <div class="hw">
+          <b>Where the cameras sit</b>
+          <span><b>Cam 1</b> is a wide-angle (160°) camera at the top of the door's inner panel. When the door is closed it faces every shelf and the front of the crisper.</span>
+          <span><b>Cam 2</b> sits in the ceiling and points down at the door racks.</span>
+          <span>Both are ESP32-CAM boards with a heated lens so they don't fog up.</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- RECEIPT SCAN -->
+  <main class="page" id="page-scan" aria-labelledby="scan-title" hidden>
+    <div class="storage-head">
+      <p class="label" style="margin:0">Receipt scan</p>
+      <h2 id="scan-title">Add your shopping from the receipt</h2>
+      <p>Take a photo of your shop receipt. The AI reads what you bought and when, then works out the expiry date for each item.</p>
+    </div>
+    <div class="scan-grid">
+      <div>
+        <img id="receipt-img" class="receipt-img" alt="Your receipt photo" hidden>
+        <div id="receipt-empty" class="empty">No photo yet</div>
+      </div>
+      <div class="found">
+        <p class="status-line" id="scan-status">Tap “Scan receipt” to open your camera.</p>
+        <div class="found" id="found-list"></div>
+        <div class="ask-row">
+          <button class="btn primary compact" id="add-found" type="button" hidden>Add to my fridge</button>
+          <button class="btn compact" id="scan-again" type="button">Take another photo</button>
+          <button class="btn compact" id="scan-example" type="button">Try an example receipt</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- RECIPES -->
+  <main class="page" id="page-recipes" role="tabpanel" aria-labelledby="tab-recipes" hidden>
+    <section class="ai" aria-labelledby="pref-title">
+      <div>
+        <span class="badge">AI</span>
+        <h2 id="pref-title" style="margin-top:8px">What do you feel like?</h2>
+        <p class="status-line" style="margin-top:4px" id="mode-hint"></p>
+      </div>
+      <div class="mode" role="group" aria-label="Ingredients">
+        <button class="tab" id="mode-fridge" type="button" aria-selected="true">From my fridge</button>
+        <button class="tab" id="mode-any" type="button" aria-selected="false">Anything, I'll shop</button>
+      </div>
+      <div class="prefs" id="prefs" aria-label="Preferences"></div>
+      <div class="ask-row">
+        <label class="sr" for="pref-text">What you want</label>
+        <input class="field" id="pref-text" type="text" maxlength="200" placeholder="e.g. lasagna, no dairy, cooking for 4">
+        <button class="btn primary compact" id="gen-recipes" type="button">Get recipes</button>
+      </div>
+      <p class="status-line" id="rec-status">Example recipes. Pick your preferences and tap “Get recipes”.</p>
+    </section>
+
+    <section aria-labelledby="rec-label">
+      <p class="label" id="rec-label"><span>Eat these first</span></p>
+      <div class="uses" id="eat-first" style="margin-bottom:20px"></div>
+      <p class="label"><span>Recipes</span><span id="rec-count"></span></p>
+      <div class="recipes" id="recipe-list"></div>
+    </section>
+  </main>
+
+  <!-- INSIGHTS -->
+  <main class="page" id="page-insights" role="tabpanel" aria-labelledby="tab-insights" hidden>
+    <section class="storage" aria-labelledby="forecast-title">
+      <div class="storage-head">
+        <p class="label" style="margin:0">How fast you use it</p>
+        <h2 id="forecast-title">Forecast</h2>
+        <p id="forecast-summary"></p>
+      </div>
+      <div class="forecast" id="forecast"></div>
+      <p class="note">Example usage from the last 14 days of scans. The forecast compares how fast you eat each item with its expiry date.</p>
+    </section>
+
+    <section class="ai" aria-labelledby="ai-title">
+      <div class="ai-head">
+        <div>
+          <span class="badge">AI</span>
+          <h2 id="ai-title" style="margin-top:8px">Advice for you</h2>
+          <p>What to buy, what to eat first, and what each food does for your body.</p>
+        </div>
+        <button class="btn primary compact" id="ask-ai" type="button">Get AI advice</button>
+      </div>
+      <p class="status-line" id="ai-status">Showing example advice. Tap “Get AI advice” to generate advice from your current fridge.</p>
+      <p class="ai-summary" id="ai-summary"></p>
+      <div class="tips" id="tips"></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Status rule: more than 3 days left = safe, 0–3 = eat soon, below 0 = expired
+const SECTIONS = ["Top shelf", "Middle shelf", "Bottom shelf", "Crisper drawer", "Door rack"];
+// qty/unit = what is left now, rate = how much is used per day (from past scans), best = where it should live
+const items = [
+  { name: "Chicken breast", section: "Bottom shelf", best: "Bottom shelf", days: -1, qty: 500, unit: "g", rate: 0 },
+  { name: "Leftover pasta", section: "Top shelf", best: "Top shelf", days: 0, qty: 1, unit: "box", rate: 0 },
+  { name: "Baby spinach", section: "Crisper drawer", best: "Crisper drawer", days: 1, qty: 200, unit: "g", rate: 30 },
+  { name: "Milk 3.6%", section: "Door rack", best: "Middle shelf", days: 2, qty: 0.6, unit: "L", rate: 0.3,
+    why: "The door is the warmest spot. Milk lasts 1–2 days longer on the middle shelf." },
+  { name: "Greek yogurt", section: "Middle shelf", best: "Middle shelf", days: 3, qty: 2, unit: "cups", rate: 1 },
+  { name: "Hummus", section: "Top shelf", best: "Top shelf", days: 4, qty: 200, unit: "g", rate: 40 },
+  { name: "Tomatoes", section: "Crisper drawer", best: "Crisper drawer", days: 5, qty: 6, unit: "pcs", rate: 1 },
+  { name: "Eggs", section: "Middle shelf", best: "Middle shelf", days: 12, qty: 10, unit: "pcs", rate: 1.5 },
+  { name: "Cheddar", section: "Middle shelf", best: "Middle shelf", days: 18, qty: 250, unit: "g", rate: 20 },
+  { name: "Butter", section: "Door rack", best: "Door rack", days: 30, qty: 250, unit: "g", rate: 10 }
+];
+const LABEL = { safe: "Safe", soon: "Eat soon", bad: "Throw away" };
+const RANK = { safe: 0, soon: 1, bad: 2 };
+const statusOf = d => d < 0 ? "bad" : d <= 3 ? "soon" : "safe";
+items.forEach(i => { i.status = statusOf(i.days); });
+
+const $ = id => document.getElementById(id);
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const fmtQty = (q, u) => `${Math.round(q * 10) / 10} ${u}`;
+const fmtDate = d => {
+  const t = new Date(); t.setDate(t.getDate() + Math.round(d));
+  return t.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+};
+const daysText = d => d < 0 ? `expired ${plural(-d, "day")} ago` : d === 0 ? "today" : plural(d, "day");
+
+/* ---------- Home ---------- */
+let filter = { section: null, status: null };
+
+function renderSummary() {
+  const el = $("summary");
+  el.innerHTML = "";
+  ["bad", "soon", "safe"].forEach(s => {
+    const n = items.filter(i => i.status === s).length;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.id = "chip-" + s;
+    b.setAttribute("aria-pressed", filter.status === s);
+    b.innerHTML = `<span class="dot ${s}"></span>${LABEL[s]} <span class="n">${n}</span>`;
+    b.onclick = () => { filter.status = filter.status === s ? null : s; renderHome(); };
+    el.appendChild(b);
+  });
+}
+
+function renderShelves() {
+  const el = $("shelves");
+  el.innerHTML = "";
+  SECTIONS.forEach((s, idx) => {
+    const inside = items.filter(i => i.section === s);
+    const worst = inside.reduce((w, i) => RANK[i.status] > RANK[w] ? i.status : w, "safe");
+    const b = document.createElement("button");
+    b.type = "button"; b.id = "shelf-" + idx; b.className = "shelf";
+    b.setAttribute("aria-pressed", filter.section === s);
+    b.setAttribute("aria-label", `${s}, LED ${LABEL[worst]}, ${inside.length} items`);
+    b.innerHTML = `<span class="led ${worst}"></span>
+      <span><span class="name">${s}</span><br><span class="meta">${inside.map(i => i.name).join(", ") || "Empty"}</span></span>
+      <span class="mono">${inside.length}</span>`;
+    b.onclick = () => { filter.section = filter.section === s ? null : s; renderHome(); };
+    el.appendChild(b);
+  });
+}
+
+function renderList() {
+  const el = $("list");
+  const shown = items
+    .filter(i => !filter.section || i.section === filter.section)
+    .filter(i => !filter.status || i.status === filter.status)
+    .sort((a, b) => a.days - b.days);
+  const parts = [filter.status && LABEL[filter.status], filter.section].filter(Boolean);
+  $("list-title").textContent = parts.length ? parts.join(" · ") : "Everything, soonest first";
+  $("list-count").textContent = plural(shown.length, "item");
+  el.innerHTML = shown.length ? "" : `<div class="empty">Nothing here. Tap the section or filter again to clear it.</div>`;
+  shown.forEach(i => {
+    const row = document.createElement("div");
+    row.className = "item " + i.status;
+    row.innerHTML = `<span class="bar"></span>
+      <span><span class="title">${i.name}</span><br><span class="sub">${i.section} · ${fmtQty(i.qty, i.unit)}${i.boughtAgo != null ? ` · bought ${fmtDate(-i.boughtAgo)}` : ""}</span></span>
+      <span class="when"><span class="days">${daysText(i.days)}</span><br>
+      <span class="pill">${LABEL[i.status]} · ${fmtDate(i.days)}</span></span>`;
+    el.appendChild(row);
+  });
+}
+
+function renderMoves() {
+  const wrong = items.filter(i => i.section !== i.best);
+  $("move-count").textContent = wrong.length ? plural(wrong.length, "item") : "";
+  $("moves").innerHTML = wrong.length ? "" : `<div class="empty">Everything is in the right place.</div>`;
+  wrong.forEach(i => {
+    const m = document.createElement("div");
+    m.className = "move";
+    m.innerHTML = `<span class="path">${i.name}: ${i.section}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      ${i.best}</span><span class="why">${i.why || ""}</span>`;
+    $("moves").appendChild(m);
+  });
+}
+
+function renderExpired() {
+  const el = $("expired");
+  const gone = items.filter(i => i.status === "bad").sort((a, b) => a.days - b.days);
+  const soon = items.filter(i => i.status === "soon").length;
+  el.className = "alert " + (gone.length ? "bad" : "safe");
+  el.innerHTML = "";
+  const h = document.createElement("h2");
+  h.innerHTML = `<span class="led ${gone.length ? "bad" : "safe"}"></span>`;
+  h.append(gone.length ? `Throw away now: ${plural(gone.length, "item")}` : "Nothing has expired");
+  el.appendChild(h);
+  gone.forEach(i => {
+    const r = document.createElement("div"); r.className = "alert-row";
+    const a = document.createElement("span"); a.className = "title"; a.textContent = i.name;
+    const b = document.createElement("span"); b.className = "sub"; b.textContent = `${i.section} · ${daysText(i.days)}`;
+    r.append(a, b); el.appendChild(r);
+  });
+  if (!gone.length) { const p = document.createElement("p"); p.textContent = soon ? `${plural(soon, "item")} should be eaten in the next 3 days.` : "Everything is fresh."; el.appendChild(p); }
+}
+
+function renderHome() {
+  renderExpired(); renderSummary(); renderShelves(); renderList(); renderMoves();
+}
+
+/* ---------- Insights ---------- */
+// For each item: days until it runs out at the current pace, and whether it expires first
+function forecastOf(i) {
+  const runOut = i.qty / i.rate;
+  const waste = i.days < runOut ? (runOut - Math.max(i.days, 0)) * i.rate : 0;
+  let kind, text;
+  if (waste > 0) { kind = "bad"; text = `<b>Goes off first.</b> About ${fmtQty(waste, i.unit)} will be wasted at your pace.`; }
+  else if (runOut <= 3) { kind = "soon"; text = `<b>Running out.</b> Buy more by ${fmtDate(Math.floor(runOut))}.`; }
+  else { kind = "safe"; text = `<b>Enough.</b> No need to buy this week.`; }
+  return { runOut, waste, kind, text };
+}
+const tracked = items.filter(i => i.rate > 0 && i.days >= 0).map(i => ({ ...i, f: forecastOf(i) }))
+  .sort((a, b) => RANK[b.f.kind] - RANK[a.f.kind] || a.f.runOut - b.f.runOut);
+
+function renderForecast() {
+  const el = $("forecast");
+  el.innerHTML = `<div class="frow head"><span>Item</span><span>Runs out in</span><span>Expires in</span><span>What it means</span></div>`;
+  tracked.forEach(i => {
+    const r = document.createElement("div");
+    r.className = "frow " + i.f.kind;
+    const ro = Math.round(i.f.runOut * 10) / 10;
+    r.innerHTML = `<span><span class="title">${i.name}</span><br><span class="sub">${fmtQty(i.rate, i.unit)} a day · ${fmtQty(i.qty, i.unit)} left</span></span>
+      <span class="mono">${plural(ro, "day")}</span>
+      <span class="mono">${plural(i.days, "day")}</span>
+      <span class="verdict">${i.f.text}</span>`;
+    el.appendChild(r);
+  });
+  const out = tracked.filter(i => i.f.kind === "soon").map(i => i.name);
+  const waste = tracked.filter(i => i.f.kind === "bad").map(i => i.name);
+  const bits = [];
+  if (out.length) bits.push(`${out.join(" and ")} will run out in the next 3 days.`);
+  if (waste.length) bits.push(`${waste.join(" and ")} will go off before you finish ${waste.length > 1 ? "them" : "it"}.`);
+  $("forecast-summary").textContent = bits.join(" ") || "You have enough of everything this week.";
+}
+
+const EXAMPLE_ADVICE = {
+  summary: "Eat the spinach and yogurt first, buy milk before the weekend, and skip cheese on your next shop.",
+  tips: [
+    { item: "Baby spinach", advice: "You use 30 g a day but it expires tomorrow. Put it all in tonight's pasta or an omelette, or freeze it for smoothies.", benefit: "Iron and folate for energy, and vitamin K for strong bones." },
+    { item: "Milk 3.6%", advice: "You drink about 0.3 L a day, so this runs out in 2 days. Buy 1 L, not 2. You'd waste the second one.", benefit: "Calcium and protein for bones and muscles." },
+    { item: "Greek yogurt", advice: "One cup a day finishes it right on the expiry date. Have it for breakfast both days.", benefit: "Probiotics for your gut and about 10 g of protein per cup." },
+    { item: "Cheddar", advice: "At 20 g a day it lasts 12 more days. Don't buy cheese this week.", benefit: "Calcium for bones. It's salty, so about 30 g a day is a good limit." }
+  ]
+};
+
+function renderAdvice(data) {
+  $("ai-summary").textContent = data.summary || "";
+  const el = $("tips");
+  el.innerHTML = "";
+  (data.tips || []).forEach(t => {
+    const c = document.createElement("article");
+    c.className = "tip";
+    const h = document.createElement("span"); h.className = "ti"; h.textContent = t.item;
+    const a = document.createElement("p"); a.textContent = t.advice;
+    const b = document.createElement("p"); b.className = "ben";
+    const bl = document.createElement("b"); bl.textContent = "Good for you: ";
+    b.append(bl, document.createTextNode(t.benefit || ""));
+    c.append(h, a, b);
+    el.appendChild(c);
+  });
+}
+
+let sampleFn = null;
+(async () => {
+  try { sampleFn = await window.claude?.use?.("sample"); } catch { sampleFn = null; }
+  if (!sampleFn) {
+    $("ask-ai").hidden = true;
+    $("gen-recipes").hidden = true;
+    $("ai-status").textContent = "Example advice. Live AI advice works when you open this page in Claude.";
+    $("rec-status").textContent = "Example recipes. Live AI recipes work when you open this page in Claude.";
+  }
+})();
+
+const aiErrorText = code => ({
+  not_granted: "AI is off because the page wasn't allowed to use Claude.",
+  sampling_disabled: "AI isn't available on this account.",
+  rate_limited: "Too many requests right now. Try again in a minute.",
+  invalid_json: "The AI answer came back in the wrong format. Tap the button to try again."
+}[code] || "Couldn't reach the AI. Check your connection and try again.");
+const aiBlocked = code => code === "not_granted" || code === "sampling_disabled";
+
+$("ask-ai").onclick = async () => {
+  if (!sampleFn) return;
+  const btn = $("ask-ai");
+  btn.disabled = true;
+  $("ai-status").textContent = "Thinking…";
+  const data = tracked.map(i => ({
+    item: i.name, left: `${i.qty} ${i.unit}`, usedPerDay: `${i.rate} ${i.unit}`,
+    runsOutInDays: Math.round(i.f.runOut * 10) / 10, expiresInDays: i.days
+  }));
+  const prompt = `You are the nutrition and food-waste assistant inside a smart fridge app.
+Here is what is in the fridge, how much is left, how fast the household uses it, and when it expires:
+${JSON.stringify(data, null, 1)}
+
+Write advice for the 4 items that matter most this week (running out soon, or expiring before it will be finished).
+For each: one practical piece of advice (when to buy more and how much, or how to finish it before it goes off), in 1–2 short plain sentences, using the numbers above.
+And one sentence on the main health benefit of that food for the body, with a sensible portion note if it matters.
+Reply with only JSON in this shape:
+{"summary": "one sentence overview for this week", "tips": [{"item": "name", "advice": "...", "benefit": "..."}]}`;
+  try {
+    const res = await sampleFn.json(prompt, { modelTier: "quick" });
+    if (!res || !Array.isArray(res.tips)) throw { code: "invalid_json" };
+    renderAdvice(res);
+    $("ai-status").textContent = "Generated by AI from your current fridge just now.";
+  } catch (e) {
+    $("ai-status").textContent = aiErrorText(e?.code) + (aiBlocked(e?.code) ? " Showing example advice." : "");
+    if (aiBlocked(e?.code)) btn.hidden = true;
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+/* ---------- Recipes ---------- */
+const PREFS = ["Sweet", "Salty", "On a diet", "Under 15 min", "Vegetarian", "High protein", "No oven"];
+const chosen = new Set();
+let shopMode = false;
+function renderMode() {
+  $("mode-fridge").setAttribute("aria-selected", !shopMode);
+  $("mode-any").setAttribute("aria-selected", shopMode);
+  $("mode-hint").textContent = shopMode
+    ? "Ask for any dish you like. The AI uses what's in your fridge where it can and tells you what to buy."
+    : "Pick what you want. The AI builds recipes from your fridge and uses the food that expires soonest first.";
+  $("pref-text").placeholder = shopMode ? "What do you want to cook? e.g. lasagna, sushi, pancakes" : "Anything else? e.g. no dairy, cooking for 4, kid friendly";
+}
+$("mode-fridge").onclick = () => { shopMode = false; renderMode(); };
+$("mode-any").onclick = () => { shopMode = true; renderMode(); $("pref-text").focus(); };
+function renderPrefs() {
+  $("prefs").innerHTML = "";
+  PREFS.forEach((p, idx) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.id = "pref-" + idx;
+    b.setAttribute("aria-pressed", chosen.has(p));
+    b.textContent = p;
+    b.onclick = () => { chosen.has(p) ? chosen.delete(p) : chosen.add(p); renderPrefs(); };
+    $("prefs").appendChild(b);
+  });
+}
+
+const EXAMPLE_RECIPES = [
+  { name: "Spinach and tomato omelette", minutes: 10, kcal: 340, servings: 1,
+    why: "Uses the spinach before it goes off tomorrow.",
+    uses: ["Eggs", "Baby spinach", "Tomatoes", "Cheddar"], extra: ["Olive oil", "Salt", "Pepper"],
+    steps: ["Beat 3 eggs with a pinch of salt and pepper.", "Wilt a big handful of spinach in a pan with a little oil.", "Pour in the eggs, add sliced tomato and 20 g grated cheddar.", "Cook 3–4 minutes on medium heat, fold and serve."],
+    look: { vessel: "plate", base: "#F2C14E", toppings: [{ shape: "leaf", color: "#3E8E41" }, { shape: "slice", color: "#D9412B" }, { shape: "crumb", color: "#E9962E" }] } },
+  { name: "Leftover pasta with creamy spinach", minutes: 12, kcal: 520, servings: 2,
+    why: "Finishes the pasta today and the milk before it runs out.",
+    uses: ["Leftover pasta", "Baby spinach", "Milk 3.6%", "Cheddar"], extra: ["Garlic", "Butter"],
+    steps: ["Melt a knob of butter with a chopped garlic clove.", "Add 100 ml milk and 40 g grated cheddar, stir until smooth.", "Stir in the spinach and the leftover pasta.", "Heat through for 4 minutes and season."],
+    look: { vessel: "pan", base: "#EBC98A", toppings: [{ shape: "leaf", color: "#2F7D3A" }, { shape: "crumb", color: "#F3E3B5" }] } },
+  { name: "Honey yogurt breakfast bowl", minutes: 5, kcal: 280, servings: 1,
+    why: "A sweet way to finish the yogurt before it expires.",
+    uses: ["Greek yogurt"], extra: ["Honey", "Oats", "Any fruit"],
+    steps: ["Spoon a cup of Greek yogurt into a bowl.", "Top with 2 tablespoons of oats and some fruit.", "Drizzle with honey."],
+    look: { vessel: "bowl", base: "#F6F2EA", toppings: [{ shape: "drizzle", color: "#D99A2B" }, { shape: "crumb", color: "#B88A55" }, { shape: "dot", color: "#B5304A" }] } }
+];
+
+function renderEatFirst() {
+  $("eat-first").innerHTML = "";
+  items.filter(i => i.status === "soon").sort((a, b) => a.days - b.days).forEach(i => {
+    const s = document.createElement("span");
+    s.className = "ing soon";
+    s.textContent = `${i.name} · ${daysText(i.days)}`;
+    $("eat-first").appendChild(s);
+  });
+}
+
+// --- Dish illustration: a top-down plate drawn from the recipe's "look" ---
+const HEX = /^#[0-9a-f]{6}$/i;
+const hashStr = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+const rng = seed => () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+function mix(hex, other, amt) {
+  const a = parseInt(hex.slice(1), 16), b = parseInt(other.slice(1), 16);
+  const ch = s => Math.round(((a >> s) & 255) * (1 - amt) + ((b >> s) & 255) * amt);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+}
+
+function drawDish(cv, look, seedText) {
+  const S = 240, dpr = window.devicePixelRatio || 1;
+  cv.width = S * dpr; cv.height = S * dpr;
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const rnd = rng(hashStr(seedText));
+  const css = getComputedStyle(document.documentElement);
+  ctx.fillStyle = css.getPropertyValue("--fridge").trim() || "#F7FAFB";
+  ctx.fillRect(0, 0, S, S);
+
+  const c = S / 2, vessel = ["plate", "bowl", "glass", "pan"].includes(look?.vessel) ? look.vessel : "plate";
+  const base = HEX.test(look?.base || "") ? look.base : "#E8C27A";
+  const circle = (r, fill, dx = 0, dy = 0) => { ctx.beginPath(); ctx.arc(c + dx, c + dy, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); };
+
+  let foodR;
+  if (vessel === "pan") {
+    ctx.save(); ctx.translate(c, c); ctx.rotate(-0.6);
+    ctx.fillStyle = "#23292D"; ctx.beginPath(); ctx.roundRect(88, -9, 60, 18, 9); ctx.fill(); ctx.restore();
+    circle(98, "rgba(0,0,0,.18)", 3, 5); circle(98, "#2E3438"); circle(88, "#3B4247"); foodR = 80;
+  } else if (vessel === "bowl") {
+    circle(94, "rgba(0,0,0,.14)", 3, 6); circle(94, "#ECE8E1"); circle(80, "#D8D3CA"); foodR = 74;
+  } else if (vessel === "glass") {
+    circle(72, "rgba(0,0,0,.12)", 3, 5); circle(72, "#E4EEF1"); foodR = 62;
+  } else {
+    circle(102, "rgba(0,0,0,.12)", 3, 6); circle(102, "#F8F8F5"); circle(84, "#EEEEE9"); circle(80, "#F8F8F5"); foodR = 70;
+  }
+
+  // Base: an uneven blob with a soft highlight
+  ctx.beginPath();
+  for (let k = 0; k <= 28; k++) {
+    const a = (k / 28) * Math.PI * 2, r = foodR * (0.9 + rnd() * 0.1);
+    k ? ctx.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r) : ctx.moveTo(c + Math.cos(a) * r, c + Math.sin(a) * r);
+  }
+  const g = ctx.createRadialGradient(c - 20, c - 24, 6, c, c, foodR);
+  g.addColorStop(0, mix(base, "#FFFFFF", 0.3)); g.addColorStop(1, mix(base, "#000000", 0.12));
+  ctx.fillStyle = g; ctx.fill();
+
+  const spot = (spread = 0.78) => { const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * foodR * spread; return [c + Math.cos(a) * r, c + Math.sin(a) * r]; };
+  (look?.toppings || []).slice(0, 4).forEach(t => {
+    const col = HEX.test(t?.color || "") ? t.color : "#7A9A3A";
+    const shape = t?.shape;
+    if (shape === "leaf") {
+      for (let n = 0; n < 8; n++) {
+        const [x, y] = spot(); ctx.save(); ctx.translate(x, y); ctx.rotate(rnd() * Math.PI);
+        ctx.beginPath(); ctx.ellipse(0, 0, 10, 4.5, 0, 0, Math.PI * 2); ctx.fillStyle = mix(col, "#000000", rnd() * 0.2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.strokeStyle = mix(col, "#FFFFFF", 0.35); ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+      }
+    } else if (shape === "slice") {
+      for (let n = 0; n < 5; n++) {
+        const [x, y] = spot(0.7);
+        ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fillStyle = mix(col, "#FFFFFF", 0.25); ctx.fill();
+        for (let s = 0; s < 4; s++) { ctx.beginPath(); ctx.arc(x + Math.cos(s * 1.57) * 3.5, y + Math.sin(s * 1.57) * 3.5, 1.3, 0, Math.PI * 2); ctx.fillStyle = mix(col, "#FFF3C4", 0.6); ctx.fill(); }
+      }
+    } else if (shape === "drizzle") {
+      ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineCap = "round";
+      for (let n = 0; n < 3; n++) {
+        const y0 = c - foodR * 0.5 + n * foodR * 0.5;
+        ctx.beginPath(); ctx.moveTo(c - foodR * 0.7, y0);
+        ctx.bezierCurveTo(c - 20, y0 - 18 + rnd() * 10, c + 20, y0 + 18 - rnd() * 10, c + foodR * 0.7, y0 + (rnd() - 0.5) * 12);
+        ctx.stroke();
+      }
+    } else if (shape === "dot") {
+      for (let n = 0; n < 12; n++) { const [x, y] = spot(); circle(3 + rnd() * 3, mix(col, "#000000", rnd() * 0.15), x - c, y - c); }
+    } else {
+      for (let n = 0; n < 40; n++) { const [x, y] = spot(0.85); circle(1.2 + rnd() * 1.6, mix(col, "#FFFFFF", rnd() * 0.2), x - c, y - c); }
+    }
+  });
+}
+
+let currentRecipes = EXAMPLE_RECIPES;
+function renderRecipes(list) {
+  currentRecipes = list;
+  const el = $("recipe-list");
+  el.innerHTML = "";
+  $("rec-count").textContent = plural(list.length, "recipe");
+  const fridgeItem = n => items.find(i => i.name.toLowerCase() === String(n).toLowerCase());
+  list.forEach((r, idx) => {
+    const card = document.createElement("article");
+    card.className = "recipe";
+
+    const fig = document.createElement("figure");
+    const cv = document.createElement("canvas");
+    cv.setAttribute("role", "img"); cv.setAttribute("aria-label", `Illustration of ${r.name}`);
+    const cap = document.createElement("figcaption"); cap.textContent = "Illustration of the dish";
+    fig.append(cv, cap);
+
+    const body = document.createElement("div"); body.className = "rbody";
+    const h = document.createElement("h3"); h.textContent = r.name;
+    const meta = document.createElement("div"); meta.className = "rmeta";
+    [[r.minutes, "min"], [r.kcal, "kcal"], [r.servings, r.servings === 1 ? "serving" : "servings"]].forEach(([v, u]) => {
+      if (v == null) return;
+      const s = document.createElement("span"); const b = document.createElement("b"); b.textContent = v;
+      s.append(b, document.createTextNode(" " + u)); meta.appendChild(s);
+    });
+    const why = document.createElement("p"); why.className = "why"; why.textContent = r.why || "";
+    const uses = document.createElement("div"); uses.className = "uses";
+    (r.uses || []).forEach(u => {
+      const it = fridgeItem(u), s = document.createElement("span");
+      s.className = "ing" + (it?.status === "soon" ? " soon" : "");
+      s.textContent = String(u); uses.appendChild(s);
+    });
+    (r.extra || []).forEach(u => { const s = document.createElement("span"); s.className = "ing pantry"; s.textContent = String(u); uses.appendChild(s); });
+    (r.buy || []).forEach(u => { const s = document.createElement("span"); s.className = "ing buy"; s.textContent = "Buy: " + String(u); uses.appendChild(s); });
+    const det = document.createElement("details"); det.id = "steps-" + idx;
+    const sum = document.createElement("summary"); sum.textContent = "How to make it";
+    const ol = document.createElement("ol");
+    (r.steps || []).forEach(st => { const li = document.createElement("li"); li.textContent = String(st); ol.appendChild(li); });
+    det.append(sum, ol);
+    body.append(h, meta, why, uses, det);
+
+    card.append(fig, body);
+    el.appendChild(card);
+    drawDish(cv, r.look, r.name);
+  });
+}
+// Redraw illustrations when the theme changes so the table colour matches
+new MutationObserver(() => renderRecipes(currentRecipes)).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => renderRecipes(currentRecipes));
+
+$("gen-recipes").onclick = async () => {
+  if (!sampleFn) return;
+  const btn = $("gen-recipes");
+  btn.disabled = true;
+  $("rec-status").textContent = "Cooking up ideas…";
+  const fridge = items.filter(i => i.days >= 0).map(i => ({ item: i.name, left: `${i.qty} ${i.unit}`, expiresInDays: i.days }));
+  const expired = items.filter(i => i.days < 0).map(i => i.name);
+  const wants = [...chosen].join(", ") || "no special preference";
+  const extra = $("pref-text").value.trim().slice(0, 200);
+  const prompt = `You are the recipe assistant in a smart fridge app.
+Fridge contents (name, amount left, days until expiry):
+${JSON.stringify(fridge, null, 1)}
+Expired, never use: ${expired.join(", ") || "none"}.
+Basic pantry is available: salt, pepper, oil, butter, sugar, honey, flour, oats, rice, dry pasta, garlic, onion, common spices.
+
+The user wants: ${wants}.${extra ? `\nThey also said: "${extra}"` : ""}
+
+${shopMode
+  ? `The user is happy to go shopping. If they name a dish, make that dish (3 different versions or close variations), even if the fridge doesn't have the ingredients. Use fridge items where they fit, especially ones that expire within 3 days.`
+  : `Suggest 3 different recipes that follow the user's wishes. Use only fridge items and the basic pantry, and prefer the items that expire within 3 days.`}
+Keep steps short and practical (3 to 6 steps, with amounts).
+In "uses", list fridge items using their exact names from the list above. In "extra", list basic pantry items used. In "buy", list ingredients the user must buy${shopMode ? "" : " (this must be an empty list)"}.
+"look" describes how the finished dish looks from above, for an illustration: vessel is one of plate, bowl, glass, pan; base is the main colour of the food as #rrggbb; toppings is 1 to 3 visible toppings, each with shape (leaf, dot, slice, drizzle or crumb) and color as #rrggbb.
+Reply with only JSON:
+{"recipes":[{"name":"","minutes":10,"kcal":350,"servings":2,"why":"one short sentence on why it fits","uses":[""],"extra":[""],"buy":[""],"steps":[""],"look":{"vessel":"plate","base":"#e8c27a","toppings":[{"shape":"leaf","color":"#3e8e41"}]}}]}`;
+  try {
+    const res = await sampleFn.json(prompt, { modelTier: "quick", cache: false });
+    const list = Array.isArray(res?.recipes) ? res.recipes.filter(r => r && r.name).slice(0, 4) : [];
+    if (!list.length) throw { code: "invalid_json" };
+    renderRecipes(list);
+    const toBuy = new Set(list.flatMap(r => Array.isArray(r.buy) ? r.buy.map(String) : []));
+    $("rec-status").textContent = `Made by AI for: ${wants}${extra ? `, ${extra}` : ""}.`
+      + (shopMode ? (toBuy.size ? ` You'll need to buy ${plural(toBuy.size, "ingredient")} (blue tags).` : " You have everything already.") : "");
+  } catch (e) {
+    $("rec-status").textContent = aiErrorText(e?.code) + (aiBlocked(e?.code) ? " Showing example recipes." : "");
+    if (aiBlocked(e?.code)) btn.hidden = true;
+  } finally {
+    btn.disabled = false;
+  }
+};
+$("pref-text").addEventListener("keydown", e => { if (e.key === "Enter") $("gen-recipes").click(); });
+
+/* ---------- Fridge camera (demo image drawn from the food list) ---------- */
+const fmtTime = d => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+const STATUS_HEX = { safe: "#2FB36B", soon: "#F0B429", bad: "#F0524A" };
+const FOOD_LOOKS = [
+  [/milk|juice|kefir/i, "carton"], [/egg/i, "eggs"], [/chicken|meat|beef|pork|salmon|fish|mince/i, "tray"],
+  [/spinach|lettuce|salad|herb|kale/i, "bag"], [/tomato|strawberr|pepper|apple|berr|grape/i, "fruit"],
+  [/yog|hummus|mozzarella|cream|dip/i, "tub"], [/cheddar|cheese|butter/i, "block"], [/pasta|leftover|rice|soup/i, "box"]
+];
+const lookOf = n => (FOOD_LOOKS.find(([re]) => re.test(n)) || [null, "pack"])[1];
+
+// Draws one food item standing on floorY, plus an AI detection box coloured by status. Returns its width.
+function drawFood(ctx, it, x, floorY) {
+  const n = it.name.toLowerCase();
+  const box = (bx, by, bw, bh, fill, r = 4) => { ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, r); ctx.fillStyle = fill; ctx.fill(); };
+  let w, h;
+  switch (lookOf(n)) {
+    case "carton": w = 32; h = 56; box(x, floorY - h, w, h, n.includes("juice") ? "#F2A33A" : "#F7F7F2", 3); box(x, floorY - h + 14, w, 16, n.includes("juice") ? "#D96C12" : "#4C8FD6", 0); break;
+    case "eggs": w = 92; h = 24; box(x, floorY - h, w, h, "#D9C79E", 5); for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.arc(x + 10 + k * 18, floorY - h, 7, Math.PI, 0); ctx.fillStyle = "#F3E9D2"; ctx.fill(); } break;
+    case "tray": w = 84; h = 22; box(x, floorY - h, w, h, "#E9ECEE", 4); box(x + 5, floorY - h + 3, w - 10, h - 8, /salmon|fish/.test(n) ? "#F08A5D" : "#E8A3A0", 6); break;
+    case "bag": w = 72; h = 44; box(x, floorY - h, w, h, "#5E9E4A", 10); box(x + 10, floorY - h + 10, w - 20, 14, "#EAF3E3", 3); break;
+    case "fruit": { const col = /pepper/.test(n) ? "#E3B21C" : "#D9412B"; w = 72; h = 22; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(x + 12 + k * 24, floorY - 11, 11, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill(); } break; }
+    case "tub": w = 44; h = 32; box(x, floorY - h, w, h, /hummus/.test(n) ? "#E6D3A8" : "#FAFAF7", 6); box(x - 2, floorY - h, w + 4, 6, "#7FA7C9", 3); break;
+    case "block": w = 56; h = 22; box(x, floorY - h, w, h, /butter/.test(n) ? "#F4D35E" : "#F09A2A", 3); break;
+    case "box": w = 62; h = 34; box(x, floorY - h, w, h, "rgba(255,255,255,.6)", 6); box(x + 4, floorY - h + 10, w - 8, h - 14, "#E9C46A", 4); break;
+    default: w = 50; h = 32; box(x, floorY - h, w, h, "#9DB4C0", 4);
+  }
+  const col = STATUS_HEX[it.status];
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.strokeRect(x - 4, floorY - h - 4, w + 8, h + 8);
+  ctx.font = "500 10px 'JetBrains Mono', Consolas, monospace";
+  const label = it.name.length > 14 ? it.name.slice(0, 13) + "…" : it.name;
+  const tw = ctx.measureText(label).width + 8;
+  ctx.fillStyle = col; ctx.fillRect(x - 5, floorY - h - 18, tw, 14);
+  ctx.fillStyle = "#11222C"; ctx.fillText(label, x - 1, floorY - h - 7);
+  return Math.max(w, tw - 8);
+}
+
+let camView = "shelves";
+let lastShot = (() => { const d = new Date(); d.setHours(7, 52, 0, 0); return d; })();
+let lastShotWhy = "when the door closed";
+
+function drawCam(dim = 0) {
+  const cv = $("cam-canvas"), W = 640, H = 400, dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const poly = (pts, fill) => { ctx.beginPath(); pts.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); };
+  let count = 0;
+
+  if (camView === "shelves") {
+    poly([[0, 0], [W, 0], [W, H], [0, H]], "#C9D2D3");
+    poly([[70, 30], [570, 30], [570, 380], [70, 380]], "#E8EEEE");
+    poly([[0, 0], [70, 30], [70, 380], [0, H]], "#C2CBCC");
+    poly([[W, 0], [570, 30], [570, 380], [W, H]], "#C2CBCC");
+    poly([[0, 0], [W, 0], [570, 30], [70, 30]], "#F4F7F6");
+    const row = (section, floorY) => {
+      let x = 96;
+      items.filter(i => i.section === section).forEach(it => { if (x > 520) return; x += drawFood(ctx, it, x, floorY) + 28; count++; });
+    };
+    [["Top shelf", 112], ["Middle shelf", 196], ["Bottom shelf", 280]].forEach(([s, y]) => {
+      row(s, y);
+      poly([[20, y], [620, y], [632, y + 9], [8, y + 9]], "rgba(185,212,224,.8)");
+      ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.fillRect(8, y + 9, 624, 2);
+    });
+    row("Crisper drawer", 374);
+    poly([[28, 314], [612, 314], [624, 398], [16, 398]], "rgba(198,224,234,.42)");
+    ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.fillRect(280, 324, 80, 6);
+  } else {
+    poly([[0, 0], [W, 0], [W, H], [0, H]], "#D6DEDF");
+    const door = items.filter(i => i.section === "Door rack");
+    [138, 258, 378].forEach((y, k) => {
+      let x = 90;
+      door.filter((_, idx) => idx % 3 === k).forEach(it => { x += drawFood(ctx, it, x, y - 6) + 30; count++; });
+      poly([[40, y - 34], [600, y - 34], [612, y], [28, y]], "rgba(198,224,234,.5)");
+      ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.fillRect(28, y, 584, 3);
+    });
+  }
+
+  const lg = ctx.createRadialGradient(W / 2, 10, 10, W / 2, 10, 420);
+  lg.addColorStop(0, "rgba(255,248,230,.45)"); lg.addColorStop(1, "rgba(255,248,230,0)");
+  ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+  if (dim) { ctx.fillStyle = `rgba(8,14,18,${dim})`; ctx.fillRect(0, 0, W, H); }
+  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.9);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.45)");
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+  ctx.font = "500 13px 'JetBrains Mono', Consolas, monospace";
+  ctx.fillStyle = "#FFFFFF"; ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 4;
+  ctx.fillText(camView === "shelves" ? "● CAM 1 · SHELVES" : "● CAM 2 · DOOR RACKS", 16, 26);
+  ctx.textAlign = "right";
+  ctx.fillText(`${lastShot.toLocaleDateString(undefined, { day: "numeric", month: "short" })} ${fmtTime(lastShot)}`, W - 16, 26);
+  ctx.fillText("4.0 °C", W - 16, H - 16);
+  ctx.textAlign = "left"; ctx.shadowBlur = 0;
+  return count;
+}
+
+function renderCam() {
+  const n = drawCam();
+  $("cam-status").textContent = `Last photo ${fmtTime(lastShot)}, ${lastShotWhy}.`;
+  $("cam-found").textContent = `AI spotted ${plural(n, "item")}.`;
+  $("cam-shelves").setAttribute("aria-pressed", camView === "shelves");
+  $("cam-door").setAttribute("aria-pressed", camView === "door");
+}
+$("cam-shelves").onclick = () => { camView = "shelves"; renderCam(); };
+$("cam-door").onclick = () => { camView = "door"; renderCam(); };
+$("live-look").onclick = async () => {
+  const btn = $("live-look");
+  btn.disabled = true;
+  for (const [msg, dim] of [["Waking the camera…", 0.75], ["Turning on the fridge light…", 0.4], ["Taking the photo…", 0.15], ["Uploading…", 0]]) {
+    $("cam-status").textContent = msg; drawCam(dim);
+    await new Promise(r => setTimeout(r, 650));
+  }
+  lastShot = new Date(); lastShotWhy = "live, from your phone";
+  renderCam();
+  btn.disabled = false;
+  toast(`New photo from ${fmtTime(lastShot)}`);
+};
+$("auto-snap").onchange = e => toast(e.target.checked ? "The fridge will take a photo every time the door closes." : "Auto photos are off. Use “Take a live look” instead.");
+document.fonts?.ready.then(() => { if (!$("page-cam").hidden) renderCam(); });
+
+/* ---------- Receipt scan ---------- */
+let found = [];
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const EXAMPLE_RECEIPT = {
+  store: "Corner Market", boughtAgo: 0,
+  items: [
+    { name: "Fresh salmon", qty: 300, unit: "g", shelfLifeDays: 2, section: "Bottom shelf" },
+    { name: "Strawberries", qty: 250, unit: "g", shelfLifeDays: 4, section: "Crisper drawer" },
+    { name: "Mozzarella", qty: 125, unit: "g", shelfLifeDays: 7, section: "Middle shelf" },
+    { name: "Bell peppers", qty: 3, unit: "pcs", shelfLifeDays: 9, section: "Crisper drawer" },
+    { name: "Orange juice", qty: 1, unit: "L", shelfLifeDays: 10, section: "Door rack" }
+  ]
+};
+
+function renderFound() {
+  const el = $("found-list");
+  el.innerHTML = "";
+  found.forEach((f, idx) => {
+    const days = f.shelfLifeDays - f.boughtAgo, st = statusOf(days);
+    const row = document.createElement("label");
+    row.className = "fitem"; row.htmlFor = "found-" + idx;
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "found-" + idx; cb.checked = f.keep;
+    cb.onchange = () => { f.keep = cb.checked; };
+    const mid = document.createElement("span");
+    const t = document.createElement("span"); t.className = "title"; t.textContent = f.name;
+    const s = document.createElement("span"); s.className = "sub"; s.textContent = `${fmtQty(f.qty, f.unit)} · goes on the ${f.section.toLowerCase()}`;
+    mid.append(t, document.createElement("br"), s);
+    const right = document.createElement("span"); right.className = st;
+    const p = document.createElement("span"); p.className = "pill"; p.textContent = `Keeps until ${fmtDate(days)}`;
+    right.appendChild(p);
+    row.append(cb, mid, right);
+    el.appendChild(row);
+  });
+  $("add-found").hidden = !found.length;
+}
+
+function setFound(list, boughtAgo) {
+  found = list.map(f => ({
+    name: String(f.name || "Item").slice(0, 40),
+    qty: Number(f.qty) > 0 ? Number(f.qty) : 1,
+    unit: String(f.unit || "pcs").slice(0, 8),
+    shelfLifeDays: Math.min(365, Math.max(1, Math.round(Number(f.shelfLifeDays) || 5))),
+    section: SECTIONS.includes(f.section) ? f.section : "Middle shelf",
+    boughtAgo, keep: true
+  }));
+  renderFound();
+}
+
+function openCamera() { $("scan-input").click(); }
+$("scan-btn").onclick = openCamera;
+$("scan-again").onclick = openCamera;
+$("scan-input").onchange = e => {
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (!file) return;
+  showPage("scan");
+  const img = $("receipt-img");
+  img.src = URL.createObjectURL(file); img.hidden = false; $("receipt-empty").hidden = true;
+  readReceipt(file);
+};
+$("scan-example").onclick = () => {
+  $("receipt-img").hidden = true; $("receipt-empty").hidden = false;
+  $("receipt-empty").textContent = "Example receipt";
+  setFound(EXAMPLE_RECEIPT.items, EXAMPLE_RECEIPT.boughtAgo);
+  $("scan-status").textContent = `Example: ${plural(found.length, "fridge item")} from ${EXAMPLE_RECEIPT.store}, bought today.`;
+};
+
+async function readReceipt(file) {
+  found = []; renderFound();
+  const lim = sampleFn ? await sampleFn.limits().catch(() => null) : null;
+  if (!lim?.images) {
+    $("scan-status").textContent = "Reading receipts needs the AI, which works when this page is open in Claude. Try the example receipt instead.";
+    return;
+  }
+  $("scan-status").textContent = "Reading your receipt… this can take up to 30 seconds.";
+  $("scan-btn").disabled = true;
+  const prompt = `The image is a photo of a grocery shop receipt. Today is ${todayISO()}.
+1. Find the purchase date on the receipt (YYYY-MM-DD). If you can't see one, use today.
+2. List the food items that should be kept in a fridge. Skip non-food and shelf-stable items (rice, dry pasta, tins, cleaning products).
+For each item give: name (short, plain English, translated if needed), qty (number), unit (g, kg, ml, L, pcs or pack), shelfLifeDays (typical fridge life from the purchase date, unopened), and section: where it should be stored, one of "Top shelf", "Middle shelf", "Bottom shelf", "Crisper drawer", "Door rack".
+If the image is not a receipt, return an empty items list.
+Reply with only JSON: {"store":"","date":"YYYY-MM-DD","items":[{"name":"","qty":1,"unit":"pcs","shelfLifeDays":5,"section":"Middle shelf"}]}`;
+  try {
+    const res = await sampleFn.json(prompt, { images: [file], cache: false });
+    const list = Array.isArray(res?.items) ? res.items.slice(0, 30) : [];
+    let bought = /^\d{4}-\d{2}-\d{2}$/.test(res?.date || "") ? new Date(res.date + "T12:00") : new Date();
+    if (isNaN(bought) || bought > new Date()) bought = new Date();
+    const boughtAgo = Math.max(0, Math.floor((Date.now() - bought) / 86400000));
+    setFound(list, boughtAgo);
+    $("scan-status").textContent = found.length
+      ? `Found ${plural(found.length, "fridge item")}${res.store ? ` from ${String(res.store).slice(0, 40)}` : ""}, bought ${boughtAgo ? fmtDate(-boughtAgo) : "today"}. Untick anything you don't want to add.`
+      : "No fridge food found in this photo. Make sure the whole receipt is in the picture and try again.";
+  } catch (e) {
+    $("scan-status").textContent = e?.code === "image_rejected"
+      ? "This photo couldn't be read. Try a sharper photo with the whole receipt in it."
+      : aiErrorText(e?.code) + " You can try the example receipt.";
+  } finally {
+    $("scan-btn").disabled = false;
+  }
+}
+
+$("add-found").onclick = () => {
+  const keep = found.filter(f => f.keep);
+  keep.forEach(f => {
+    const days = f.shelfLifeDays - f.boughtAgo;
+    items.push({ name: f.name, section: f.section, best: f.section, days, qty: f.qty, unit: f.unit, rate: 0, boughtAgo: f.boughtAgo, status: statusOf(days) });
+  });
+  found = []; renderFound();
+  renderHome(); renderEatFirst();
+  $("scan-status").textContent = `Added ${plural(keep.length, "item")}. Scan another receipt any time.`;
+  showPage("home");
+  toast(`Added ${plural(keep.length, "item")} to your fridge`);
+};
+
+/* ---------- Tabs, greeting, toasts ---------- */
+const PAGES = ["home", "cam", "recipes", "insights", "scan"];
+function showPage(name) {
+  PAGES.forEach(p => {
+    $("page-" + p).hidden = p !== name;
+    $("tab-" + p)?.setAttribute("aria-selected", p === name);
+  });
+  const expired = items.filter(i => i.status === "bad").length;
+  const runningOut = tracked.filter(i => i.f.kind !== "safe").length;
+  $("greeting").textContent = {
+    home: expired ? `Hi Pesho, ${plural(expired, "thing")} to throw away` : "Hi Pesho, your fridge is all good",
+    cam: "Pesho, here's your fridge right now",
+    recipes: "Pesho, cook with what you already have",
+    insights: `Pesho, ${runningOut} things to plan for this week`,
+    scan: "Pesho, add what you just bought"
+  }[name];
+  if (name === "recipes") renderRecipes(currentRecipes);
+  if (name === "cam") renderCam();
+  window.scrollTo(0, 0);
+}
+$("tab-home").onclick = () => showPage("home");
+$("tab-cam").onclick = () => showPage("cam");
+$("tab-recipes").onclick = () => showPage("recipes");
+$("tab-insights").onclick = () => showPage("insights");
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+renderHome();
+renderForecast();
+renderAdvice(EXAMPLE_ADVICE);
+renderPrefs();
+renderEatFirst();
+renderRecipes(EXAMPLE_RECIPES);
+showPage("home");
+</script>

@@ -1,0 +1,2189 @@
+<title>ChillCheck</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* ChillCheck MVP styles
+   Layout: one phone-width column, screens swapped in place (setup, home, review, Eat Me First) */
+:root {
+  --ice: #EDF3F5;
+  --panel: #FFFFFF;
+  --ink: #11222C;
+  --muted: #587079;
+  --line: #D2DEE3;
+  --accent: #0D6A86;
+  --accent-ink: #FFFFFF;
+  --safe: #23935A;
+  --soon: #B98800;
+  --bad: #D2423A;
+  --unknown: #7A4FD6;
+  --well: #F7FAFB;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ice: #0C151A; --panel: #142228; --ink: #E3EDF1; --muted: #8DA3AC; --line: #253841;
+    --accent: #52B8D8; --accent-ink: #062029; --safe: #3CC47D; --soon: #F0BE2E; --bad: #FF6B60; --unknown: #B394FF; --well: #101C22;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ice: #0C151A; --panel: #142228; --ink: #E3EDF1; --muted: #8DA3AC; --line: #253841;
+  --accent: #52B8D8; --accent-ink: #062029; --safe: #3CC47D; --soon: #F0BE2E; --bad: #FF6B60; --unknown: #B394FF; --well: #101C22;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--ice);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-block: 24px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 680px; margin: 0 auto; }
+.screen { display: grid; gap: 22px; }
+
+/* Type */
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 6vw, 40px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.lead { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+.note { margin: 0; font-size: 13px; color: var(--muted); }
+.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.brand svg { color: var(--accent); }
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.fridge-line { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.fridge-line b { color: var(--ink); font-size: 13px; }
+
+/* Surfaces */
+.card { display: grid; gap: 14px; padding: 20px; border-radius: 18px; background: var(--panel); border: 1.5px solid var(--line); }
+.card p { margin: 0; }
+
+/* Controls */
+.btn {
+  font: inherit; font-weight: 700; cursor: pointer; border-radius: 12px; padding: 13px 18px;
+  border: 1.5px solid var(--line); background: var(--panel); color: var(--ink);
+  transition: transform .12s ease, border-color .12s ease;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .55; cursor: progress; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.small { padding: 7px 12px; font-size: 14px; border-radius: 10px; }
+.link { font: inherit; font-size: 14px; font-weight: 700; color: var(--accent); background: none; border: 0; padding: 6px 0; cursor: pointer; justify-self: start; text-decoration: underline; text-underline-offset: 3px; }
+.back { font: inherit; font-weight: 700; font-size: 14px; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; justify-self: start; }
+.icon-btn { font: inherit; font-size: 20px; line-height: 1; width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; }
+.icon-btn:hover { color: var(--bad); border-color: var(--bad); }
+:is(.btn, .link, .back, .icon-btn, .eat-btn):focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.form { gap: 16px; }
+.field-group { display: grid; gap: 6px; }
+.field-group label { font-weight: 700; font-size: 14px; }
+.field {
+  font: inherit; width: 100%; min-width: 0; padding: 11px 13px; border-radius: 10px;
+  border: 1.5px solid var(--line); background: var(--well); color: var(--ink);
+}
+.field.mono { font-size: 15px; }
+.field:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.hint { color: var(--muted); font-size: 13px; }
+.error { margin: 0; color: var(--bad); font-weight: 700; font-size: 14px; }
+.add-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+
+/* Status colours */
+.expired { --c: var(--bad); }
+.soon { --c: var(--soon); }
+.safe { --c: var(--safe); }
+.unknown { --c: var(--unknown); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+.pill { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); white-space: nowrap; }
+.tag { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1.5px solid var(--line); color: var(--muted); }
+.tag.new { border-color: var(--accent); color: var(--accent); }
+
+/* Home: Eat Me First entry */
+.eat-btn {
+  font: inherit; color: var(--accent-ink); text-align: left; cursor: pointer; position: relative;
+  display: grid; gap: 6px; padding: 24px 64px 24px 24px; border-radius: 22px; border: 0;
+  background: var(--accent);
+}
+.eat-title { font-family: var(--font-display); font-weight: 800; font-size: 32px; line-height: 1; letter-spacing: -0.02em; }
+.eat-sub { opacity: .9; }
+.eat-arrow { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.count { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; background: var(--panel); color: var(--ink); font-size: 14px; font-weight: 700; }
+.count .n { font-family: var(--font-data); font-weight: 500; }
+
+/* Home: scan steps */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.step { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); font-size: 14px; color: var(--muted); }
+.step::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.step[data-state="active"] { border-color: var(--accent); color: var(--ink); }
+.step[data-state="active"]::before { background: var(--accent); animation: blink .8s ease-in-out infinite; }
+.step[data-state="done"] { color: var(--ink); }
+.step[data-state="done"]::before { background: var(--safe); }
+@keyframes blink { 50% { opacity: .25; } }
+.status { margin: 0; font-size: 14px; font-weight: 700; }
+.status:empty { display: none; }
+
+/* Lists */
+.list { display: grid; gap: 8px; }
+.group { display: grid; gap: 8px; margin-bottom: 18px; }
+.group-head { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.group-head .n { font-family: var(--font-data); }
+.empty { padding: 22px; border-radius: 14px; border: 1.5px dashed var(--line); color: var(--muted); text-align: center; }
+
+/* Review rows */
+.rrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) 160px auto 36px; gap: 10px; align-items: center;
+  padding: 12px; border-radius: 14px; background: var(--panel); border: 1.5px solid var(--line);
+}
+.rname { display: grid; gap: 4px; }
+.rmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+/* Review photo with coloured circles; the wrapper hugs the image so the circles line up */
+.photo-block { display: grid; gap: 8px; }
+.photo-wrap { position: relative; width: fit-content; max-width: 100%; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--line); }
+.photo-wrap img { display: block; max-width: 100%; max-height: 70vh; width: auto; height: auto; }
+.photo-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.legend-block { display: grid; gap: 8px; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0; font-size: 13px; font-weight: 700; }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.rrow:hover, .rrow:focus-within { border-color: var(--accent); }
+
+/* "Can't check this photo" warning */
+.modal {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  background: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+.modal-card {
+  width: min(380px, 100%); display: grid; gap: 10px; padding: 22px; border-radius: 18px;
+  background: var(--panel); border: 2px solid var(--soon); box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+}
+.modal-card h2 { font-size: 20px; }
+.modal-card p { margin: 0; color: var(--muted); font-size: 15px; }
+.warn-badge { justify-self: start; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 3px 10px; border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--soon) 35%, var(--panel)); }
+.missing { display: grid; gap: 8px; }
+.missing .note { margin-bottom: 4px; }
+.check { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1.5px solid var(--line); cursor: pointer; }
+.check span { font-weight: 700; }
+.check small { color: var(--muted); font-weight: 400; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+.save-bar {
+  position: sticky; bottom: 0; padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(transparent, var(--ice) 30%); display: grid;
+}
+
+/* Eat Me First rows */
+.erow {
+  display: grid; grid-template-columns: 6px minmax(0, 1fr) auto; gap: 14px; align-items: center;
+  padding: 12px 14px 12px 0; border-radius: 14px; background: var(--panel); border: 1.5px solid var(--line); overflow: hidden;
+}
+.erow .bar { align-self: stretch; background: var(--c); }
+.erow .name { font-weight: 700; }
+.erow .meta { font-size: 13px; color: var(--muted); }
+.erow .right { display: grid; justify-items: end; gap: 6px; }
+.erow .date { font-size: 13px; color: var(--muted); }
+.erow .actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.erow .edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.erow .edit .field { width: auto; padding: 7px 10px; }
+
+/* Sensor alerts (every screen) */
+.alerts { display: grid; gap: 8px; margin-bottom: 16px; }
+.alerts:empty { display: none; }
+.alert-item {
+  --c: var(--bad);
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; font-weight: 700;
+  background: color-mix(in srgb, var(--bad) 14%, var(--panel)); border: 1.5px solid var(--bad);
+}
+.alert-item .dot { width: 12px; height: 12px; animation: blink .9s ease-in-out infinite; }
+
+/* Home: sensor readings */
+.readings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reading { display: grid; gap: 2px; padding: 14px; border-radius: 14px; background: color-mix(in srgb, var(--c) 8%, var(--panel)); border: 1.5px solid color-mix(in srgb, var(--c) 40%, var(--line)); }
+.reading-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.reading-value { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1.1; }
+.reading-value.mono { font-family: var(--font-data); font-weight: 500; font-size: 26px; }
+.reading-text { font-size: 13px; color: var(--muted); }
+/* Home: use the phone's camera from a computer */
+.phone-panel { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; padding: 16px; border-radius: 14px; background: var(--well); border: 1.5px solid var(--line); }
+.qr { flex: none; padding: 10px; border-radius: 12px; background: #FFFFFF; line-height: 0; }
+.qr img, .qr canvas { display: block; max-width: 100%; }
+.phone-steps { flex: 1 1 240px; display: grid; gap: 10px; min-width: 0; }
+.phone-steps .mono { font-size: 12px; overflow-wrap: anywhere; }
+.howto { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+
+/* Review: date sources, uncertain items, open door */
+.source { font-size: 12px; color: var(--muted); }
+.warn-note { font-size: 13px; font-weight: 700; color: var(--soon); }
+.check-tag { border-color: var(--soon); color: var(--soon); }
+.rrow.uncertain { border-color: color-mix(in srgb, var(--soon) 60%, var(--line)); }
+.door-warn {
+  --c: var(--bad);
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px;
+  background: color-mix(in srgb, var(--bad) 12%, var(--panel)); border: 1.5px solid var(--bad);
+}
+.door-warn .led { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--bad); box-shadow: 0 0 12px 2px color-mix(in srgb, var(--bad) 60%, transparent); animation: blink 1s ease-in-out infinite; }
+
+/* Home: secondary nav card */
+.nav-card {
+  font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 22px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--panel);
+}
+.nav-card:hover { border-color: var(--accent); }
+.nav-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.nav-card svg { color: var(--accent); flex: none; }
+.nav-title { display: block; font-family: var(--font-display); font-weight: 700; font-size: 22px; }
+.nav-sub { display: block; font-size: 14px; color: var(--muted); }
+
+/* Home: "Check inside" photo picker */
+.picker { display: grid; gap: 8px; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.photo-pick {
+  font: inherit; font-size: 13px; color: var(--ink); cursor: pointer; padding: 0; overflow: hidden; text-align: left;
+  display: grid; border-radius: 12px; border: 1.5px solid var(--line); background: var(--panel);
+}
+.photo-pick:hover { border-color: var(--accent); }
+.photo-pick:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.photo-pick img, .photo-pick .no-photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.photo-pick .no-photo { display: grid; place-items: center; background: var(--well); color: var(--muted); }
+.photo-pick > span:last-child { padding: 6px 10px; overflow-wrap: anywhere; }
+.condition { font-size: 13px; color: var(--ink); }
+
+/* Food & your body */
+.ing .times { color: var(--muted); font-size: 12px; }
+.ai-summary { margin: 0; font-size: 17px; max-width: 60ch; }
+.ai-summary:empty { display: none; }
+.food-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.food-card { display: grid; gap: 10px; align-content: start; padding: 18px; border-radius: 16px; background: var(--panel); border: 1.5px solid var(--line); }
+.food-card p { margin: 0; }
+.food-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.food-head h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 21px; }
+.facts { margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.facts dt { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 4px; }
+.facts dd { margin: 0; }
+.facts dd.warn { color: var(--ink); padding-left: 10px; border-left: 3px solid var(--soon); }
+
+/* Recipes */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.grow { flex: 1 1 240px; width: auto; }
+.mode { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--well); border: 1.5px solid var(--line); width: fit-content; max-width: 100%; }
+.seg { font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; border: 0; border-radius: 8px; padding: 8px 14px; background: transparent; color: var(--muted); }
+.seg[aria-selected="true"] { background: var(--ink); color: var(--ice); }
+.prefs { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-size: 14px; cursor: pointer; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--ice); }
+:is(.seg, .chip):focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.uses { display: flex; flex-wrap: wrap; gap: 6px; }
+.ing { font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); }
+.ing.soon { border-color: color-mix(in srgb, var(--soon) 60%, var(--line)); background: color-mix(in srgb, var(--soon) 14%, var(--panel)); }
+.ing.pantry { border-style: dashed; color: var(--muted); }
+.ing.buy { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.recipes { display: grid; gap: 14px; }
+.recipe { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 18px; padding: 16px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 18px; }
+.recipe figure { margin: 0; display: grid; gap: 6px; align-content: start; }
+.recipe canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 1; border-radius: 14px; }
+.recipe figcaption { font-size: 12px; color: var(--muted); }
+.rbody { display: grid; gap: 10px; align-content: start; }
+.rbody h3 { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.rbody .why { margin: 0; color: var(--muted); font-size: 14px; }
+.rmeta2 { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-data); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rmeta2 b { color: var(--ink); font-weight: 500; }
+.recipe summary { cursor: pointer; font-weight: 700; font-size: 14px; color: var(--accent); }
+.recipe summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.recipe ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 5;
+  background: var(--ink); color: var(--ice); padding: 12px 18px; border-radius: 12px; font-size: 14px; max-width: calc(100% - 32px);
+}
+
+@media (max-width: 560px) {
+  .rrow { grid-template-columns: minmax(0, 1fr) auto 36px; }
+  .rrow .rname { grid-column: 1 / -1; }
+  .add-grid { grid-template-columns: minmax(0, 1fr); }
+  .erow { grid-template-columns: 6px minmax(0, 1fr); }
+  .erow .right { grid-column: 2; justify-items: start; }
+  .erow .actions, .erow .edit { justify-content: flex-start; }
+  .recipe { grid-template-columns: minmax(0, 1fr); }
+  .recipe canvas { max-width: 240px; }
+  .readings { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<div class="app">
+
+  <!-- Sensor alerts: shown on every screen while a problem lasts -->
+  <div class="alerts" id="alerts" aria-live="assertive"></div>
+
+  <!-- SETUP: sign in + pair the fridge with its device code -->
+  <section class="screen" id="screen-setup" hidden>
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
+      ChillCheck
+    </div>
+    <h1>Pair your fridge</h1>
+    <p class="lead">Sign in, then enter the device code from the sticker inside your fridge door.</p>
+    <form class="card form" id="setup-form" novalidate>
+      <div class="field-group">
+        <label for="user-name">Your name</label>
+        <input class="field" id="user-name" autocomplete="given-name" maxlength="40">
+      </div>
+      <div class="field-group">
+        <label for="user-email">Email</label>
+        <input class="field" id="user-email" type="email" autocomplete="email" maxlength="80">
+      </div>
+      <div class="field-group">
+        <label for="device-code">Device code</label>
+        <input class="field mono" id="device-code" placeholder="CC-XXXX-XXXX" autocapitalize="characters" spellcheck="false" maxlength="12">
+        <small class="hint">Every fridge has its own code. There is no default password.</small>
+      </div>
+      <p class="error" id="setup-error" role="alert" hidden></p>
+      <button class="btn primary" type="submit">Pair fridge</button>
+      <button class="link" id="demo-fill" type="button">Fill in demo details</button>
+    </form>
+  </section>
+
+  <!-- HOME -->
+  <section class="screen" id="screen-home" hidden>
+    <div class="topbar">
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
+        ChillCheck
+      </div>
+      <button class="link" id="unpair" type="button">Unpair fridge</button>
+    </div>
+    <div>
+      <h1 id="hello">Hi</h1>
+      <p class="fridge-line">Fridge <b class="mono" id="device-label"></b> · <span id="last-scan"></span></p>
+    </div>
+
+    <button class="eat-btn" id="open-eat" type="button">
+      <span class="eat-title">Eat Me First</span>
+      <span class="eat-sub" id="eat-sub"></span>
+      <span class="counts" id="eat-counts"></span>
+      <svg class="eat-arrow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+
+    <button class="nav-card" id="open-recipes" type="button">
+      <span><span class="nav-title">Recipes</span><span class="nav-sub">Ideas from what's in your fridge, or anything you crave</span></span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+
+    <button class="nav-card" id="open-health" type="button">
+      <span><span class="nav-title">Food &amp; your body</span><span class="nav-sub">What the food you eat most does for you, and how much is enough</span></span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+
+    <section class="card" aria-labelledby="sensor-title">
+      <h2 id="sensor-title">Fridge sensors</h2>
+      <div class="readings">
+        <div class="reading safe" id="sensor-temp-box">
+          <span class="reading-label"><span class="dot"></span>Temperature</span>
+          <span class="reading-value mono" id="sensor-temp"></span>
+          <span class="reading-text" id="sensor-temp-text"></span>
+        </div>
+        <div class="reading safe" id="sensor-door-box">
+          <span class="reading-label"><span class="dot"></span>Door</span>
+          <span class="reading-value" id="sensor-door"></span>
+          <span class="reading-text" id="sensor-door-text"></span>
+        </div>
+      </div>
+      <p class="note">If the temperature or the door stays wrong for 10 minutes, you get an alert. The door closes itself after 60 seconds. <span id="sensor-source"></span></p>
+    </section>
+
+    <section class="card scan" aria-labelledby="scan-title">
+      <h2 id="scan-title">Scan your food</h2>
+      <p>The fridge camera takes a photo every time the door closes. You can also use your phone's camera.</p>
+      <ol class="steps" id="scan-steps" aria-label="Scan progress"></ol>
+      <div class="row">
+        <button class="btn primary" id="check-inside" type="button">Check inside</button>
+        <button class="btn" id="scan-photo" type="button">Take a photo</button>
+        <button class="btn" id="phone-cam" type="button">Use my phone's camera</button>
+      </div>
+      <div class="picker" id="inside-picker" hidden>
+        <p class="note">Pick the photo the fridge camera takes:</p>
+        <div class="photo-grid" id="photo-grid"></div>
+      </div>
+      <div class="phone-panel" id="phone-panel" hidden>
+        <div class="qr" id="phone-qr"></div>
+        <div class="phone-steps">
+          <ol class="howto">
+            <li>Point your phone's camera at the QR code and open the link.</li>
+            <li>Sign in to Claude with the same account as on this computer.</li>
+            <li>Tap <b>Take a photo</b>. Your phone's camera opens.</li>
+            <li>Check the dates and tap <b>Save</b>. The list on this computer updates by itself.</li>
+          </ol>
+          <p class="note mono" id="phone-link"></p>
+        </div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
+      <p class="status" id="scan-status" role="status"></p>
+      <p class="note">“Take a photo” opens your phone's camera. Photograph the open fridge, any food (on the table, from the shop), a shop bill or a package's printed date. The AI works out which one it is. Demo: there is no fridge camera yet, so “Check inside” uses the photos from the photos folder.</p>
+      <p class="note" id="sync-status"></p>
+    </section>
+
+    <button class="link" id="add-by-hand" type="button">Add an item by hand</button>
+  </section>
+
+  <!-- REVIEW: check what the scan found and fix the dates -->
+  <section class="screen" id="screen-review" hidden>
+    <button class="back" type="button" data-go="home">← Home</button>
+    <div>
+      <h1>Check the dates</h1>
+      <p class="lead" id="review-lead"></p>
+    </div>
+    <div class="door-warn" id="review-door" role="alert" hidden>
+      <span class="led"></span>
+      <span><b>The fridge door was open in this photo.</b> Close it to keep your food cold. Your food list is still updated below.</span>
+    </div>
+    <div class="photo-block" id="review-photo-wrap" hidden>
+      <div class="photo-wrap">
+        <img id="review-photo" alt="Photo from this scan, with a coloured square around each food">
+        <svg id="review-overlay" aria-hidden="true"></svg>
+      </div>
+      <div class="legend-block" id="review-legend" hidden>
+        <div class="mode" role="group" aria-label="Which squares to show">
+          <button class="seg" id="boxes-attention" type="button" aria-selected="true">Needs attention</button>
+          <button class="seg" id="boxes-all" type="button" aria-selected="false">All food</button>
+        </div>
+        <p class="legend">
+          <span class="expired"><span class="dot"></span>Expired</span>
+          <span class="soon"><span class="dot"></span>Eat soon</span>
+          <span class="unknown"><span class="dot"></span>Date unrecognised</span>
+          <span class="safe"><span class="dot"></span>Safe</span>
+        </p>
+        <p class="note">Point at or tap an item in the list below to find it in the photo. <span id="legend-note">Squares are placed by the AI and can be slightly off.</span></p>
+      </div>
+    </div>
+    <div class="list" id="review-list"></div>
+    <button class="btn" id="review-add" type="button">+ Add an item the camera missed</button>
+    <div id="review-missing"></div>
+    <div class="save-bar">
+      <button class="btn primary" id="review-save" type="button">Save food list</button>
+    </div>
+  </section>
+
+  <!-- EAT ME FIRST -->
+  <section class="screen" id="screen-eat" hidden>
+    <button class="back" type="button" data-go="home">← Home</button>
+    <div>
+      <h1>Eat Me First</h1>
+      <p class="lead" id="eat-lead"></p>
+    </div>
+    <div id="eat-groups"></div>
+    <input type="file" id="label-input" accept="image/*" capture="environment" hidden>
+    <form class="card form" id="add-form" novalidate>
+      <h2>Add an item by hand</h2>
+      <p class="note">For food the camera can't see or didn't recognize.</p>
+      <div class="add-grid">
+        <div class="field-group">
+          <label for="add-name">Food</label>
+          <input class="field" id="add-name" maxlength="40" placeholder="e.g. Hummus">
+        </div>
+        <div class="field-group">
+          <label for="add-date">Expires</label>
+          <input class="field mono" id="add-date" type="date">
+        </div>
+        <div class="field-group">
+          <label for="add-shelf">Shelf</label>
+          <select class="field" id="add-shelf"></select>
+        </div>
+      </div>
+      <p class="error" id="add-error" role="alert" hidden></p>
+      <button class="btn primary" type="submit">Add to list</button>
+    </form>
+  </section>
+
+  <!-- RECIPES -->
+  <section class="screen" id="screen-recipes" hidden>
+    <button class="back" type="button" data-go="home">← Home</button>
+    <div>
+      <h1>Recipes</h1>
+      <p class="lead" id="mode-hint"></p>
+    </div>
+    <section class="card" aria-label="What you feel like">
+      <div class="mode" role="group" aria-label="Ingredients">
+        <button class="seg" id="mode-fridge" type="button" aria-selected="true">From my fridge</button>
+        <button class="seg" id="mode-any" type="button" aria-selected="false">Anything, I'll shop</button>
+      </div>
+      <div class="prefs" id="prefs" aria-label="Preferences"></div>
+      <div class="row">
+        <label class="sr" for="pref-text">What you want</label>
+        <input class="field grow" id="pref-text" type="text" maxlength="200">
+        <button class="btn primary" id="gen-recipes" type="button">Get recipes</button>
+      </div>
+      <p class="note" id="rec-status">Example recipes. Pick your preferences and tap “Get recipes”.</p>
+    </section>
+    <div class="list">
+      <h2 class="group-head">Eat these first</h2>
+      <div class="uses" id="rec-eat-first"></div>
+    </div>
+    <div class="list">
+      <h2 class="group-head">Recipes <span class="n" id="rec-count"></span></h2>
+      <div class="recipes" id="recipe-list"></div>
+    </div>
+  </section>
+
+  <!-- FOOD & YOUR BODY -->
+  <section class="screen" id="screen-health" hidden>
+    <button class="back" type="button" data-go="home">← Home</button>
+    <div>
+      <h1>Food &amp; your body</h1>
+      <p class="lead">What the food you eat most does for you, what it gives you, and how often is good before it becomes too much.</p>
+    </div>
+    <div class="list">
+      <h2 class="group-head">You eat most</h2>
+      <div class="uses" id="health-top"></div>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="health-ask" type="button">Get AI advice</button>
+    </div>
+    <p class="note" id="health-status">Example advice. Tap “Get AI advice” for advice on your own food.</p>
+    <p class="ai-summary" id="health-summary"></p>
+    <div class="food-cards" id="health-cards"></div>
+    <p class="note">General information, not medical advice. If you have a health condition, ask your doctor what suits you.</p>
+  </section>
+
+</div>
+<div class="modal" id="warn-modal" hidden>
+  <div class="modal-card" role="alertdialog" aria-labelledby="warn-title" aria-describedby="warn-text">
+    <span class="warn-badge">Can't check this photo</span>
+    <h2 id="warn-title"></h2>
+    <p id="warn-text"></p>
+    <div class="row">
+      <button class="btn primary" id="warn-retry" type="button">Try again</button>
+      <button class="btn" id="warn-close" type="button">Close</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+// Small shared UI helpers used by every screen.
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// Element builder; text children are always set as text, never as HTML
+function el(tag, props = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (k === "value" || k === "checked") n[k] = v;
+    else if (v != null && v !== false) n.setAttribute(k, v === true ? "" : v);
+  }
+  n.append(...kids.flat().filter(k => k != null && k !== false && k !== ""));
+  return n;
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, Math.max(2600, msg.length * 55));
+}
+</script>
+<script>
+// Date helpers. Days are stored as local "YYYY-MM-DD" strings so they don't shift with time zones.
+const Dates = {
+  iso(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  },
+  today() {
+    return Dates.iso(new Date());
+  },
+  // A real calendar day within a sensible range (one year back, three years ahead)
+  valid(iso) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return false;
+    const d = Dates.parse(iso);
+    if (Dates.iso(d) !== iso) return false;
+    const days = Dates.daysUntil(iso);
+    return days > -365 && days < 1095;
+  },
+  parse(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  },
+  addDays(iso, n) {
+    const d = Dates.parse(iso);
+    d.setDate(d.getDate() + Math.round(n));
+    return Dates.iso(d);
+  },
+  daysUntil(iso) {
+    return Math.round((Dates.parse(iso) - Dates.parse(Dates.today())) / 86400000);
+  },
+  format(iso) {
+    return Dates.parse(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  },
+  // "14:32" for today, "Mon 20 Oct, 14:32" for older timestamps
+  stamp(isoDateTime) {
+    const d = new Date(isoDateTime);
+    const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return Dates.iso(d) === Dates.today() ? time : `${Dates.format(Dates.iso(d))}, ${time}`;
+  }
+};
+</script>
+<script>
+// Saved app state: who is signed in, which fridge is paired, and the food list.
+// Always kept in this browser. On the shared claude.ai link it is also synced live between your
+// devices (same Claude account), so a photo taken on the phone updates the list on the computer.
+const Store = (() => {
+  const KEY = "chillcheck.v1";
+  // eaten: [{ name, date }] for the "Food & your body" page, newest last
+  const empty = () => ({ user: null, device: null, items: [], lastScan: null, eaten: [] });
+  const state = empty();
+  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { /* start empty */ }
+
+  let ref = null;           // this user's private document in the artifact's database
+  let synced = false;
+  let writing = false, writeAgain = false;
+  let lastWriteId = null;   // to recognise our own writes when they come back
+  const listeners = [];
+
+  const saveLocal = () => {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* storage blocked: keep working in memory */ }
+  };
+
+  // One write at a time; if more changes come in meanwhile, send the latest once it's done
+  async function push() {
+    if (!ref) return;
+    if (writing) { writeAgain = true; return; }
+    writing = true;
+    lastWriteId = Math.random().toString(36).slice(2);
+    try {
+      await ref.set(JSON.parse(JSON.stringify({ ...state, writeId: lastWriteId })));
+    } catch { /* offline or not allowed: this device keeps its own copy */ }
+    writing = false;
+    if (writeAgain) { writeAgain = false; push(); }
+  }
+
+  async function connect() {
+    try {
+      const [db, user] = await Promise.all([window.claude?.use?.("db"), window.claude?.use?.("user")]);
+      const uid = db && user ? await user.id() : null;
+      if (!uid) return false;
+      ref = db.doc(`data/users/${uid}/fridge`);
+    } catch {
+      return false;
+    }
+    synced = true;
+    ref.onSnapshot(snap => {
+      if (snap.metadata.hasPendingWrites) return;
+      if (!snap.exists) { push(); return; }           // first device to connect uploads what it has
+      const remote = JSON.parse(JSON.stringify(snap.data()));
+      if (remote.writeId === lastWriteId) return;      // our own write coming back
+      delete remote.writeId;
+      Object.assign(state, empty(), remote);
+      saveLocal();
+      listeners.forEach(fn => fn());
+    }, () => { synced = false; });
+    return true;
+  }
+
+  return {
+    get: () => state,
+    isSynced: () => synced,
+    connect,
+    onRemoteChange: fn => listeners.push(fn),
+    save() { saveLocal(); push(); },
+    reset() { Object.assign(state, empty()); this.save(); }
+  };
+})();
+</script>
+<script>
+// Food rules: statuses, where each expiry date comes from, and merging a new scan into the saved list.
+const SHELVES = ["Top shelf", "Middle shelf", "Bottom shelf", "Crisper drawer", "Door rack"];
+const EAT_SOON_DAYS = 2;
+const COOKED_DAYS = 3; // home-cooked food and leftovers: eat within 3 days of first being seen
+
+// Status labels; STATUS_ORDER lists them most urgent first.
+// "unknown" = a package whose printed date couldn't be read: it gets no date rather than a guess.
+const STATUS = {
+  expired: { label: "Expired" },
+  soon: { label: "Eat soon" },
+  unknown: { label: "Date unrecognised" },
+  safe: { label: "Safe" }
+};
+const STATUS_ORDER = ["expired", "soon", "unknown", "safe"];
+
+// Where an expiry date came from. A weaker source never overwrites a stronger one.
+const DATE_SOURCES = {
+  manual: { text: "Date set by you", rank: 4 },
+  label: { text: "Date printed on the pack", rank: 3 },
+  receipt: { text: "Date from shop bill + shelf life", rank: 2 },
+  cooked: { text: `Cooked food: ${COOKED_DAYS} days from first photo`, rank: 1 },
+  look: { text: "Estimated from how it looks", rank: 1 },
+  unknown: { text: "Printed date couldn't be read. Tap “Scan date” or set it yourself.", rank: 0 }
+};
+
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const norm = s => String(s || "").trim().toLowerCase();
+
+// "Milk" and "Milk 3.6%" are the same food; very short names must match exactly
+function sameFood(a, b) {
+  const x = norm(a), y = norm(b);
+  if (x === y) return true;
+  if (x.length < 4 || y.length < 4) return false;
+  return x.includes(y) || y.includes(x);
+}
+
+const Food = {
+  status(item) {
+    if (!item.expires) return "unknown";
+    const d = Dates.daysUntil(item.expires);
+    return d < 0 ? "expired" : d <= EAT_SOON_DAYS ? "soon" : "safe";
+  },
+
+  daysText(item) {
+    if (!item.expires) return "Date unrecognised";
+    const d = Dates.daysUntil(item.expires);
+    if (d < 0) return `Expired ${plural(-d, "day")} ago`;
+    if (d === 0) return "Eat today";
+    return `${plural(d, "day")} left`;
+  },
+
+  sourceText(item) {
+    const src = DATE_SOURCES[item.dateSource] || DATE_SOURCES.look;
+    return src.text + (item.dateText ? ` (on the pack: “${item.dateText}”)` : "");
+  },
+
+  // Undated items sort after dated ones
+  byUrgency(items) {
+    return [...items].sort((a, b) => (a.expires || "9999").localeCompare(b.expires || "9999") || a.name.localeCompare(b.name));
+  },
+
+  counts(items) {
+    const c = { expired: 0, soon: 0, unknown: 0, safe: 0 };
+    items.forEach(i => { c[Food.status(i)]++; });
+    return c;
+  },
+
+  newId() {
+    return Math.random().toString(36).slice(2, 10);
+  },
+
+  // Expiry date for one scanned item, from the best information the scan has.
+  // A package's date must be read, never guessed: if it couldn't be read the item gets no date,
+  // unless it visibly looks spoiled.
+  dateFor(s, firstSeen) {
+    const today = Dates.today();
+    if (Dates.valid(s.printedDate)) return { expires: s.printedDate, dateSource: "label", dateText: s.dateText || "" };
+    if (Dates.valid(s.purchaseDate) && s.shelfLifeDays > 0) {
+      return { expires: Dates.addDays(s.purchaseDate, s.shelfLifeDays), dateSource: "receipt", dateText: "" };
+    }
+    const byLook = Dates.addDays(today, s.daysLeft ?? 5);
+    if (s.kind === "cooked") {
+      const byRule = Dates.addDays(firstSeen, COOKED_DAYS);
+      return { expires: byLook < byRule ? byLook : byRule, dateSource: "cooked", dateText: "" };
+    }
+    if (s.kind === "packaged" && !(s.daysLeft < 0)) {
+      return { expires: null, dateSource: "unknown", dateText: s.dateText || "" };
+    }
+    return { expires: byLook, dateSource: "look", dateText: "" };
+  },
+
+  // Merge a scan into the saved list. Every photo is dated today.
+  // An item is matched to a saved one by container first (the AI recognised a container it was
+  // told about, so a renamed "blue box" stays "Chicken soup"), then by name.
+  // Items seen before keep their name, first-seen day and date unless the new scan has a
+  // stronger date source, or the food now looks spoiled.
+  // trackMissing: a fridge photo shows everything, so saved items it didn't see are asked about.
+  // A shop bill doesn't, so unmatched saved items are left as they are ("untouched").
+  merge(saved, scanned, { trackMissing = true } = {}) {
+    const today = Dates.today();
+    const pool = [...saved];
+    const rows = scanned.map(s => {
+      let k = s.knownId ? pool.findIndex(e => e.id === s.knownId) : -1;
+      if (k < 0) k = pool.findIndex(e => sameFood(e.name, s.name));
+      const e = k >= 0 ? pool.splice(k, 1)[0] : null;
+      const firstSeen = e?.firstSeen || Dates.addDays(today, -(s.seenDaysAgo || 0));
+      const found = Food.dateFor(s, firstSeen);
+      const info = {
+        condition: s.condition || "", confidence: s.confidence || "high", note: s.note || "",
+        container: s.container || e?.container || "",
+        box: s.box || null   // where it is in this photo; only used to draw the circles, not saved
+      };
+
+      if (!e) {
+        return { id: Food.newId(), name: s.name, qty: s.qty, shelf: s.shelf, kind: s.kind || "other", firstSeen, ...found, ...info, isNew: true };
+      }
+      const savedSource = e.dateSource || "look";
+      const stronger = DATE_SOURCES[found.dateSource].rank > DATE_SOURCES[savedSource].rank;
+      const looksSpoiled = s.daysLeft < 0 && found.expires && (!e.expires || found.expires < e.expires);
+      const dates = stronger || looksSpoiled ? found : { expires: e.expires, dateSource: savedSource, dateText: e.dateText || "" };
+      return {
+        ...e, qty: s.qty || e.qty, shelf: s.shelf || e.shelf, kind: s.kind || e.kind,
+        ...info, ...dates, isNew: false, dateChanged: dates.expires !== e.expires
+      };
+    });
+    return {
+      rows,
+      missing: trackMissing ? pool.map(item => ({ item, keep: true })) : [],
+      untouched: trackMissing ? [] : pool
+    };
+  }
+};
+
+// Example data for demos without a camera. The second set shows the pasta gone, a new item,
+// a mislabelled box and something the AI can't see into.
+const EXAMPLE_SCANS = [
+  [
+    { name: "Chicken breast", kind: "packaged", qty: "500 g", shelf: "Bottom shelf", printedDate: "", daysLeft: -1, seenDaysAgo: 3, condition: "grey patches on the meat", confidence: "high" },
+    { name: "Leftover pasta", kind: "cooked", qty: "1 box", shelf: "Top shelf", daysLeft: 2, seenDaysAgo: 2, condition: "home-cooked, in a glass box", confidence: "high" },
+    { name: "Baby spinach", kind: "fresh", qty: "200 g", shelf: "Crisper drawer", daysLeft: 1, seenDaysAgo: 4, condition: "a few leaves turning dark", confidence: "high" },
+    { name: "Milk 3.6%", kind: "packaged", qty: "1 L", shelf: "Door rack", printedDate: "", dateText: "2?.1?.2?", daysLeft: 2, seenDaysAgo: 3, condition: "sealed carton, date partly hidden", confidence: "medium" },
+    { name: "Greek yogurt", kind: "packaged", qty: "2 cups", shelf: "Middle shelf", printedIn: 4, daysLeft: 4, seenDaysAgo: 6, condition: "sealed, looks fine", confidence: "high" },
+    { name: "Tomatoes", kind: "fresh", qty: "6 pcs", shelf: "Crisper drawer", daysLeft: 5, seenDaysAgo: 1, condition: "firm and bright red", confidence: "high" },
+    { name: "Eggs", kind: "fresh", qty: "10 pcs", shelf: "Middle shelf", daysLeft: 12, seenDaysAgo: 5, condition: "carton closed", confidence: "medium" },
+    { name: "Cheddar", kind: "packaged", qty: "250 g", shelf: "Middle shelf", printedIn: 18, daysLeft: 18, seenDaysAgo: 8, condition: "sealed block", confidence: "high" }
+  ],
+  [
+    { name: "Chicken breast", kind: "packaged", qty: "500 g", shelf: "Bottom shelf", daysLeft: -1, condition: "grey patches on the meat", confidence: "high" },
+    { name: "Baby spinach", kind: "fresh", qty: "150 g", shelf: "Crisper drawer", daysLeft: 1, condition: "more leaves turning dark", confidence: "high" },
+    { name: "Milk 3.6%", kind: "packaged", qty: "0.5 L", shelf: "Door rack", daysLeft: 2, condition: "opened carton", confidence: "medium" },
+    { name: "Greek yogurt", kind: "packaged", qty: "1 cup", shelf: "Middle shelf", daysLeft: 4, condition: "sealed, looks fine", confidence: "high" },
+    { name: "Cookies", kind: "other", qty: "1 tub", shelf: "Top shelf", daysLeft: 20, container: "vanilla ice cream tub", condition: "cookies visible through the lid gap", confidence: "low", note: "An ice cream tub outside the freezer, holding cookies" },
+    { name: "Unknown container", kind: "cooked", qty: "1 box", shelf: "Middle shelf", daysLeft: 3, container: "blue opaque box, white lid", condition: "can't see inside", confidence: "low", note: "Contents unknown. Type what's inside, and the app will remember this box." },
+    { name: "Tomatoes", kind: "fresh", qty: "5 pcs", shelf: "Crisper drawer", daysLeft: 5, condition: "firm and bright red", confidence: "high" },
+    { name: "Eggs", kind: "fresh", qty: "8 pcs", shelf: "Middle shelf", daysLeft: 12, condition: "carton closed", confidence: "medium" },
+    { name: "Cheddar", kind: "packaged", qty: "200 g", shelf: "Middle shelf", daysLeft: 18, condition: "opened, edges dry", confidence: "high" }
+  ]
+];
+</script>
+<script>
+// Generated by build.js from the photos/ folder. Do not edit by hand.
+const CAMERA_PHOTOS = [];
+</script>
+<script>
+// Everything the AI reads from photos. One photo can show the inside of the fridge, food anywhere
+// else, a shop bill or a package close-up; the AI works out which. Plus "Scan date" for one item.
+// Uses Claude when the page runs inside Claude. Elsewhere only the example data works;
+// the real product would send photos to a backend that calls the Claude API.
+const RULER = 36;      // px of white margin holding the rulers
+const MAX_SIDE = 1024; // the photo is scaled to this before it is sent
+
+const Scanner = {
+  sample: null,
+  canReadPhotos: false,
+  ready: null,
+
+  init() {
+    this.ready = (async () => {
+      try { this.sample = await window.claude?.use?.("sample"); } catch { this.sample = null; }
+      const limits = this.sample ? await this.sample.limits().catch(() => null) : null;
+      this.canReadPhotos = !!limits?.images;
+    })();
+    return this.ready;
+  },
+
+  async ask(prompt, file) {
+    await this.ready;
+    if (!this.canReadPhotos) throw { code: "no_ai" };
+    return this.sample.json(prompt, { images: [file], cache: false });
+  },
+
+  // Any photo, always treated as taken today.
+  // `known` = saved items with their container, so the AI can recognise a reused box it has seen before.
+  async readPhoto(file, known = []) {
+    const { blob, w, h } = await withRulers(file);
+    const knownList = known.filter(i => i.container).slice(0, 40)
+      .map(i => ({ id: i.id, container: i.container, contents: i.name }));
+    const shelves = SHELVES.map(s => `"${s}"`).join(", ");
+
+    const res = await this.ask(`This photo was taken today, ${Dates.today()}. The photo is ${w} × ${h} pixels. It sits inside a white margin with rulers: the ruler along the top gives x in pixels and the ruler down the left gives y in pixels, both counted from the photo's own top-left corner.
+
+First decide what the photo shows and set "type":
+- "fridge": the inside of a fridge (from the camera inside it, or from a phone with the door open)
+- "food": one or more foods that are not in a fridge, e.g. on a table or counter, in a bag, or a close-up of a package
+- "bill": a shop receipt
+- "other": no food at all (a room, a person, a screen, an empty shelf)
+If "other", return an empty items list. If the photo is too dark, blurry or foggy to read, set "unclear" to true and return an empty list.
+${knownList.length ? `
+Containers the user has already told us about (id, what the container looks like, what is inside):
+${JSON.stringify(knownList)}
+If you see one of these containers, set "knownId" to its id and use its contents as the name, even if the packaging says something else.
+` : ""}
+For "fridge" and "food", list every food item you can see. For each item give:
+- name: short and plain. Name what is actually inside, not only what the packaging says. If a container's label doesn't match what you can see inside (e.g. cookies in an ice cream tub), name the contents and explain in "note". Packaging that doesn't belong in a fridge (an ice cream tub outside the freezer, a biscuit tin) is often reused for something else: if you can't see the contents, say so in "note" and use confidence "low".
+- container: a short description of the packaging as it looks, e.g. "vanilla ice cream tub", "blue opaque box, white lid". Use "" for loose food.
+- knownId: the id from the list above if this is one of those containers, otherwise "".
+- kind: "packaged" (shop packaging), "cooked" (home-cooked food or leftovers), "fresh" (fruit, vegetables, eggs, loose items) or "other".
+- qty: a short amount if you can tell, e.g. "1 L", "6 pcs", "half a pack", otherwise "".
+- shelf: for "fridge", the shelf it is on; for "food", the shelf where it should be stored, or "" if it doesn't belong in a fridge (bread, bananas). One of ${shelves}.
+- dateText: the use-by, best-before or expiry date EXACTLY as printed, character by character, e.g. "28.10.26" or "BB 03 NOV". Write a "?" for every character you can't read with certainty. Use "" if no date is visible.
+- printedDate: that date as YYYY-MM-DD, but ONLY if every digit in dateText is certain (no "?"). Dates are usually written day first (28.10.26 = 2026-10-28). If anything is blurry, cut off, too small, covered, or you can't tell day from month, use "". Never complete, round or guess a date: a wrong date is worse than no date, and the app will show "Date unrecognised" instead.
+- daysLeft: how many days until it should be eaten, if stored the right way from now. Judge by how it looks and its typical life. Look closely for mould, dark or grey patches, slime, wilted or brown leaves, wrinkled skin, separated liquid or bloated packaging. Negative if it already looks spoiled (-1 slightly off, -5 clearly mouldy).
+- condition: a few words on what you see that tells you how fresh it is.
+- confidence: "high", "medium" or "low": how sure you are what it is and how fresh it is. "low" for opaque containers you can't see into, food mostly hidden, or labels that don't match the contents.
+- note: anything the user should check, otherwise "".
+- box: [x1, y1, x2, y2] in pixels read off the rulers: the left, top, right and bottom edges of this one item. Make it tight around the whole item, edge to edge, without the shelf or neighbouring items.
+Transparent packaging: judge the food you see through it.
+
+For "bill": set "billDateText" to the purchase date exactly as printed ("?" for unreadable characters, "" if none) and "purchaseDate" as YYYY-MM-DD only if it is fully readable, otherwise "". Set "store", and list the food items that are kept in a fridge (skip non-food and shelf-stable items) with name, qty, kind, shelf, and shelfLifeDays (typical fridge life from the purchase date, unopened). No boxes.
+
+For "fridge" only: set "doorOpen" to true if the photo was clearly taken with the fridge door open (you can see the door edge, the room outside, or a hand).
+
+Reply with only JSON:
+{"type": "fridge", "unclear": false, "doorOpen": false, "store": "", "billDateText": "", "purchaseDate": "", "items": [{"name": "", "container": "", "knownId": "", "kind": "packaged", "qty": "", "shelf": "Middle shelf", "dateText": "", "printedDate": "", "daysLeft": 5, "shelfLifeDays": 0, "condition": "", "confidence": "high", "note": "", "box": [120, 340, 260, 470]}]}`, blob);
+
+    const type = ["fridge", "food", "bill", "other"].includes(res?.type) ? res.type : "fridge";
+    if (type === "other") return { type, items: [] };
+    if (res?.unclear) return { type, unclear: true, items: [] };
+
+    // Bill date: only trusted if it was fully read and matches what is printed. Otherwise today is
+    // used, and the review screen says so.
+    let purchaseDate = "", billDateRead = false;
+    if (type === "bill") {
+      const read = String(res?.purchaseDate || "");
+      billDateRead = dateMatchesText(read, res?.billDateText) && Dates.daysUntil(read) <= 0;
+      purchaseDate = billDateRead ? read : Dates.today();
+    }
+    const items = (Array.isArray(res?.items) ? res.items.slice(0, 40) : []).map(i => {
+      const item = cleanScanItem(i, w, h);
+      if (type === "bill") {
+        item.box = null;
+        item.purchaseDate = purchaseDate;
+        item.shelfLifeDays = Math.min(365, Math.max(1, Math.round(Number(i?.shelfLifeDays)) || 5));
+      }
+      return item;
+    });
+    return {
+      type, items, purchaseDate, billDateRead,
+      billDateText: String(res?.billDateText || "").slice(0, 30),
+      photo: file,
+      doorOpen: type === "fridge" && !!res?.doorOpen,
+      store: String(res?.store || "").slice(0, 40)
+    };
+  },
+
+  // Second pass for the squares: in the whole photo each product is small, so the first boxes are
+  // rough. Cut a zoomed-in piece around each item (with its own rulers), ask for a tight box inside
+  // it, and map that back onto the photo. Updates row.box in place; onUpdate runs after each batch.
+  async refineBoxes(file, rows, onUpdate) {
+    await this.ready;
+    const limits = this.sample ? await this.sample.limits().catch(() => null) : null;
+    if (!limits?.images) return false;
+    const bmp = await loadBitmap(file);
+    const perCall = Math.max(1, Math.min(limits.images.maxCount || 1, 6));
+    const targets = rows.filter(r => r.box);
+
+    for (let k = 0; k < targets.length; k += perCall) {
+      const batch = targets.slice(k, k + perCall);
+      const crops = await Promise.all(batch.map(r => cropAround(bmp, r.box)));
+      const list = batch.map((r, i) => `${i + 1}. "${r.name}"${r.container ? ` (${r.container})` : ""}`).join("\n");
+      const res = await this.sample.json(`You get ${batch.length} image${batch.length === 1 ? "" : "s"}, in order. Each is a zoomed-in piece of a photo of food, inside a white margin with pixel rulers on the top and left edges, counted from that piece's own top-left corner.
+Each piece should contain one item:
+${list}
+For each image, give the box around that one item as [x1, y1, x2, y2] read off that image's rulers: its left, top, right and bottom edges. Make it tight around the whole item, edge to edge, without the shelf, neighbouring items or the white margin. If the item isn't in that piece, use null.
+Reply with only JSON with exactly ${batch.length} entries: {"boxes": [[x1, y1, x2, y2]]}`, { images: crops.map(c => c.blob), cache: false });
+
+      const boxes = Array.isArray(res?.boxes) ? res.boxes : [];
+      batch.forEach((r, i) => {
+        const b = boxes[i], c = crops[i];
+        if (!Array.isArray(b) || b.length !== 4) return;
+        const [x1, y1, x2, y2] = b.map(Number);
+        if (![x1, y1, x2, y2].every(Number.isFinite) || x2 <= x1 || y2 <= y1) return;
+        // piece pixels → photo pixels → 0–1000
+        const toX = v => (c.sx + Math.min(c.w, Math.max(0, v)) / c.scale) / bmp.width * 1000;
+        const toY = v => (c.sy + Math.min(c.h, Math.max(0, v)) / c.scale) / bmp.height * 1000;
+        const box = [toX(x1), toY(y1), toX(x2), toY(y2)];
+        if (box[2] - box[0] > 2 && box[3] - box[1] > 2) r.box = box;
+      });
+      onUpdate?.();
+    }
+    return true;
+  },
+
+  // A close-up of one package, taken with the phone: read its printed date
+  async readLabel(file, itemName) {
+    const res = await this.ask(`This is a close-up photo of a food package, taken today (${Dates.today()}). The user says the food is: "${itemName}".
+Find the use-by, best-before or expiry date printed on it.
+- dateText: the date EXACTLY as printed, character by character, e.g. "28.10.26" or "BB 03 NOV". Write a "?" for every character you can't read with certainty. "" if there is no date.
+- date: that date as YYYY-MM-DD, ONLY if every character is certain. Numbers are usually day first (28.10.26 = 2026-10-28). If only month and year are printed, use the last day of that month. If anything is blurry, cut off, covered, or you can't tell day from month, set "found" to false and "date" to "". Never complete or guess a date: a wrong date is worse than none.
+Also read the product name and the barcode number if they are visible.
+Reply with only JSON: {"found": true, "dateText": "", "date": "YYYY-MM-DD", "dateType": "use by", "product": "", "barcode": ""}
+dateType is one of "use by", "best before", "expiry", "other".`, file);
+    const date = String(res?.date || "");
+    const dateText = String(res?.dateText || "").slice(0, 30);
+    return {
+      found: !!res?.found && dateMatchesText(date, dateText),
+      date,
+      dateText,
+      dateType: String(res?.dateType || "").slice(0, 20),
+      product: String(res?.product || "").slice(0, 60),
+      barcode: String(res?.barcode || "").replace(/[^0-9]/g, "").slice(0, 20)
+    };
+  },
+
+  // Example items with printedIn get a printed date that many days from today, as if read off the pack
+  example(n) {
+    const items = EXAMPLE_SCANS[n % EXAMPLE_SCANS.length].map(i => {
+      if (i.printedIn == null) return { ...i };
+      const iso = Dates.addDays(Dates.today(), i.printedIn);
+      const [y, m, d] = iso.split("-");
+      return { ...i, printedDate: iso, dateText: `${d}.${m}.${y.slice(2)}` };
+    });
+    return { type: "fridge", doorOpen: false, items };
+  },
+
+  errorText(code) {
+    return {
+      no_ai: "The AI can only read photos when the app is open on the shared claude.ai link. Here, use Check inside → Example data.",
+      not_granted: "The app wasn't allowed to send the photo to the AI. Allow it and try again.",
+      sampling_disabled: "AI isn't available on this account.",
+      images_unavailable: "This view can't send photos to the AI.",
+      image_rejected: "This photo couldn't be read. Try a sharper photo.",
+      photo_load: "That photo couldn't be loaded. Run node build.js again and reload.",
+      rate_limited: "Too many requests in a short time. Wait a minute and try again.",
+      invalid_json: "The AI answer came back in the wrong format. Try again."
+    }[code] || "Couldn't reach the AI. Check your connection and try again.";
+  }
+};
+
+async function loadBitmap(file) {
+  try { return await createImageBitmap(file); } catch { throw { code: "image_rejected" }; }
+}
+
+const toJpeg = async cv => {
+  const blob = await new Promise(r => cv.toBlob(r, "image/jpeg", 0.9));
+  if (!blob) throw { code: "image_rejected" };
+  return blob;
+};
+
+// The whole photo, scaled to at most MAX_SIDE px, with rulers
+async function withRulers(file) {
+  const bmp = await loadBitmap(file);
+  const { cv, w, h } = rulerCanvas(bmp, 0, 0, bmp.width, bmp.height, MAX_SIDE);
+  return { blob: await toJpeg(cv), w, h };
+}
+
+// A zoomed-in piece around one item (box on the 0–1000 scale), with generous room around it
+// in case the first box was off
+async function cropAround(bmp, box) {
+  const W = bmp.width, H = bmp.height;
+  const [x1, y1, x2, y2] = [box[0] / 1000 * W, box[1] / 1000 * H, box[2] / 1000 * W, box[3] / 1000 * H];
+  const pad = Math.max(x2 - x1, y2 - y1) * 0.6 + Math.max(W, H) * 0.04;
+  const sx = Math.max(0, x1 - pad), sy = Math.max(0, y1 - pad);
+  const ex = Math.min(W, x2 + pad), ey = Math.min(H, y2 + pad);
+  const { cv, w, h, scale } = rulerCanvas(bmp, sx, sy, ex - sx, ey - sy, 448);
+  return { blob: await toJpeg(cv), w, h, scale, sx, sy };
+}
+
+// Draw part of an image (sx, sy, sw, sh) scaled to at most maxSide px, inside a white margin with
+// pixel rulers on the top and left edges, so the AI can read off where things are instead of guessing
+function rulerCanvas(source, sx, sy, sw, sh, maxSide) {
+  const scale = Math.min(1, maxSide / Math.max(sw, sh));
+  const w = Math.round(sw * scale), h = Math.round(sh * scale);
+  const cv = document.createElement("canvas");
+  cv.width = w + RULER;
+  cv.height = h + RULER;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(source, sx, sy, sw, sh, RULER, RULER, w, h);
+
+  ctx.fillStyle = "#000000";
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 1;
+  ctx.font = "11px sans-serif";
+  for (let x = 0; x <= w; x += 25) {
+    const major = x % 100 === 0;
+    ctx.beginPath(); ctx.moveTo(RULER + x + 0.5, RULER - (major ? 14 : 6)); ctx.lineTo(RULER + x + 0.5, RULER); ctx.stroke();
+    if (major) ctx.fillText(String(x), RULER + x + 2, 11);
+  }
+  for (let y = 0; y <= h; y += 25) {
+    const major = y % 100 === 0;
+    ctx.beginPath(); ctx.moveTo(RULER - (major ? 14 : 6), RULER + y + 0.5); ctx.lineTo(RULER, RULER + y + 0.5); ctx.stroke();
+    if (major) ctx.fillText(String(y), 1, RULER + y + 12);
+  }
+  return { cv, w, h, scale };
+}
+
+// Guard against made-up dates: the date must be built from what the AI copied off the pack.
+// Any "?" means part of it couldn't be read, so no date. Numbers must be in the printed order:
+// day.month.year (28.10.26), year-month-day (2026-10-28), month/year (10/2026 = last day of the
+// month) or day + month name (03 NOV).
+const MONTH_NAMES = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+function dateMatchesText(iso, text) {
+  text = String(text || "").toLowerCase();
+  if (!Dates.valid(iso) || !text || text.includes("?")) return false;
+  const [y, m, d] = iso.split("-").map(Number);
+  const n = (text.match(/\d+/g) || []).map(Number);
+  const yearIs = v => v === y || v === y % 100;
+  const monthWord = MONTH_NAMES.findIndex(name => text.includes(name)) + 1;
+  const lastDay = new Date(y, m, 0).getDate();
+
+  if (monthWord) {                                   // "03 NOV", "BB 03 NOV 26"
+    return monthWord === m && n[0] === d && (n.length < 2 || yearIs(n[1]));
+  }
+  if (n.length >= 3) {
+    return n[0] >= 1000
+      ? n[0] === y && n[1] === m && n[2] === d       // 2026-10-28
+      : n[0] === d && n[1] === m && yearIs(n[2]);    // 28.10.26, 28/10/2026
+  }
+  if (n.length === 2) {
+    return n[1] > 31 || n[1] >= 1000
+      ? n[0] === m && yearIs(n[1]) && d === lastDay  // 10/2026, 10/26
+      : n[0] === d && n[1] === m;                    // 28.10 (year not printed)
+  }
+  return false;
+}
+
+// Box in photo pixels (of a w × h photo) → [x1, y1, x2, y2] on a 0–1000 scale, or null
+function cleanBox(b, w, h) {
+  if (!Array.isArray(b) || b.length !== 4 || !w || !h) return null;
+  const n = b.map(Number);
+  if (!n.every(Number.isFinite)) return null;
+  const [x1, x2] = [n[0], n[2]].map(v => Math.min(1000, Math.max(0, v / w * 1000)));
+  const [y1, y2] = [n[1], n[3]].map(v => Math.min(1000, Math.max(0, v / h * 1000)));
+  return x2 > x1 && y2 > y1 ? [x1, y1, x2, y2] : null;
+}
+
+function cleanScanItem(i, w, h) {
+  const days = Math.round(Number(i?.daysLeft));
+  const pick = (v, list, fallback) => list.includes(v) ? v : fallback;
+  return {
+    name: String(i?.name || "").trim().slice(0, 40) || "Unknown item",
+    container: String(i?.container || "").trim().slice(0, 60),
+    knownId: String(i?.knownId || "").slice(0, 20),
+    kind: pick(i?.kind, ["packaged", "cooked", "fresh", "other"], "other"),
+    qty: String(i?.qty || "").trim().slice(0, 20),
+    shelf: pick(i?.shelf, SHELVES, ""),
+    dateText: String(i?.dateText || "").trim().slice(0, 30),
+    printedDate: dateMatchesText(i?.printedDate, i?.dateText) ? i.printedDate : "",
+    daysLeft: Number.isFinite(days) ? Math.min(365, Math.max(-30, days)) : 5,
+    condition: String(i?.condition || "").trim().slice(0, 80),
+    confidence: pick(i?.confidence, ["high", "medium", "low"], "medium"),
+    note: String(i?.note || "").trim().slice(0, 100),
+    box: cleanBox(i?.box, w, h),
+    seenDaysAgo: 0
+  };
+}
+</script>
+<script>
+// Draws a top-down picture of a dish on a canvas from a recipe's "look":
+// { vessel: plate|bowl|glass|pan, base: "#rrggbb", toppings: [{ shape: leaf|dot|slice|drizzle|crumb, color }] }
+const Dish = (() => {
+  const HEX = /^#[0-9a-f]{6}$/i;
+  const hashStr = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+  // Seeded random numbers, so the same recipe always looks the same
+  const rng = seed => () => {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const mix = (hex, other, amt) => {
+    const a = parseInt(hex.slice(1), 16), b = parseInt(other.slice(1), 16);
+    const ch = s => Math.round(((a >> s) & 255) * (1 - amt) + ((b >> s) & 255) * amt);
+    return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+  };
+
+  function draw(cv, look, seedText) {
+    const S = 240, dpr = window.devicePixelRatio || 1;
+    cv.width = S * dpr; cv.height = S * dpr;
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const rnd = rng(hashStr(seedText));
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--well").trim() || "#F7FAFB";
+    ctx.fillRect(0, 0, S, S);
+
+    const c = S / 2;
+    const vessel = ["plate", "bowl", "glass", "pan"].includes(look?.vessel) ? look.vessel : "plate";
+    const base = HEX.test(look?.base || "") ? look.base : "#E8C27A";
+    const circle = (r, fill, dx = 0, dy = 0) => { ctx.beginPath(); ctx.arc(c + dx, c + dy, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); };
+
+    let foodR;
+    if (vessel === "pan") {
+      ctx.save(); ctx.translate(c, c); ctx.rotate(-0.6);
+      ctx.fillStyle = "#23292D"; ctx.beginPath(); ctx.roundRect(88, -9, 60, 18, 9); ctx.fill(); ctx.restore();
+      circle(98, "rgba(0,0,0,.18)", 3, 5); circle(98, "#2E3438"); circle(88, "#3B4247"); foodR = 80;
+    } else if (vessel === "bowl") {
+      circle(94, "rgba(0,0,0,.14)", 3, 6); circle(94, "#ECE8E1"); circle(80, "#D8D3CA"); foodR = 74;
+    } else if (vessel === "glass") {
+      circle(72, "rgba(0,0,0,.12)", 3, 5); circle(72, "#E4EEF1"); foodR = 62;
+    } else {
+      circle(102, "rgba(0,0,0,.12)", 3, 6); circle(102, "#F8F8F5"); circle(84, "#EEEEE9"); circle(80, "#F8F8F5"); foodR = 70;
+    }
+
+    // Base: an uneven blob with a soft highlight
+    ctx.beginPath();
+    for (let k = 0; k <= 28; k++) {
+      const a = (k / 28) * Math.PI * 2, r = foodR * (0.9 + rnd() * 0.1);
+      const x = c + Math.cos(a) * r, y = c + Math.sin(a) * r;
+      k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    const g = ctx.createRadialGradient(c - 20, c - 24, 6, c, c, foodR);
+    g.addColorStop(0, mix(base, "#FFFFFF", 0.3));
+    g.addColorStop(1, mix(base, "#000000", 0.12));
+    ctx.fillStyle = g; ctx.fill();
+
+    const spot = (spread = 0.78) => {
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * foodR * spread;
+      return [c + Math.cos(a) * r, c + Math.sin(a) * r];
+    };
+    (look?.toppings || []).slice(0, 4).forEach(t => {
+      const col = HEX.test(t?.color || "") ? t.color : "#7A9A3A";
+      if (t?.shape === "leaf") {
+        for (let n = 0; n < 8; n++) {
+          const [x, y] = spot();
+          ctx.save(); ctx.translate(x, y); ctx.rotate(rnd() * Math.PI);
+          ctx.beginPath(); ctx.ellipse(0, 0, 10, 4.5, 0, 0, Math.PI * 2); ctx.fillStyle = mix(col, "#000000", rnd() * 0.2); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.strokeStyle = mix(col, "#FFFFFF", 0.35); ctx.lineWidth = 1; ctx.stroke();
+          ctx.restore();
+        }
+      } else if (t?.shape === "slice") {
+        for (let n = 0; n < 5; n++) {
+          const [x, y] = spot(0.7);
+          ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fillStyle = mix(col, "#FFFFFF", 0.25); ctx.fill();
+          for (let s = 0; s < 4; s++) {
+            ctx.beginPath(); ctx.arc(x + Math.cos(s * 1.57) * 3.5, y + Math.sin(s * 1.57) * 3.5, 1.3, 0, Math.PI * 2);
+            ctx.fillStyle = mix(col, "#FFF3C4", 0.6); ctx.fill();
+          }
+        }
+      } else if (t?.shape === "drizzle") {
+        ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineCap = "round";
+        for (let n = 0; n < 3; n++) {
+          const y0 = c - foodR * 0.5 + n * foodR * 0.5;
+          ctx.beginPath(); ctx.moveTo(c - foodR * 0.7, y0);
+          ctx.bezierCurveTo(c - 20, y0 - 18 + rnd() * 10, c + 20, y0 + 18 - rnd() * 10, c + foodR * 0.7, y0 + (rnd() - 0.5) * 12);
+          ctx.stroke();
+        }
+      } else if (t?.shape === "dot") {
+        for (let n = 0; n < 12; n++) { const [x, y] = spot(); circle(3 + rnd() * 3, mix(col, "#000000", rnd() * 0.15), x - c, y - c); }
+      } else {
+        for (let n = 0; n < 40; n++) { const [x, y] = spot(0.85); circle(1.2 + rnd() * 1.6, mix(col, "#FFFFFF", rnd() * 0.2), x - c, y - c); }
+      }
+    });
+  }
+
+  return { draw };
+})();
+</script>
+<script>
+// Recipes: AI recipe ideas from the food list, with taste preferences and a "happy to shop" mode.
+const Recipes = (() => {
+  const PREFS = ["Sweet", "Salty", "On a diet", "Under 15 min", "Vegetarian", "High protein", "No oven"];
+  const chosen = new Set();
+  let shopMode = false;
+
+  const EXAMPLES = [
+    { name: "Spinach and tomato omelette", minutes: 10, kcal: 340, servings: 1,
+      why: "Uses the spinach before it goes off.",
+      uses: ["Eggs", "Baby spinach", "Tomatoes", "Cheddar"], extra: ["Olive oil", "Salt", "Pepper"], buy: [],
+      steps: ["Beat 3 eggs with a pinch of salt and pepper.", "Wilt a big handful of spinach in a pan with a little oil.", "Pour in the eggs, add sliced tomato and 20 g grated cheddar.", "Cook 3–4 minutes on medium heat, fold and serve."],
+      look: { vessel: "plate", base: "#F2C14E", toppings: [{ shape: "leaf", color: "#3E8E41" }, { shape: "slice", color: "#D9412B" }, { shape: "crumb", color: "#E9962E" }] } },
+    { name: "Leftover pasta with creamy spinach", minutes: 12, kcal: 520, servings: 2,
+      why: "Finishes the pasta today and the milk before it runs out.",
+      uses: ["Leftover pasta", "Baby spinach", "Milk 3.6%", "Cheddar"], extra: ["Garlic", "Butter"], buy: [],
+      steps: ["Melt a knob of butter with a chopped garlic clove.", "Add 100 ml milk and 40 g grated cheddar, stir until smooth.", "Stir in the spinach and the leftover pasta.", "Heat through for 4 minutes and season."],
+      look: { vessel: "pan", base: "#EBC98A", toppings: [{ shape: "leaf", color: "#2F7D3A" }, { shape: "crumb", color: "#F3E3B5" }] } },
+    { name: "Honey yogurt breakfast bowl", minutes: 5, kcal: 280, servings: 1,
+      why: "A sweet way to finish the yogurt.",
+      uses: ["Greek yogurt"], extra: ["Honey", "Oats"], buy: ["Fresh berries"],
+      steps: ["Spoon a cup of Greek yogurt into a bowl.", "Top with 2 tablespoons of oats and some berries.", "Drizzle with honey."],
+      look: { vessel: "bowl", base: "#F6F2EA", toppings: [{ shape: "drizzle", color: "#D99A2B" }, { shape: "crumb", color: "#B88A55" }, { shape: "dot", color: "#B5304A" }] } }
+  ];
+  let current = EXAMPLES;
+
+  const items = () => Store.get().items;
+  const findItem = name => items().find(i => i.name.toLowerCase() === String(name).toLowerCase());
+
+  function renderMode() {
+    $("mode-fridge").setAttribute("aria-selected", !shopMode);
+    $("mode-any").setAttribute("aria-selected", shopMode);
+    $("mode-hint").textContent = shopMode
+      ? "Ask for any dish you like. The AI uses what's in your fridge where it can and tells you what to buy."
+      : "Pick what you want. The AI builds recipes from your fridge and uses the food that expires soonest first.";
+    $("pref-text").placeholder = shopMode
+      ? "What do you want to cook? e.g. lasagna, sushi, pancakes"
+      : "Anything else? e.g. no dairy, cooking for 4, kid friendly";
+  }
+
+  function renderPrefs() {
+    $("prefs").replaceChildren(...PREFS.map((p, idx) => el("button", {
+      class: "chip", type: "button", id: "pref-" + idx, "aria-pressed": String(chosen.has(p)),
+      onclick: () => { chosen.has(p) ? chosen.delete(p) : chosen.add(p); renderPrefs(); }
+    }, p)));
+  }
+
+  function renderEatFirst() {
+    const soon = Food.byUrgency(items().filter(i => Food.status(i) === "soon"));
+    $("rec-eat-first").replaceChildren(...(soon.length
+      ? soon.map(i => el("span", { class: "ing soon" }, `${i.name} · ${Food.daysText(i).toLowerCase()}`))
+      : [el("span", { class: "note" }, "Nothing needs eating urgently.")]));
+  }
+
+  function card(r, idx) {
+    const cv = el("canvas", { role: "img", "aria-label": `Illustration of ${r.name}` });
+    const meta = [[r.minutes, "min"], [r.kcal, "kcal"], [r.servings, r.servings === 1 ? "serving" : "servings"]]
+      .filter(([v]) => v != null)
+      .map(([v, u]) => el("span", {}, el("b", {}, String(v)), " " + u));
+    const tags = [
+      ...(r.uses || []).map(u => el("span", { class: "ing" + (findItem(u) && Food.status(findItem(u)) === "soon" ? " soon" : "") }, String(u))),
+      ...(r.extra || []).map(u => el("span", { class: "ing pantry" }, String(u))),
+      ...(r.buy || []).map(u => el("span", { class: "ing buy" }, "Buy: " + String(u)))
+    ];
+    const article = el("article", { class: "recipe" },
+      el("figure", {}, cv, el("figcaption", {}, "Illustration of the dish")),
+      el("div", { class: "rbody" },
+        el("h3", {}, String(r.name)),
+        el("div", { class: "rmeta2" }, meta),
+        r.why && el("p", { class: "why" }, String(r.why)),
+        el("div", { class: "uses" }, tags),
+        el("details", { id: "steps-" + idx },
+          el("summary", {}, "How to make it"),
+          el("ol", {}, (r.steps || []).map(s => el("li", {}, String(s)))))
+      )
+    );
+    return { article, draw: () => Dish.draw(cv, r.look, String(r.name)) };
+  }
+
+  function renderList() {
+    const cards = current.map(card);
+    $("recipe-list").replaceChildren(...cards.map(c => c.article));
+    cards.forEach(c => c.draw());
+    $("rec-count").textContent = plural(current.length, "recipe");
+  }
+
+  async function generate() {
+    if (!Scanner.sample) return;
+    const btn = $("gen-recipes");
+    btn.disabled = true;
+    $("rec-status").textContent = "Cooking up ideas…";
+    const usable = items().filter(i => Food.status(i) !== "expired");
+    const fridge = usable.map(i => ({ item: i.name, amount: i.qty || "unknown", expiresInDays: i.expires ? Dates.daysUntil(i.expires) : "unknown" }));
+    const expired = items().filter(i => Food.status(i) === "expired").map(i => i.name);
+    const wants = [...chosen].join(", ") || "no special preference";
+    const extra = $("pref-text").value.trim().slice(0, 200);
+    const prompt = `You are the recipe assistant in a smart fridge app.
+Fridge contents (name, amount, days until expiry):
+${JSON.stringify(fridge, null, 1)}
+Expired, never use: ${expired.join(", ") || "none"}.
+Basic pantry is available: salt, pepper, oil, butter, sugar, honey, flour, oats, rice, dry pasta, garlic, onion, common spices.
+
+The user wants: ${wants}.${extra ? `\nThey also said: "${extra}"` : ""}
+
+${shopMode
+  ? "The user is happy to go shopping. If they name a dish, make that dish (3 different versions or close variations), even if the fridge doesn't have the ingredients. Use fridge items where they fit, especially ones that expire within 2 days."
+  : "Suggest 3 different recipes that follow the user's wishes. Use only fridge items and the basic pantry, and prefer the items that expire within 2 days."}
+Keep steps short and practical (3 to 6 steps, with amounts).
+In "uses", list fridge items using their exact names from the list above. In "extra", list basic pantry items used. In "buy", list ingredients the user must buy${shopMode ? "" : " (this must be an empty list)"}.
+"look" describes how the finished dish looks from above, for an illustration: vessel is one of plate, bowl, glass, pan; base is the main colour of the food as #rrggbb; toppings is 1 to 3 visible toppings, each with shape (leaf, dot, slice, drizzle or crumb) and color as #rrggbb.
+Reply with only JSON:
+{"recipes":[{"name":"","minutes":10,"kcal":350,"servings":2,"why":"one short sentence on why it fits","uses":[""],"extra":[""],"buy":[""],"steps":[""],"look":{"vessel":"plate","base":"#e8c27a","toppings":[{"shape":"leaf","color":"#3e8e41"}]}}]}`;
+    try {
+      const res = await Scanner.sample.json(prompt, { modelTier: "quick", cache: false });
+      const list = Array.isArray(res?.recipes) ? res.recipes.filter(r => r && r.name).slice(0, 4) : [];
+      if (!list.length) throw { code: "invalid_json" };
+      current = list;
+      renderList();
+      const toBuy = new Set(list.flatMap(r => Array.isArray(r.buy) ? r.buy.map(String) : []));
+      $("rec-status").textContent = `Made by AI for: ${wants}${extra ? `, ${extra}` : ""}.`
+        + (shopMode ? (toBuy.size ? ` You'll need to buy ${plural(toBuy.size, "ingredient")} (blue tags).` : " You have everything already.") : "");
+    } catch (e) {
+      $("rec-status").textContent = Scanner.errorText(e?.code);
+      if (e?.code === "not_granted" || e?.code === "sampling_disabled") btn.hidden = true;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function init() {
+    $("mode-fridge").addEventListener("click", () => { shopMode = false; renderMode(); });
+    $("mode-any").addEventListener("click", () => { shopMode = true; renderMode(); $("pref-text").focus(); });
+    $("gen-recipes").addEventListener("click", generate);
+    $("pref-text").addEventListener("keydown", e => { if (e.key === "Enter") generate(); });
+    Scanner.ready.then(() => {
+      if (Scanner.sample) return;
+      $("gen-recipes").hidden = true;
+      $("rec-status").textContent = "Example recipes. AI recipes work when the app is open on the shared claude.ai link.";
+    });
+    // Redraw the dish pictures when the theme changes so their background matches
+    const redraw = () => { if (!$("screen-recipes").hidden) renderList(); };
+    new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", redraw);
+  }
+
+  return {
+    init,
+    render() { renderMode(); renderPrefs(); renderEatFirst(); renderList(); }
+  };
+})();
+</script>
+<script>
+// "Food & your body": AI advice on the foods you eat most: what they do for you, what they give you,
+// how often is good, and when it becomes too much. "Most eaten" comes from the Eaten button in
+// Eat Me First (last 30 days); food that's in the fridge but not eaten yet fills up the list.
+const Health = (() => {
+  const EXAMPLE = {
+    summary: "A good mix of protein and dairy. Keep cheese portions small and add more vegetables.",
+    foods: [
+      { name: "Eggs", helps: "Complete protein for your muscles, and choline for your brain.", nutrients: ["Protein", "Vitamin B12", "Vitamin D", "Choline"],
+        howOften: "1–2 eggs a day is fine for most healthy adults.", tooMuch: "If you have high cholesterol, ask your doctor how many suit you.", yourIntake: "About right" },
+      { name: "Milk", helps: "Keeps bones and teeth strong.", nutrients: ["Calcium", "Protein", "Iodine", "Vitamin B12"],
+        howOften: "2–3 portions of dairy a day (a portion is a 200 ml glass).", tooMuch: "Over about 1 litre a day adds a lot of saturated fat and can push out other foods.", yourIntake: "About right" },
+      { name: "Cheddar", helps: "Calcium for your bones and protein to keep you full.", nutrients: ["Calcium", "Protein", "Vitamin A"],
+        howOften: "About 30 g a day (a matchbox-sized piece).", tooMuch: "It's high in salt and saturated fat, so big daily portions raise blood pressure and cholesterol.", yourIntake: "More than recommended" },
+      { name: "Baby spinach", helps: "Supports energy and healthy blood, and keeps bones strong.", nutrients: ["Iron", "Folate", "Vitamin K", "Vitamin A"],
+        howOften: "A handful (30–80 g) most days counts towards your 5 a day.", tooMuch: "It's high in oxalates: very large daily amounts can add to kidney stones in people prone to them.", yourIntake: "Could eat more" }
+    ]
+  };
+  let current = EXAMPLE;
+  let isExample = true;
+
+  // Foods ranked by how often they were eaten in the last 30 days, then what's in the fridge now
+  function topFoods() {
+    const st = Store.get();
+    const since = Dates.addDays(Dates.today(), -30);
+    const counts = new Map();
+    (st.eaten || []).filter(e => e.date >= since).forEach(e => {
+      const key = e.name.trim().toLowerCase();
+      counts.set(key, { name: e.name, times: (counts.get(key)?.times || 0) + 1 });
+    });
+    st.items.forEach(i => {
+      const key = i.name.trim().toLowerCase();
+      if (!counts.has(key)) counts.set(key, { name: i.name, times: 0 });
+    });
+    return [...counts.values()].sort((a, b) => b.times - a.times).slice(0, 8);
+  }
+
+  function renderTop() {
+    const top = topFoods();
+    $("health-top").replaceChildren(...(top.length
+      ? top.map(f => el("span", { class: "ing" }, f.name, " ",
+          el("span", { class: "times" }, f.times ? `${f.times}× this month` : "in your fridge")))
+      : [el("span", { class: "note" }, "Nothing yet. Tap “Eaten” in Eat Me First when you finish something.")]));
+    return top;
+  }
+
+  function card(f) {
+    const intake = String(f.yourIntake || "");
+    const tone = /more than|too much|a lot/i.test(intake) ? "soon" : /more|less/i.test(intake) ? "unknown" : "safe";
+    return el("article", { class: "food-card" },
+      el("div", { class: "food-head" },
+        el("h3", {}, String(f.name)),
+        intake && !isExample && el("span", { class: "pill " + tone }, intake)),   // no verdict without real data
+      el("p", {}, String(f.helps || "")),
+      el("div", { class: "uses" }, (Array.isArray(f.nutrients) ? f.nutrients : []).slice(0, 5).map(n => el("span", { class: "ing" }, String(n)))),
+      el("dl", { class: "facts" },
+        el("dt", {}, "How often"), el("dd", {}, String(f.howOften || "")),
+        f.tooMuch && el("dt", {}, "When it's too much"), f.tooMuch && el("dd", { class: "warn" }, String(f.tooMuch)))
+    );
+  }
+
+  function render() {
+    renderTop();
+    $("health-summary").textContent = current.summary || "";
+    $("health-cards").replaceChildren(...(current.foods || []).map(card));
+  }
+
+  async function generate() {
+    if (!Scanner.sample) return;
+    const top = topFoods();
+    if (!top.length) { $("health-status").textContent = "Scan your fridge or mark food as eaten first."; return; }
+    const btn = $("health-ask");
+    btn.disabled = true;
+    $("health-status").textContent = "Thinking…";
+    const prompt = `You are the nutrition assistant in a smart fridge app. These are the foods this household eats most. "times" = how often they ate it in the last 30 days (0 = in the fridge, not eaten yet):
+${JSON.stringify(top.map(f => ({ food: f.name, times: f.times })))}
+
+For up to 6 of these foods (most eaten first; skip drinks like wine and non-foods) give:
+- name: the food
+- helps: one short sentence on what it does for the body
+- nutrients: the 2–4 main nutrients it gives, short words like "Protein", "Vitamin C", "Calcium"
+- howOften: a sensible amount and frequency for an adult, based on common dietary guidance, e.g. "1 portion (150 g) a day"
+- tooMuch: one short sentence on when it starts to be a problem (how much, and why), or "" if there's no realistic concern
+- yourIntake: compare "times" with howOften in 2–4 words: "About right", "More than recommended" or "Could eat more". Use "Not enough data" when times is 0.
+And "summary": one sentence about their overall pattern.
+Plain, friendly and factual. General information, not medical advice: no diagnoses or cures.
+Reply with only JSON: {"summary": "", "foods": [{"name": "", "helps": "", "nutrients": [""], "howOften": "", "tooMuch": "", "yourIntake": ""}]}`;
+    try {
+      const res = await Scanner.sample.json(prompt, { modelTier: "quick", cache: false });
+      if (!Array.isArray(res?.foods) || !res.foods.length) throw { code: "invalid_json" };
+      current = { summary: String(res.summary || ""), foods: res.foods.slice(0, 6) };
+      isExample = false;
+      render();
+      $("health-status").textContent = "Made by AI from the foods you eat most.";
+    } catch (e) {
+      $("health-status").textContent = Scanner.errorText(e?.code);
+      if (e?.code === "not_granted" || e?.code === "sampling_disabled") btn.hidden = true;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function init() {
+    $("health-ask").addEventListener("click", generate);
+    Scanner.ready.then(() => {
+      if (Scanner.sample) return;
+      $("health-ask").hidden = true;
+      $("health-status").textContent = "Example advice. AI advice works when the app is open on the shared claude.ai link.";
+    });
+  }
+
+  return { init, render };
+})();
+</script>
+<script>
+// Fridge sensors: temperature and door (magnet sensor). Read-only in the app.
+// Rules: the fridge closes the door itself after 60 s; a problem that lasts 10 minutes sends an alert.
+// The door state only ever comes from the sensor, never from a photo.
+const SENSOR_RULES = { tempMin: 0, tempMax: 5, autoCloseSec: 60, alertAfterMin: 10 };
+
+const Sensors = (() => {
+  const s = { temp: 3.8, doorOpen: false, doorSecs: 0, tempSecs: 0, live: false };
+  const active = {}; // alerts on screen right now, by kind
+
+  const tempState = () => s.temp > SENSOR_RULES.tempMax ? "warm" : s.temp < SENSOR_RULES.tempMin ? "cold" : "ok";
+  const duration = secs => secs < 60 ? `${secs} s` : plural(Math.floor(secs / 60), "minute");
+  const limitSecs = () => SENSOR_RULES.alertAfterMin * 60;
+
+  function setAlert(kind, on, text) {
+    if (on && !active[kind]) toast("Alert sent to your phone");
+    if (on) active[kind] = text; else delete active[kind];
+  }
+
+  // Each reading from the fridge (ESP32) goes through here
+  function update(reading) {
+    s.live = true;
+    if (typeof reading.temp === "number") s.temp = reading.temp;
+    if (typeof reading.doorOpen === "boolean" && reading.doorOpen !== s.doorOpen) {
+      s.doorOpen = reading.doorOpen;
+      s.doorSecs = 0;
+    }
+  }
+
+  function tick() {
+    // Until the hardware is connected: a steady, healthy simulated reading
+    if (!s.live) s.temp = 3.8 + Math.sin(Date.now() / 90000) * 0.3;
+
+    if (s.doorOpen) s.doorSecs += 1;
+    s.tempSecs = tempState() === "ok" ? 0 : s.tempSecs + 1;
+
+    setAlert("door", s.doorOpen && s.doorSecs >= limitSecs(),
+      `Your fridge door has been open for ${duration(s.doorSecs)}. Something is stopping it from closing.`);
+    setAlert("temp", tempState() !== "ok" && s.tempSecs >= limitSecs(),
+      tempState() === "warm"
+        ? `Your fridge is at ${s.temp.toFixed(1)} °C. Food will spoil faster.`
+        : `Your fridge is at ${s.temp.toFixed(1)} °C. Food may freeze.`);
+    render();
+  }
+
+  function render() {
+    const t = tempState();
+    $("sensor-temp").textContent = `${s.temp.toFixed(1)} °C`;
+    $("sensor-temp-box").className = "reading " + (t === "ok" ? "safe" : s.tempSecs >= limitSecs() ? "expired" : "soon");
+    $("sensor-temp-text").textContent = t === "ok"
+      ? `Safe range ${SENSOR_RULES.tempMin}–${SENSOR_RULES.tempMax} °C`
+      : `Too ${t} for ${duration(s.tempSecs)}. Alert after ${SENSOR_RULES.alertAfterMin} min.`;
+
+    $("sensor-door").textContent = s.doorOpen ? "Open" : "Closed";
+    $("sensor-door-box").className = "reading " + (!s.doorOpen ? "safe" : s.doorSecs >= limitSecs() ? "expired" : "soon");
+    $("sensor-door-text").textContent = !s.doorOpen
+      ? "Magnet sensor: door shut"
+      : s.doorSecs >= SENSOR_RULES.autoCloseSec
+        ? `Open for ${duration(s.doorSecs)}. Buzzer on: something is blocking it.`
+        : `Open for ${duration(s.doorSecs)}. Closes itself at ${SENSOR_RULES.autoCloseSec} s.`;
+    $("sensor-source").textContent = s.live ? "Live from your fridge." : "Simulated reading until the fridge hardware is connected.";
+
+    $("alerts").replaceChildren(...Object.entries(active).map(([kind, text]) =>
+      el("div", { class: "alert-item", role: "alert" }, el("span", { class: "dot" }), el("span", {}, text))));
+  }
+
+  function init() {
+    render();
+    setInterval(tick, 1000);
+  }
+
+  return { init, update };
+})();
+</script>
+<script>
+// ChillCheck MVP: pair a fridge, scan, check dates, Eat Me First list, recipes, sensor alerts.
+const state = Store.get();
+const APP_LINK = "https://claude.ai/artifact/YAGAy8EvHWCznEqzx6mWfz"; // opened on the phone to use its camera
+
+let draft = null;          // the latest scan, waiting for the user to check it
+let exampleCount = 0;      // which example data set to use next
+let editingId = null;      // item whose date is being changed on Eat Me First
+let labelTargetId = null;  // item whose package label is being photographed
+
+/* ---------- Navigation ---------- */
+const SCREENS = ["setup", "home", "review", "eat", "recipes", "health"];
+const render = { recipes: () => Recipes.render(), health: () => Health.render() };
+function go(name) {
+  SCREENS.forEach(s => { $("screen-" + s).hidden = s !== name; });
+  render[name]?.();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+
+/* ---------- Setup ---------- */
+const CODE_RE = /^CC-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+
+$("device-code").addEventListener("input", e => {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+});
+$("demo-fill").addEventListener("click", () => {
+  $("user-name").value = "Katerina";
+  $("user-email").value = "katerina@example.com";
+  $("device-code").value = "CC-A7F3-2291";
+});
+$("setup-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("user-name").value.trim();
+  const email = $("user-email").value.trim();
+  const code = $("device-code").value.trim();
+  const error =
+    !name ? "Enter your name." :
+    !/^\S+@\S+\.\S+$/.test(email) ? "Enter a valid email address." :
+    !CODE_RE.test(code) ? "The device code looks like CC-A7F3-2291. It's on the sticker inside the fridge door." : "";
+  $("setup-error").textContent = error;
+  $("setup-error").hidden = !error;
+  if (error) return;
+  state.user = { name, email };
+  state.device = { code, pairedAt: new Date().toISOString() };
+  Store.save();
+  toast("Fridge paired");
+  go("home");
+});
+
+/* ---------- Home ---------- */
+render.home = () => {
+  $("hello").textContent = `Hi ${state.user.name}`;
+  $("device-label").textContent = state.device.code;
+  $("last-scan").textContent = state.lastScan ? `Last photo: ${Dates.stamp(state.lastScan)}` : "No photos yet";
+
+  const c = Food.counts(state.items);
+  $("eat-sub").textContent =
+    !state.items.length ? "Your list fills in after the first scan." :
+    c.expired ? `${plural(c.expired, "item")} expired. Throw ${c.expired === 1 ? "it" : "them"} away.` :
+    c.soon ? `${plural(c.soon, "item")} to eat in the next ${EAT_SOON_DAYS} days.` :
+    c.unknown ? `${plural(c.unknown, "item")} with a date we couldn't read.` :
+    "Everything is fresh.";
+  $("eat-counts").replaceChildren(...(state.items.length ? STATUS_ORDER.filter(s => s !== "unknown" || c.unknown).map(s =>
+    el("span", { class: "count " + s }, el("span", { class: "dot" }), STATUS[s].label, " ", el("span", { class: "n" }, String(c[s])))
+  ) : []));
+  setSteps("fridge", -1);
+};
+
+$("open-eat").addEventListener("click", () => go("eat"));
+$("open-recipes").addEventListener("click", () => go("recipes"));
+$("open-health").addEventListener("click", () => go("health"));
+$("add-by-hand").addEventListener("click", () => { go("eat"); $("add-name").focus(); });
+
+let unpairArmed = false;
+$("unpair").addEventListener("click", () => {
+  if (!unpairArmed) {
+    unpairArmed = true;
+    $("unpair").textContent = "Tap again to unpair and clear the list";
+    setTimeout(() => { unpairArmed = false; $("unpair").textContent = "Unpair fridge"; }, 4000);
+    return;
+  }
+  unpairArmed = false;
+  $("unpair").textContent = "Unpair fridge";
+  Store.reset();
+  exampleCount = 0;
+  go("setup");
+});
+
+/* ---------- Scanning ---------- */
+// Only the fridge camera is triggered by the door closing. A phone photo says nothing about the door.
+const SCAN_STEPS = {
+  fridge: ["Door closed", "Light on", "Photo taken", "Finding food"],
+  phone: ["Photo from your phone", "Finding food"]
+};
+
+function setSteps(kind, active) {
+  $("scan-steps").replaceChildren(...SCAN_STEPS[kind].map((label, k) => el("li", {
+    class: "step", "data-state": active < 0 ? "idle" : k < active ? "done" : k === active ? "active" : "idle"
+  }, label)));
+}
+
+function setScanning(on) {
+  ["check-inside", "scan-photo"].forEach(id => { $(id).disabled = on; });
+  document.querySelectorAll(".photo-pick").forEach(b => { b.disabled = on; });
+}
+
+async function runScan(kind, getResult, photoUrl = null) {
+  setScanning(true);
+  $("scan-status").textContent = "";
+  const last = SCAN_STEPS[kind].length - 1;
+  try {
+    for (let k = 0; k < last; k++) { setSteps(kind, k); await wait(550); }
+    setSteps(kind, last);
+    const res = await getResult();
+    if (res.type === "other" || res.unclear) {
+      setSteps(kind, -1);
+      showWarning(kind, res.unclear ? "unclear" : "notFood");
+      return;
+    }
+    if (!res.items.length) {
+      setSteps(kind, -1);
+      showWarning(kind, res.type === "bill" ? "emptyBill" : "notFood");
+      return;
+    }
+    setSteps(kind, last + 1);
+    draft = {
+      kind, photoUrl,
+      type: res.type,
+      takenAt: new Date().toISOString(),
+      doorOpen: !!res.doorOpen,
+      store: res.store || "",
+      purchaseDate: res.purchaseDate || "",
+      billDateRead: !!res.billDateRead,
+      billDateText: res.billDateText || "",
+      // Only a photo of the whole fridge can tell that something is no longer there
+      ...Food.merge(state.items, res.items, { trackMissing: res.type === "fridge" })
+    };
+    await wait(300);
+    go("review");
+    if (res.photo && draft.rows.some(r => r.box)) tightenSquares(draft, res.photo);
+  } catch (e) {
+    setSteps(kind, -1);
+    $("scan-status").textContent = Scanner.errorText(e?.code);
+  } finally {
+    setScanning(false);
+  }
+}
+
+// Small warning in the middle of the screen when a photo can't be checked
+const WARNINGS = {
+  notFood: ["There's no food in this photo", "We can check the inside of your fridge, food anywhere else, or a shop bill. This photo shows none of them, so we can't check it."],
+  emptyBill: ["No fridge food on this bill", "Make sure the whole bill is in the photo. Things like rice, tins or cleaning products aren't added."],
+  unclear: ["We can't see the food clearly", "The photo is too dark, blurry or foggy. Turn on the light and try again."]
+};
+let retryKind = null;
+function showWarning(kind, reason) {
+  retryKind = kind;
+  $("warn-title").textContent = WARNINGS[reason][0];
+  $("warn-text").textContent = WARNINGS[reason][1];
+  $("warn-modal").hidden = false;
+  $("warn-retry").focus();
+}
+function closeWarning() {
+  $("warn-modal").hidden = true;
+}
+$("warn-close").addEventListener("click", closeWarning);
+$("warn-modal").addEventListener("click", e => { if (e.target === $("warn-modal")) closeWarning(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("warn-modal").hidden) closeWarning(); });
+$("warn-retry").addEventListener("click", () => {
+  closeWarning();
+  if (retryKind === "phone") $("photo-input").click();
+  else $("inside-picker").hidden = false;
+});
+
+async function photoBlob(src) {
+  if (src.startsWith("data:")) {
+    const [head, b64] = src.split(",");
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: head.slice(5, head.indexOf(";")) });
+  }
+  const res = await fetch(src);
+  if (!res.ok) throw { code: "photo_load" };
+  return res.blob();
+}
+
+// "Check inside": the photos/ folder stands in for the fridge camera until the hardware exists
+const runExample = () => runScan("fridge", async () => Scanner.example(exampleCount++));
+const runCameraPhoto = photo => runScan("fridge", async () => {
+  await Scanner.ready;
+  if (!Scanner.canReadPhotos) throw { code: "no_ai" };
+  return Scanner.readPhoto(await photoBlob(photo.src), state.items);
+}, photo.src);
+
+$("photo-grid").replaceChildren(
+  ...CAMERA_PHOTOS.map(photo => el("button", {
+    class: "photo-pick", type: "button",
+    onclick: () => { $("inside-picker").hidden = true; runCameraPhoto(photo); }
+  }, el("img", { src: photo.src, alt: "" }), el("span", {}, photo.name))),
+  el("button", {
+    class: "photo-pick", type: "button",
+    onclick: () => { $("inside-picker").hidden = true; runExample(); }
+  }, el("span", { class: "no-photo" }, "No photo"), el("span", {}, "Example data"))
+);
+$("check-inside").addEventListener("click", () => {
+  if (!CAMERA_PHOTOS.length) return runExample();
+  $("inside-picker").hidden = !$("inside-picker").hidden;
+});
+
+// Phone camera: one button for everything. The AI decides if it's the fridge, food elsewhere or a shop bill.
+// On a phone the input opens the camera directly; on a computer it opens a file picker.
+const pickFile = (input, onFile) => input.addEventListener("change", e => {
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (file) onFile(file);
+});
+$("scan-photo").addEventListener("click", () => $("photo-input").click());
+pickFile($("photo-input"), file => runScan("phone", () => Scanner.readPhoto(file, state.items), URL.createObjectURL(file)));
+
+// "Use my phone's camera" (on a computer): a QR code opens this app on the phone.
+// Same Claude account on both, so whatever the phone scans shows up here live.
+let qrDrawn = false;
+$("phone-cam").addEventListener("click", () => {
+  const panel = $("phone-panel");
+  panel.hidden = !panel.hidden;
+  if (panel.hidden || qrDrawn) return;
+  qrDrawn = true;
+  $("phone-link").textContent = APP_LINK;
+  if (window.QRCode) {
+    new QRCode($("phone-qr"), { text: APP_LINK, width: 180, height: 180, colorDark: "#11222C", colorLight: "#FFFFFF" });
+  } else {
+    $("phone-qr").replaceChildren(el("p", { class: "note" }, "The QR code needs an internet connection. Open the link below on your phone instead."));
+  }
+});
+
+/* ---------- Review the scan ---------- */
+const KIND_LABEL = { packaged: "Packaged", cooked: "Cooked", fresh: "Fresh", other: "Other" };
+
+render.review = () => {
+  if (!draft) return go("home");
+  const n = draft.rows.length;
+  const fresh = draft.rows.filter(r => r.isNew).length;
+  const redated = draft.rows.filter(r => r.dateChanged).length;
+  const toCheck = draft.rows.filter(r => r.confidence === "low").length;
+  const taken = `Photo taken today at ${Dates.stamp(draft.takenAt)}`;
+  const counts = `${fresh} new, ${n - fresh} already in your list` + (redated ? `, ${redated} with a new date` : "") + "." +
+    (toCheck ? ` ${plural(toCheck, "item")} marked “Check this”.` : "");
+  const unread = draft.rows.filter(r => r.dateSource === "unknown").length;
+  $("review-lead").textContent =
+    draft.type === "bill"
+      ? `Shop bill${draft.store ? ` from ${draft.store}` : ""}: ${plural(n, "fridge item")}. ` +
+        (draft.billDateRead
+          ? `Bought ${Dates.format(draft.purchaseDate)}. Each date is the purchase date plus the item's usual shelf life.`
+          : `The date on the bill couldn't be read${draft.billDateText ? ` (“${draft.billDateText}”)` : ""}, so today is used as the purchase date. Change the dates if you bought it earlier.`)
+      : draft.type === "food"
+        ? `${taken}: ${plural(n, "food")} outside the fridge, ${counts} Dates assume you store them the right way from now.`
+        : `${taken}: ${plural(n, "item")} in your fridge, ${counts}`;
+  if (unread && draft.type !== "bill") {
+    $("review-lead").textContent += ` ${plural(unread, "package")} with a date we couldn't read: set ${unread === 1 ? "it" : "them"} or use “Scan date” later.`;
+  }
+
+  $("review-door").hidden = !draft.doorOpen;
+  const photo = $("review-photo");
+  $("review-photo-wrap").hidden = !draft.photoUrl;
+  if (draft.photoUrl && photo.getAttribute("src") !== draft.photoUrl) {
+    photo.onload = renderOverlay;
+    photo.src = draft.photoUrl;
+  }
+  renderOverlay();
+
+  $("review-list").replaceChildren(...Food.byUrgency(draft.rows).map(reviewRow));
+
+  const missing = $("review-missing");
+  missing.replaceChildren();
+  if (draft.missing.length) {
+    missing.append(el("div", { class: "missing" },
+      el("h2", {}, "Not in this photo"),
+      el("p", { class: "note" }, "These were in your fridge before. They may be hidden behind something, or already gone."),
+      draft.missing.map(m => el("label", { class: "check", for: "keep-" + m.item.id },
+        el("span", {}, m.item.name, " ", el("small", {}, `· ${Food.daysText(m.item)}`)),
+        el("span", { class: "rmeta" }, "Still in the fridge",
+          el("input", { type: "checkbox", id: "keep-" + m.item.id, checked: m.keep, onchange: e => { m.keep = e.target.checked; } }))
+      ))
+    ));
+  }
+};
+
+// Squares on the photo around each food, in its status colour. No names, to keep the photo calm:
+// by default only food that needs attention is marked, and the item under the pointer in the list
+// is highlighted while the rest fade.
+const BOX_COLORS = { safe: "#2FB36B", soon: "#F5B82E", expired: "#F0524A", unknown: "#A877FF" };
+let boxFilter = "attention";   // "attention" or "all"
+let highlightId = null;
+
+// Runs while the user already sees the list: zoom in on each item and tighten its square
+async function tightenSquares(d, photo) {
+  const note = $("legend-note");
+  note.textContent = "Tightening the squares…";
+  try {
+    await Scanner.refineBoxes(photo, d.rows, () => { if (draft === d) renderOverlay(); });
+    if (draft === d) note.textContent = "Squares placed by the AI, checked close up. They can still be slightly off.";
+  } catch {
+    if (draft === d) note.textContent = "Squares placed by the AI. They can be slightly off.";
+  }
+}
+function svgEl(tag, attrs, text) {
+  const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (text) n.textContent = text;
+  return n;
+}
+function renderOverlay() {
+  const svg = $("review-overlay");
+  const img = $("review-photo");
+  const all = draft?.photoUrl ? draft.rows.filter(r => r.box) : [];
+  const attention = all.filter(r => Food.status(r) !== "safe");
+  $("review-legend").hidden = !all.length;
+  $("boxes-attention").textContent = `Needs attention (${attention.length})`;
+  $("boxes-all").textContent = `All food (${all.length})`;
+  $("boxes-attention").setAttribute("aria-selected", boxFilter === "attention");
+  $("boxes-all").setAttribute("aria-selected", boxFilter === "all");
+  if (!all.length || !img.naturalWidth) { svg.replaceChildren(); return; }
+
+  const shown = all.filter(r => boxFilter === "all" || Food.status(r) !== "safe" || r.id === highlightId);
+  const W = img.naturalWidth, H = img.naturalHeight;
+  const unit = Math.max(W, H) / 500;   // keeps lines the same thickness on any photo
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren(...shown
+    .map(r => {
+      const [x1, y1, x2, y2] = r.box;
+      return { r, x: x1 / 1000 * W, y: y1 / 1000 * H, w: (x2 - x1) / 1000 * W, h: (y2 - y1) / 1000 * H };
+    })
+    .sort((a, b) => (a.r.id === highlightId) - (b.r.id === highlightId) || b.w * b.h - a.w * a.h)  // highlighted on top
+    .map(s => {
+      const color = BOX_COLORS[Food.status(s.r)];
+      const lit = s.r.id === highlightId;
+      const faded = highlightId && !lit;
+      return svgEl("rect", {
+        x: s.x, y: s.y, width: s.w, height: s.h, rx: 3 * unit,
+        fill: lit ? color : "none", "fill-opacity": lit ? 0.18 : 0,
+        stroke: color, "stroke-width": (lit ? 3.5 : 2) * unit, "stroke-opacity": faded ? 0.25 : 1
+      });
+    }));
+}
+
+$("boxes-attention").addEventListener("click", () => { boxFilter = "attention"; renderOverlay(); });
+$("boxes-all").addEventListener("click", () => { boxFilter = "all"; renderOverlay(); });
+function highlight(id) {
+  if (highlightId === id) return;
+  highlightId = id;
+  renderOverlay();
+}
+
+function reviewRow(row) {
+  const pill = el("span", { class: "pill" });
+  const source = el("span", { class: "source" });
+  const paint = () => {
+    pill.className = "pill " + Food.status(row);
+    pill.textContent = Food.daysText(row);
+    source.textContent = Food.sourceText(row);
+    renderOverlay();
+  };
+  paint();
+  return el("div", {
+    class: "rrow" + (row.confidence === "low" ? " uncertain" : ""),
+    onmouseenter: () => highlight(row.id), onmouseleave: () => highlight(null),
+    onfocusin: () => highlight(row.id), onfocusout: () => highlight(null)
+  },
+    el("div", { class: "rname" },
+      el("input", {
+        class: "field", id: "name-" + row.id, value: row.name, maxlength: 40, "aria-label": "Food name", placeholder: "Food name",
+        oninput: e => { row.name = e.target.value; renderOverlay(); }
+      }),
+      el("span", { class: "rmeta" },
+        el("span", { class: "tag" + (row.isNew ? " new" : "") }, row.isNew ? "New" : "Seen before"),
+        row.kind && el("span", { class: "tag" }, KIND_LABEL[row.kind] || "Other"),
+        row.confidence === "low" && el("span", { class: "tag check-tag" }, "Check this"),
+        [row.shelf, row.qty].filter(Boolean).join(" · ")),
+      row.container && el("span", { class: "source" }, `Container: ${row.container}`),
+      row.condition && el("span", { class: "condition" }, `AI saw: ${row.condition}`),
+      row.note && el("span", { class: "warn-note" }, row.note),
+      row.confidence === "low" && el("span", { class: "source" }, "Fix the name if it's wrong. The app remembers this container on the next scan."),
+      source
+    ),
+    el("input", {
+      class: "field mono", type: "date", id: "date-" + row.id, value: row.expires || "", "aria-label": `Expiry date for ${row.name || "item"}`,
+      oninput: e => { if (Dates.valid(e.target.value)) { row.expires = e.target.value; row.dateSource = "manual"; row.dateText = ""; paint(); } }
+    }),
+    pill,
+    el("button", {
+      class: "icon-btn", type: "button", "aria-label": `Remove ${row.name || "item"}`,
+      onclick: () => { draft.rows = draft.rows.filter(r => r !== row); render.review(); }
+    }, "×")
+  );
+}
+
+$("review-add").addEventListener("click", () => {
+  const today = Dates.today();
+  const row = {
+    id: Food.newId(), name: "", qty: "", shelf: "", kind: "other", confidence: "high",
+    expires: Dates.addDays(today, 3), dateSource: "manual", firstSeen: today, isNew: true
+  };
+  draft.rows.push(row);
+  render.review();
+  $("name-" + row.id).focus();
+});
+
+$("review-save").addEventListener("click", () => {
+  const rows = draft.rows
+    .filter(r => r.name.trim())
+    .map(({ isNew, dateChanged, box, ...r }) => ({ ...r, name: r.name.trim() }));
+  state.items = [...rows, ...draft.missing.filter(m => m.keep).map(m => m.item), ...draft.untouched];
+  if (draft.type === "fridge") state.lastScan = draft.takenAt;
+  Store.save();
+  draft = null;
+  toast(`Saved ${plural(state.items.length, "item")}`);
+  go("eat");
+});
+
+/* ---------- Eat Me First ---------- */
+render.eat = () => {
+  const c = Food.counts(state.items);
+  $("eat-lead").textContent =
+    !state.items.length ? "Nothing here yet. Run a scan, or add an item by hand." :
+    [
+      c.expired && `${plural(c.expired, "item")} expired: throw ${c.expired === 1 ? "it" : "them"} away.`,
+      c.soon && `${plural(c.soon, "item")} to eat in the next ${EAT_SOON_DAYS} days.`,
+      c.unknown && `${plural(c.unknown, "item")} with a date we couldn't read: tap “Scan date” or “Set date”.`,
+      !c.expired && !c.soon && !c.unknown && "Everything is fresh."
+    ].filter(Boolean).join(" ") + (state.lastScan ? ` Last photo: ${Dates.stamp(state.lastScan)}.` : "");
+
+  const groups = $("eat-groups");
+  groups.replaceChildren();
+  if (!state.items.length) {
+    groups.append(el("div", { class: "empty" }, "Your food list is empty."));
+    return;
+  }
+  const sorted = Food.byUrgency(state.items);
+  STATUS_ORDER.forEach(s => {
+    const list = sorted.filter(i => Food.status(i) === s);
+    if (!list.length) return;
+    groups.append(el("section", { class: "group " + s, "aria-label": STATUS[s].label },
+      el("h2", { class: "group-head" }, el("span", { class: "dot" }), STATUS[s].label, el("span", { class: "n" }, String(list.length))),
+      list.map(eatRow)
+    ));
+  });
+};
+
+function eatRow(item) {
+  const s = Food.status(item);
+  const meta = [item.shelf, item.qty, item.firstSeen && `in since ${Dates.format(item.firstSeen)}`, item.barcode && `barcode ${item.barcode}`]
+    .filter(Boolean).join(" · ");
+
+  let right;
+  if (editingId === item.id) {
+    const input = el("input", { class: "field mono", type: "date", id: "edit-" + item.id, value: item.expires || "", "aria-label": `New expiry date for ${item.name}` });
+    right = el("div", { class: "edit" },
+      input,
+      el("button", { class: "btn primary small", type: "button", onclick: () => {
+        if (Dates.valid(input.value)) {
+          item.expires = input.value;
+          item.dateSource = "manual";
+          item.dateText = "";
+          Store.save();
+          toast(`${item.name}: date changed`);
+        }
+        editingId = null; render.eat();
+      } }, "Save"),
+      el("button", { class: "btn small", type: "button", onclick: () => { editingId = null; render.eat(); } }, "Cancel")
+    );
+  } else {
+    right = el("div", { class: "right" },
+      el("span", { class: "pill" }, Food.daysText(item)),
+      item.expires && el("span", { class: "date mono" }, Dates.format(item.expires)),
+      el("div", { class: "actions" },
+        el("button", { class: "btn small", type: "button", onclick: () => {
+          labelTargetId = item.id;
+          $("label-input").click();
+        } }, "Scan date"),
+        el("button", { class: "btn small", type: "button", onclick: () => {
+          editingId = item.id; render.eat(); $("edit-" + item.id)?.focus();
+        } }, item.expires ? "Change date" : "Set date"),
+        el("button", { class: "btn small", type: "button", onclick: () => {
+          state.items = state.items.filter(i => i !== item);
+          if (s !== "expired") state.eaten = [...(state.eaten || []), { name: item.name, date: Dates.today() }].slice(-300);
+          Store.save(); render.eat();
+          toast(`Removed ${item.name}`);
+        } }, s === "expired" ? "Thrown away" : "Eaten")
+      )
+    );
+  }
+  return el("div", { class: "erow " + s },
+    el("span", { class: "bar" }),
+    el("div", {},
+      el("div", { class: "name" }, item.name),
+      meta && el("div", { class: "meta" }, meta),
+      el("div", { class: "source" }, Food.sourceText(item)),
+      item.note && el("div", { class: "warn-note" }, item.note)),
+    right
+  );
+}
+
+// "Scan date": a phone photo of one package's printed date. A printed date beats any estimate.
+pickFile($("label-input"), async file => {
+  const item = state.items.find(i => i.id === labelTargetId);
+  if (!item) return;
+  toast(`Reading the date on ${item.name}…`);
+  try {
+    const res = await Scanner.readLabel(file, item.name);
+    if (!res.found) {
+      toast(res.dateText
+        ? `Date unrecognised: we could only read “${res.dateText}”. Take a closer, sharper photo of the date.`
+        : "Date unrecognised: no printed date found. Take a closer, sharper photo of the date.");
+      return;
+    }
+    item.expires = res.date;
+    item.dateSource = "label";
+    item.dateText = res.dateText;
+    if (res.barcode) item.barcode = res.barcode;
+    Store.save();
+    render.eat();
+    toast(`${item.name}: ${res.dateType || "date"} ${Dates.format(res.date)}`);
+  } catch (e) {
+    toast(Scanner.errorText(e?.code));
+  }
+});
+
+// Manual add: for food the camera can't see or didn't recognize
+$("add-shelf").replaceChildren(el("option", { value: "" }, "Not sure"), ...SHELVES.map(s => el("option", { value: s }, s)));
+$("add-date").value = Dates.addDays(Dates.today(), 3);
+$("add-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("add-name").value.trim();
+  const expires = $("add-date").value;
+  const error = !name ? "Enter the food's name." : !Dates.valid(expires) ? "Pick an expiry date." : "";
+  $("add-error").textContent = error;
+  $("add-error").hidden = !error;
+  if (error) return;
+  state.items.push({
+    id: Food.newId(), name, qty: "", shelf: $("add-shelf").value, kind: "other",
+    expires, dateSource: "manual", firstSeen: Dates.today()
+  });
+  Store.save();
+  $("add-name").value = "";
+  render.eat();
+  toast(`Added ${name}`);
+});
+
+/* ---------- Sync between devices ---------- */
+function currentScreen() {
+  return SCREENS.find(s => !$("screen-" + s).hidden);
+}
+Store.onRemoteChange(() => {
+  const screen = currentScreen();
+  if (!state.user || !state.device) return go("setup");
+  if (screen === "setup") return go("home");
+  if (screen !== "review") render[screen]?.();   // never wipe a scan the user is checking
+  toast("Updated from your other device");
+});
+Store.connect().then(ok => {
+  $("sync-status").textContent = ok
+    ? "Live sync is on: your phone and computer show the same list."
+    : "Live sync works on the shared claude.ai link.";
+});
+
+/* ---------- Start ---------- */
+Scanner.init();
+Recipes.init();
+Health.init();
+Sensors.init();
+go(state.user && state.device ? "home" : "setup");
+</script>
