@@ -62,3 +62,17 @@ Research found that at least 23–24% of expiration waste at one retailer came f
 - *(Future)* flagging expiring items for donation to food banks
   
 ## The app recognizes food and gives each item an expiry date (editable)
+- Packing?? [not quite sure]
+  - * package
+    *   - barcode
+        - no barcode
+        - visible
+        - transparent
+    * no package 
+    *  bar code - typr of food, but no expire date
+    if expire date- expire date,  two dates- prouction date, date not visible
+    If it got food in the wrong packaging (Cookies in an ice cream box) - It can see that by logic the ice cream bx is not in a freezer;
+    If it got a not visible pack or transperent one -  if there is a non visible package it will ask for whats inside and ask to check in the date you got it;
+- Cooked [yes]
+
+## 
