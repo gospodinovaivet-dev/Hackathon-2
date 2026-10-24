@@ -6,7 +6,7 @@
 <style>
 /* ChillCheck styles: playful and rounded. Dark-olive header with a curved bottom, cream page,
    white rounded cards, soft pastel tiles.
-   Palette "Matcha & Blush": #A8B98A matcha · #F5C9D3 baby pink · #FFF9F0 cream · #303B2B dark olive · #F5E6A8 butter
+   Palette "Matcha & Blush": #A8B98A matcha · #F5C9D3 baby pink · #FFF9F0 cream · #62774F olive (header, buttons) · #3B4733 text · #F5E6A8 butter
    Layout: one column on phones; on computers home and the review screen split into two columns. */
 :root {
   --sky: #FFF9F0;        /* page background (cream) */
@@ -15,12 +15,12 @@
   --blush: #F5C9D3;      /* baby pink */
   --panel: #FFFFFF;      /* cards */
   --well: #FBF4E8;       /* inputs, inner wells */
-  --green: #303B2B;      /* main action colour (dark olive) */
+  --green: #62774F;      /* main action colour (olive) */
   --green-ink: #FFF9F0;
   --leaf: #A8B98A;       /* matcha */
   --lime: #A8B98A;
-  --forest: #303B2B;     /* header */
-  --ink: #303B2B;
+  --forest: #62774F;     /* header */
+  --ink: #3B4733;
   --muted: #6E7365;
   --line: #EEE4D3;
   --accent: var(--green);
@@ -37,7 +37,7 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --sky: #1C2219; --sky-deep: #4A4326; --mint: #343F2D; --blush: #F5C9D3; --panel: #262E22; --well: #20271C;
-    --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #303B2B;
+    --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #4A5A40;
     --ink: #FFF9F0; --muted: #C3C5B4; --line: #3A4434;
     --safe: #BCCD9C; --soon: #F0D77A; --bad: #F290A6; --unknown: #B394FF;
     --shadow: 0 8px 24px rgba(0, 0, 0, .35);
@@ -46,7 +46,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --sky: #1C2219; --sky-deep: #4A4326; --mint: #343F2D; --blush: #F5C9D3; --panel: #262E22; --well: #20271C;
-  --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #303B2B;
+  --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #4A5A40;
   --ink: #FFF9F0; --muted: #C3C5B4; --line: #3A4434;
   --safe: #BCCD9C; --soon: #F0D77A; --bad: #F290A6; --unknown: #B394FF;
   --shadow: 0 8px 24px rgba(0, 0, 0, .35);
@@ -93,7 +93,7 @@ body {
 .logo { display: flex; align-items: center; gap: 10px; }
 .logo-badge {
   display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
-  background: #A8B98A; color: #303B2B; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+  background: #A8B98A; color: #3B4733; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
 }
 .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 28px; letter-spacing: .01em; }
 .header-back {
@@ -211,7 +211,7 @@ h3 { text-wrap: balance; }
 .col { display: grid; gap: 18px; }
 
 .eat-btn {
-  font: inherit; color: #303B2B; text-align: left; cursor: pointer; position: relative; overflow: hidden;
+  font: inherit; color: #3B4733; text-align: left; cursor: pointer; position: relative; overflow: hidden;
   display: grid; gap: 6px; padding: 28px 80px 28px 26px; border-radius: 32px; border: 0;
   background: #F5C9D3;
   box-shadow: 0 12px 28px rgba(184, 60, 87, .14);
@@ -225,10 +225,10 @@ h3 { text-wrap: balance; }
 .eat-sub { opacity: .95; font-weight: 700; }
 .eat-arrow {
   position: absolute; right: 22px; top: 50%; transform: translateY(-50%); z-index: 1;
-  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #303B2B; color: #FFF9F0;
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #62774F; color: #FFF9F0;
 }
 .counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; position: relative; z-index: 1; }
-.count { justify-content: flex-start; background: #FFFFFF; color: #303B2B; }
+.count { justify-content: flex-start; background: #FFFFFF; color: #3B4733; }
 .count.expired { --c: #B83C57; } .count.soon { --c: #957011; } .count.unknown { --c: #6E4BC4; } .count.safe { --c: #5C7041; }
 .count .n { margin-left: auto; font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 
