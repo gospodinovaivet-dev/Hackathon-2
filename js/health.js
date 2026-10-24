@@ -47,6 +47,7 @@ const Health = (() => {
     const intake = String(f.yourIntake || "");
     const tone = /more than|too much|a lot/i.test(intake) ? "soon" : /more|less/i.test(intake) ? "unknown" : "safe";
     return el("article", { class: "food-card" },
+      ProductPhotos.figure(f.name),
       el("div", { class: "food-head" },
         el("h3", {}, String(f.name)),
         intake && !isExample && el("span", { class: "pill " + tone }, intake)),   // no verdict without real data

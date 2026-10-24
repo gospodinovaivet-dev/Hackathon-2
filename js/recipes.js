@@ -52,6 +52,7 @@ const Recipes = (() => {
   }
 
   function card(r, idx) {
+    const photo = ProductPhotos.recipe(r.name);
     const cv = el("canvas", { role: "img", "aria-label": `Illustration of ${r.name}` });
     const meta = [[r.minutes, "min"], [r.kcal, "kcal"], [r.servings, r.servings === 1 ? "serving" : "servings"]]
       .filter(([v]) => v != null)
@@ -62,7 +63,7 @@ const Recipes = (() => {
       ...(r.buy || []).map(u => el("span", { class: "ing buy" }, "Buy: " + String(u)))
     ];
     const article = el("article", { class: "recipe" },
-      el("figure", {}, cv, el("figcaption", {}, "Illustration of the dish")),
+      photo || el("figure", {}, cv, el("figcaption", {}, "Illustration of the dish")),
       el("div", { class: "rbody" },
         el("h3", {}, String(r.name)),
         el("div", { class: "rmeta2" }, meta),
@@ -73,7 +74,7 @@ const Recipes = (() => {
           el("ol", {}, (r.steps || []).map(s => el("li", {}, String(s)))))
       )
     );
-    return { article, draw: () => Dish.draw(cv, r.look, String(r.name)) };
+    return { article, draw: () => { if (!photo) Dish.draw(cv, r.look, String(r.name)); } };
   }
 
   function renderList() {

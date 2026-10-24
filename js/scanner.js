@@ -47,7 +47,7 @@ ${JSON.stringify(knownList)}
 If you see one of these containers, set "knownId" to its id and use its contents as the name, even if the packaging says something else.
 ` : ""}
 For "fridge" and "food", list every food item you can see. For each item give:
-- name: short and plain. Name what is actually inside, not only what the packaging says. If a container's label doesn't match what you can see inside (e.g. cookies in an ice cream tub), name the contents and explain in "note". Packaging that doesn't belong in a fridge (an ice cream tub outside the freezer, a biscuit tin) is often reused for something else: if you can't see the contents, say so in "note" and use confidence "low".
+- name: short and plain. Name what is actually inside, not only what the packaging says. If a container's label doesn't match what you can see inside (e.g. rice-stuffed peppers or soup in an ice cream tub), name the contents and explain in "note". Packaging that doesn't belong in a fridge (an ice cream tub outside the freezer, a biscuit tin) is often reused for something else: if you can't see the contents, say so in "note" and use confidence "low".
 - container: a short description of the packaging as it looks, e.g. "vanilla ice cream tub", "blue opaque box, white lid". Use "" for loose food.
 - knownId: the id from the list above if this is one of those containers, otherwise "".
 - kind: "packaged" (shop packaging), "cooked" (home-cooked food or leftovers), "fresh" (fruit, vegetables, eggs, loose items) or "other".
@@ -62,6 +62,7 @@ For "fridge" and "food", list every food item you can see. For each item give:
 - note: anything the user should check, otherwise "".
 - box: [x1, y1, x2, y2] in pixels read off the rulers: the left, top, right and bottom edges of this one item. Make it tight around the whole item, edge to edge, without the shelf or neighbouring items.
 Transparent packaging: judge the food you see through it.
+Reused packaging is common in Balkan households: rice-stuffed peppers (papricas), soup and other leftovers may be in an ice cream tub. Visible cooked contents mean kind "cooked" even when the tub says ice cream. Ignore the original tub's printed date: return empty dateText and printedDate, and ask the user to confirm when the food was cooked. If the tub is closed and unfamiliar, never guess peppers or ice cream: use "Unknown container", confidence "low", and ask what is inside.
 
 For "bill": set "billDateText" to the purchase date exactly as printed ("?" for unreadable characters, "" if none) and "purchaseDate" as YYYY-MM-DD only if it is fully readable, otherwise "". Set "store", and list the food items that are kept in a fridge (skip non-food and shelf-stable items) with name, qty, kind, category, shelf, and shelfLifeDays (typical fridge life from the purchase date, unopened). No boxes.
 

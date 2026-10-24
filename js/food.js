@@ -77,6 +77,7 @@ const Food = {
 
   categoryOf(item) {
     if (CATEGORY_IDS.includes(item.category) && item.category !== "unknown") return item.category;
+    if (item.kind === "cooked") return "cooked";
     const name = norm(item.name);
     const hit = CATEGORY_WORDS.find(([, re]) => re.test(name));
     if (hit) return hit[0];
@@ -112,8 +113,8 @@ const Food = {
   // unless it visibly looks spoiled.
   dateFor(s, firstSeen) {
     const today = Dates.today();
-    if (Dates.valid(s.printedDate)) return { expires: s.printedDate, dateSource: "label", dateText: s.dateText || "" };
-    if (Dates.valid(s.purchaseDate) && s.shelfLifeDays > 0) {
+    if (s.kind !== "cooked" && Dates.valid(s.printedDate)) return { expires: s.printedDate, dateSource: "label", dateText: s.dateText || "" };
+    if (s.kind !== "cooked" && Dates.valid(s.purchaseDate) && s.shelfLifeDays > 0) {
       return { expires: Dates.addDays(s.purchaseDate, s.shelfLifeDays), dateSource: "receipt", dateText: "" };
     }
     const byLook = Dates.addDays(today, s.daysLeft ?? 5);
@@ -174,6 +175,8 @@ const Food = {
 // a mislabelled box and something the AI can't see into.
 const EXAMPLE_SCANS = [
   [
+    { name: "Leftover vegetable soup", kind: "cooked", qty: "1 box · 2 portions", shelf: "Top shelf", daysLeft: 2, seenDaysAgo: 1, container: "clear glass soup box with cream lid", condition: "carrot and potato pieces visible in broth", confidence: "high", note: "Homemade leftovers. Check when the soup was cooked and adjust the date." },
+    { name: "Rice-stuffed peppers", kind: "cooked", qty: "6 peppers", shelf: "Middle shelf", daysLeft: 1, seenDaysAgo: 2, container: "vanilla ice cream tub with pink lid", condition: "cooked peppers and rice visible inside the open tub", confidence: "low", note: "Reused ice cream tub: these are rice-stuffed peppers, not ice cream. Confirm the contents and when they were cooked; the tub's printed date does not apply." },
     { name: "Chicken breast", kind: "packaged", qty: "500 g", shelf: "Bottom shelf", printedDate: "", daysLeft: -1, seenDaysAgo: 3, condition: "grey patches on the meat", confidence: "high" },
     { name: "Leftover pasta", kind: "cooked", qty: "1 box", shelf: "Top shelf", daysLeft: 2, seenDaysAgo: 2, condition: "home-cooked, in a glass box", confidence: "high" },
     { name: "Baby spinach", kind: "fresh", qty: "200 g", shelf: "Crisper drawer", daysLeft: 1, seenDaysAgo: 4, condition: "a few leaves turning dark", confidence: "high" },
@@ -184,6 +187,8 @@ const EXAMPLE_SCANS = [
     { name: "Cheddar", kind: "packaged", qty: "250 g", shelf: "Middle shelf", printedIn: 18, daysLeft: 18, seenDaysAgo: 8, condition: "sealed block", confidence: "high" }
   ],
   [
+    { name: "Leftover vegetable soup", kind: "cooked", qty: "1 box · 2 portions", shelf: "Top shelf", daysLeft: 2, seenDaysAgo: 1, container: "clear glass soup box with cream lid", condition: "carrot and potato pieces visible in broth", confidence: "high", note: "Homemade leftovers. Check when the soup was cooked and adjust the date." },
+    { name: "Rice-stuffed peppers", kind: "cooked", qty: "6 peppers", shelf: "Middle shelf", daysLeft: 1, seenDaysAgo: 2, container: "vanilla ice cream tub with pink lid", condition: "cooked peppers and rice visible inside the open tub", confidence: "low", note: "Reused ice cream tub: these are rice-stuffed peppers, not ice cream. Confirm the contents and when they were cooked; the tub's printed date does not apply." },
     { name: "Chicken breast", kind: "packaged", qty: "500 g", shelf: "Bottom shelf", daysLeft: -1, condition: "grey patches on the meat", confidence: "high" },
     { name: "Baby spinach", kind: "fresh", qty: "150 g", shelf: "Crisper drawer", daysLeft: 1, condition: "more leaves turning dark", confidence: "high" },
     { name: "Milk 3.6%", kind: "packaged", qty: "0.5 L", shelf: "Door rack", daysLeft: 2, condition: "opened carton", confidence: "medium" },

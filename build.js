@@ -28,10 +28,14 @@ const head = html.match(/<head>([\s\S]*?)<\/head>/)[1]
   .replace(/<meta name="viewport"[^>]*>\s*/, "");
 const body = html.match(/<body>([\s\S]*?)<\/body>/)[1];
 
+// Embed product assets so the shareable page also works offline.
+const embedProducts = source => source.replace(/"(assets\/products\/[^"\n]+\.jpg)"/g,
+  (_, file) => JSON.stringify(`data:image/jpeg;base64,${fs.readFileSync(path.join(root, file)).toString("base64")}`));
+
 const inline = s => s
   .replace(/<link rel="stylesheet" href="(css\/[^"]+)">/g, (_, file) => `<style>\n${read(file)}</style>`)
   .replace(/<script src="(js\/[^"]+)"><\/script>/g, (_, file) =>
-    `<script>\n${file === "js/photos.js" ? embeddedPhotos : read(file)}</script>`);
+    `<script>\n${file === "js/photos.js" ? embeddedPhotos : file === "js/products.js" ? embedProducts(read(file)) : read(file)}</script>`);
 
 const out = `${inline(head).trim()}\n${inline(body).trim()}\n`;
 fs.mkdirSync(path.join(root, "dist"), { recursive: true });

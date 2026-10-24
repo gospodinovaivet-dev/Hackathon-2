@@ -80,6 +80,9 @@ render.home = () => {
   $("eat-counts").replaceChildren(...(state.items.length ? STATUS_ORDER.filter(s => s !== "unknown" || c.unknown).map(s =>
     el("span", { class: "count " + s }, el("span", { class: "dot" }), STATUS[s].label, " ", el("span", { class: "n" }, String(c[s])))
   ) : []));
+  $("fridge-preview-card").hidden = !state.items.length;
+  $("fridge-preview").replaceChildren(...Food.byUrgency(state.items).map(item =>
+    el("div", { class: "fridge-preview-item" }, ProductPhotos.figure(item.name), el("span", {}, item.name))));
   setSteps("fridge", -1);
 };
 
@@ -360,6 +363,7 @@ function highlight(id) {
 }
 
 function reviewRow(row) {
+  const photo = ProductPhotos.figure(row.name);
   const pill = el("span", { class: "pill" });
   const source = el("span", { class: "source" });
   const paint = () => {
@@ -375,9 +379,10 @@ function reviewRow(row) {
     onfocusin: () => highlight(row.id), onfocusout: () => highlight(null)
   },
     el("div", { class: "rname" },
+      photo,
       el("input", {
         class: "field", id: "name-" + row.id, value: row.name, maxlength: 40, "aria-label": "Food name", placeholder: "Food name",
-        oninput: e => { row.name = e.target.value; renderOverlay(); }
+        oninput: e => { row.name = e.target.value; ProductPhotos.update(photo, row.name); renderOverlay(); }
       }),
       el("span", { class: "rmeta" },
         el("span", { class: "tag" + (row.isNew ? " new" : "") }, row.isNew ? "New" : "Seen before"),
@@ -560,11 +565,12 @@ function eatRow(item) {
   }
   return el("div", { class: "erow " + s },
     el("span", { class: "bar" }),
-    el("div", {},
+    el("div", { class: "product-info" }, ProductPhotos.figure(item.name),
+    el("div", { class: "product-copy" },
       el("div", { class: "name" }, item.name),
       meta && el("div", { class: "meta" }, meta),
       el("div", { class: "source" }, Food.sourceText(item)),
-      item.note && el("div", { class: "warn-note" }, item.note)),
+      item.note && el("div", { class: "warn-note" }, item.note))),
     right
   );
 }

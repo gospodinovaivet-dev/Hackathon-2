@@ -1,22 +1,22 @@
 /* ChillCheck styles: playful and rounded. Dark-olive header with a curved bottom, cream page,
    white rounded cards, soft pastel tiles.
-   Palette "Matcha & Blush": #A8B98A matcha · #F5C9D3 baby pink · #FFF9F0 cream · #62774F olive (header, buttons) · #3B4733 text · #F5E6A8 butter
+   Palette "R 02 — Strawberry Matcha": #809B62 matcha · #EFA7BC baby pink · #FFF0E7 cream · #526A3D olive (header, buttons) · #382E30 text · #F5D5DF butter
    Layout: one column on phones; on computers home and the review screen split into two columns. */
 :root {
-  --sky: #FFF9F0;        /* page background (cream) */
-  --sky-deep: #F5E6A8;   /* butter tiles */
-  --mint: #E3EAD5;       /* light matcha fills */
-  --blush: #F5C9D3;      /* baby pink */
+  --sky: #FFF0E7;        /* page background (cream) */
+  --sky-deep: #F5D5DF;   /* butter tiles */
+  --mint: #E4EAD9;       /* light matcha fills */
+  --blush: #EFA7BC;      /* baby pink */
   --panel: #FFFFFF;      /* cards */
-  --well: #FBF4E8;       /* inputs, inner wells */
-  --green: #62774F;      /* main action colour (olive) */
-  --green-ink: #FFF9F0;
-  --leaf: #A8B98A;       /* matcha */
-  --lime: #A8B98A;
-  --forest: #62774F;     /* header */
-  --ink: #3B4733;
-  --muted: #6E7365;
-  --line: #EEE4D3;
+  --well: #FFF5EF;       /* inputs, inner wells */
+  --green: #526A3D;      /* main action colour (olive) */
+  --green-ink: #FFF0E7;
+  --leaf: #809B62;       /* matcha */
+  --lime: #809B62;
+  --forest: #809B62;     /* header */
+  --ink: #382E30;
+  --muted: #77696B;
+  --line: #EBDCD5;
   --accent: var(--green);
   --safe: #5C7041;
   --soon: #957011;
@@ -30,18 +30,18 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --sky: #1C2219; --sky-deep: #4A4326; --mint: #343F2D; --blush: #F5C9D3; --panel: #262E22; --well: #20271C;
-    --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #4A5A40;
-    --ink: #FFF9F0; --muted: #C3C5B4; --line: #3A4434;
+    --sky: #241E20; --sky-deep: #52363F; --mint: #3E4735; --blush: #EFA7BC; --panel: #382E30; --well: #2D2527;
+    --green: #809B62; --green-ink: #241E20; --leaf: #809B62; --lime: #809B62; --forest: #4A5A40;
+    --ink: #FFF0E7; --muted: #C3C5B4; --line: #514547;
     --safe: #BCCD9C; --soon: #F0D77A; --bad: #F290A6; --unknown: #B394FF;
     --shadow: 0 8px 24px rgba(0, 0, 0, .35);
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --sky: #1C2219; --sky-deep: #4A4326; --mint: #343F2D; --blush: #F5C9D3; --panel: #262E22; --well: #20271C;
-  --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #4A5A40;
-  --ink: #FFF9F0; --muted: #C3C5B4; --line: #3A4434;
+  --sky: #241E20; --sky-deep: #52363F; --mint: #3E4735; --blush: #EFA7BC; --panel: #382E30; --well: #2D2527;
+  --green: #809B62; --green-ink: #241E20; --leaf: #809B62; --lime: #809B62; --forest: #4A5A40;
+  --ink: #FFF0E7; --muted: #C3C5B4; --line: #514547;
   --safe: #BCCD9C; --soon: #F0D77A; --bad: #F290A6; --unknown: #B394FF;
   --shadow: 0 8px 24px rgba(0, 0, 0, .35);
 }
@@ -66,11 +66,11 @@ body {
 .app-header {
   position: relative;
   overflow: hidden;
-  color: #FFF9F0;
+  color: #382E30;
   background: linear-gradient(135deg, var(--forest), color-mix(in srgb, var(--forest) 82%, var(--leaf)));
   border-radius: 0 0 40px 40px;
   padding-block: 18px 30px;
-  box-shadow: 0 10px 30px rgba(11, 90, 66, .22);
+  box-shadow: 0 10px 30px rgba(56, 46, 48, .14);
 }
 .app-header::before, .app-header::after {            /* playful bubbles */
   content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .08);
@@ -87,7 +87,7 @@ body {
 .logo { display: flex; align-items: center; gap: 10px; }
 .logo-badge {
   display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
-  background: #A8B98A; color: #3B4733; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+  background: #809B62; color: #382E30; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
 }
 .logo-name { font-family: var(--font-display); font-weight: 800; font-size: 28px; letter-spacing: -0.01em; }
 
@@ -199,9 +199,9 @@ h3 { text-wrap: balance; }
 .col { display: grid; gap: 18px; }
 
 .eat-btn {
-  font: inherit; color: #3B4733; text-align: left; cursor: pointer; position: relative; overflow: hidden;
+  font: inherit; color: #382E30; text-align: left; cursor: pointer; position: relative; overflow: hidden;
   display: grid; gap: 6px; padding: 28px 80px 28px 26px; border-radius: 32px; border: 0;
-  background: #F5C9D3;
+  background: #EFA7BC;
   box-shadow: 0 12px 28px rgba(184, 60, 87, .14);
   transition: transform .15s ease;
 }
@@ -213,10 +213,10 @@ h3 { text-wrap: balance; }
 .eat-sub { opacity: .95; font-weight: 700; }
 .eat-arrow {
   position: absolute; right: 22px; top: 50%; transform: translateY(-50%); z-index: 1;
-  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #62774F; color: #FFF9F0;
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #526A3D; color: #FFF0E7;
 }
 .counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; position: relative; z-index: 1; }
-.count { justify-content: flex-start; background: #FFFFFF; color: #3B4733; }
+.count { justify-content: flex-start; background: #FFFFFF; color: #382E30; }
 .count.expired { --c: #B83C57; } .count.soon { --c: #957011; } .count.unknown { --c: #6E4BC4; } .count.safe { --c: #5C7041; }
 .count .n { margin-left: auto; font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 
@@ -501,3 +501,26 @@ h3 { text-wrap: balance; }
   .eat-btn { padding-right: 72px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* Representative product photography, shared across food views. */
+.product-photo { margin: 0; position: relative; width: 88px; flex: none; }
+.product-photo img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 20px; background: #FFF0E7; }
+.product-photo figcaption { font-size: 10px; line-height: 1.2; color: var(--muted); text-align: center; margin-top: 4px; }
+.product-info { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.product-copy { min-width: 0; overflow-wrap: anywhere; }
+.rname > .product-photo { width: 74px; }
+.food-card > .product-photo { width: 100%; }
+.food-card > .product-photo img { aspect-ratio: 3 / 2; }
+.fridge-preview { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+.fridge-preview-item { flex: 0 0 100px; text-align: center; font-size: 13px; font-weight: 800; }
+.fridge-preview-item .product-photo { width: 100%; margin-bottom: 6px; }
+.app-header .header-back { color: #382E30; }
+.toast { background: var(--green); color: var(--green-ink); }
+@media (max-width: 560px) {
+  .product-info { gap: 10px; align-items: flex-start; }
+  .product-photo { width: 70px; }
+  .erow { gap: 10px; }
+}
+
+.recipe-photo img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 24px; }
+@media (max-width: 560px) { .recipe-photo { width: 100%; max-width: 320px; justify-self: center; } }
