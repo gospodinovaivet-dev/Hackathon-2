@@ -7,18 +7,15 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="css/styles.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
-<!-- App header: the name, and a back button on inner screens -->
+<!-- App header: the name -->
 <header class="app-header">
   <div class="app-header-inner">
-    <button class="header-back" id="header-back" type="button" aria-label="Back to home" hidden>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-    </button>
     <div class="logo">
       <span class="logo-badge">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
@@ -79,39 +76,6 @@
           </span>
         </button>
 
-        <div class="nav-pair">
-          <button class="nav-card" id="open-recipes" type="button">
-            <span class="nav-icon" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>
-            </span>
-            <span class="nav-title">Recipes</span>
-          </button>
-          <button class="nav-card sky" id="open-health" type="button">
-            <span class="nav-icon" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>
-            </span>
-            <span class="nav-title">Food &amp; your body</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="col">
-        <section class="card" aria-labelledby="sensor-title">
-          <h2 id="sensor-title">Fridge sensors</h2>
-          <div class="readings">
-            <div class="reading safe" id="sensor-temp-box">
-              <span class="reading-label"><span class="dot"></span>Temperature</span>
-              <span class="reading-value" id="sensor-temp"></span>
-              <span class="reading-text" id="sensor-temp-text"></span>
-            </div>
-            <div class="reading safe" id="sensor-door-box">
-              <span class="reading-label"><span class="dot"></span>Door</span>
-              <span class="reading-value" id="sensor-door"></span>
-              <span class="reading-text" id="sensor-door-text"></span>
-            </div>
-          </div>
-        </section>
-
         <section class="card scan" aria-labelledby="scan-title">
           <h2 id="scan-title">Scan your food</h2>
           <ol class="steps" id="scan-steps" aria-label="Scan progress"></ol>
@@ -142,6 +106,41 @@
 
         <button class="link" id="add-by-hand" type="button">Add an item by hand</button>
       </div>
+
+      <div class="col">
+        <section class="card" aria-labelledby="sensor-title">
+          <h2 id="sensor-title">Fridge sensors</h2>
+          <div class="readings">
+            <div class="reading safe" id="sensor-temp-box">
+              <span class="reading-label"><span class="dot"></span>Temperature</span>
+              <span class="reading-value" id="sensor-temp"></span>
+              <span class="reading-text" id="sensor-temp-text"></span>
+            </div>
+            <div class="reading safe" id="sensor-door-box">
+              <span class="reading-label"><span class="dot"></span>Door</span>
+              <span class="reading-value" id="sensor-door"></span>
+              <span class="reading-text" id="sensor-door-text"></span>
+            </div>
+          </div>
+        </section>
+
+        <div class="nav-pair">
+          <button class="nav-card" id="open-recipes" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>
+            </span>
+            <span class="nav-title">Recipes</span>
+            <span class="nav-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          </button>
+          <button class="nav-card sky" id="open-health" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>
+            </span>
+            <span class="nav-title">Food &amp; your body</span>
+            <span class="nav-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -149,7 +148,7 @@
   <section class="screen" id="screen-review" hidden>
     <div>
       <h1>Check the dates</h1>
-      <p class="lead" id="review-lead"></p>
+      <p class="summary-line" id="review-lead"></p>
     </div>
     <div class="door-warn" id="review-door" role="alert" hidden>
       <span class="led"></span>
@@ -187,13 +186,23 @@
   </section>
 
   <!-- EAT ME FIRST -->
-  <section class="screen narrow" id="screen-eat" hidden>
+  <section class="screen" id="screen-eat" hidden>
     <div>
       <h1>Eat Me First</h1>
-      <p class="lead" id="eat-lead"></p>
+      <p class="summary-line" id="eat-lead"></p>
     </div>
-    <div id="eat-groups"></div>
-    <input type="file" id="label-input" accept="image/*" capture="environment" hidden>
+    <div class="eat-layout">
+      <div class="fridge-panel">
+        <div class="type-filters" id="type-filters" role="group" aria-label="Show one type of food"></div>
+        <div class="fridge-map" id="fridge-map" role="group" aria-label="Your fridge: tap a section to see its food"></div>
+        <div class="filter-bar" id="filter-bar" hidden>
+          <span id="filter-text"></span>
+          <button class="btn small" id="filter-clear" type="button">Show all</button>
+        </div>
+      </div>
+      <div class="eat-list">
+        <div id="eat-groups"></div>
+        <input type="file" id="label-input" accept="image/*" capture="environment" hidden>
     <form class="card form" id="add-form" novalidate>
       <h2>Add an item by hand</h2>
       <div class="add-grid">
@@ -209,10 +218,16 @@
           <label for="add-shelf">Shelf</label>
           <select class="field" id="add-shelf"></select>
         </div>
+        <div class="field-group">
+          <label for="add-type">Type</label>
+          <select class="field" id="add-type"></select>
+        </div>
       </div>
       <p class="error" id="add-error" role="alert" hidden></p>
       <button class="btn primary" type="submit">Add to list</button>
     </form>
+      </div>
+    </div>
   </section>
 
   <!-- RECIPES -->
@@ -264,6 +279,18 @@
   </section>
 
 </div>
+<!-- Always-visible round buttons: home in the top-left corner, scroll up/down in the middle of the left side -->
+<button class="fab fab-home" id="fab-home" type="button" aria-label="Go to the home page" hidden>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-6h4v6"/></svg>
+</button>
+<nav class="fab-scroll" id="fab-scroll" aria-label="Scroll the page" hidden>
+  <button class="fab" id="fab-up" type="button" aria-label="Scroll to the top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+  </button>
+  <button class="fab" id="fab-down" type="button" aria-label="Scroll to the bottom">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+</nav>
 <div class="modal" id="warn-modal" hidden>
   <div class="modal-card" role="alertdialog" aria-labelledby="warn-title" aria-describedby="warn-text">
     <span class="warn-badge">Can't check this photo</span>

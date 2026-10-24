@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* ChillCheck styles: playful and rounded. Dark-olive header with a curved bottom, cream page,
    white rounded cards, soft pastel tiles.
@@ -29,7 +29,7 @@
   --bad: #B83C57;
   --unknown: #6E4BC4;
   --shadow: 0 8px 24px rgba(48, 59, 43, .08);
-  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
@@ -95,14 +95,7 @@ body {
   display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
   background: #A8B98A; color: #3B4733; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
 }
-.logo-name { font-family: var(--font-display); font-weight: 700; font-size: 28px; letter-spacing: .01em; }
-.header-back {
-  position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%);
-  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
-  background: rgba(255, 255, 255, .16); color: #FFFFFF;
-}
-.header-back:hover { background: rgba(255, 255, 255, .26); }
-.header-back:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
+.logo-name { font-family: var(--font-display); font-weight: 800; font-size: 28px; letter-spacing: -0.01em; }
 
 /* ---------- Page ---------- */
 .app {
@@ -115,10 +108,11 @@ body {
 .screen { display: grid; gap: 22px; }
 .screen.narrow { max-width: 720px; width: 100%; margin-inline: auto; }
 
-h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(28px, 5vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
-h2 { font-family: var(--font-display); font-weight: 600; font-size: 21px; line-height: 1.2; margin: 0; text-wrap: balance; }
+h1 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; font-size: clamp(28px, 5vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; font-size: 21px; line-height: 1.2; margin: 0; text-wrap: balance; }
 h3 { text-wrap: balance; }
 .lead { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.summary-line { margin: 8px 0 0; color: var(--ink); font-weight: 800; font-size: 17px; }
 .note { margin: 0; font-size: 13px; color: var(--muted); }
 .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 .hello { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
@@ -162,7 +156,7 @@ h3 { text-wrap: balance; }
 .grow { flex: 1 1 240px; width: auto; }
 .hint { color: var(--muted); font-size: 13px; }
 .error { margin: 0; color: var(--bad); font-weight: 800; font-size: 14px; }
-.add-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.add-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* Segmented switch and chips */
@@ -221,7 +215,7 @@ h3 { text-wrap: balance; }
 .eat-btn::before, .eat-btn::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .35); }
 .eat-btn::before { width: 160px; height: 160px; right: -50px; bottom: -70px; }
 .eat-btn::after { width: 60px; height: 60px; right: 90px; top: -24px; }
-.eat-title { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1; }
+.eat-title { font-family: var(--font-display); font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -0.02em; }
 .eat-sub { opacity: .95; font-weight: 700; }
 .eat-arrow {
   position: absolute; right: 22px; top: 50%; transform: translateY(-50%); z-index: 1;
@@ -232,16 +226,18 @@ h3 { text-wrap: balance; }
 .count.expired { --c: #B83C57; } .count.soon { --c: #957011; } .count.unknown { --c: #6E4BC4; } .count.safe { --c: #5C7041; }
 .count .n { margin-left: auto; font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 
-.nav-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.nav-pair { display: grid; gap: 12px; }
 .nav-card {
   font: inherit; color: var(--ink); text-align: left; cursor: pointer;
-  display: grid; gap: 4px; align-content: start; padding: 18px; border-radius: 26px; border: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px;
+  padding: 14px 18px 14px 14px; border-radius: 26px; border: 0;
   background: var(--sky-deep); transition: transform .15s ease;
 }
 .nav-card.sky { background: var(--mint); }
 .nav-card:hover { transform: translateY(-2px); }
-.nav-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--panel); color: var(--ink); margin-bottom: 6px; }
-.nav-title { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.15; }
+.nav-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--panel); color: var(--ink); }
+.nav-title { font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 1.15; }
+.nav-arrow { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--panel); color: var(--ink); }
 
 .readings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .reading { display: grid; gap: 2px; padding: 16px; border-radius: 22px; background: color-mix(in srgb, var(--c) 10%, var(--panel)); }
@@ -343,6 +339,72 @@ h3 { text-wrap: balance; }
 .erow .edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
 .erow .edit .field { width: auto; padding: 7px 12px; }
 
+/* ---------- Eat Me First: type buttons + fridge map ---------- */
+.eat-layout { display: grid; gap: 24px; align-items: start; }
+.fridge-panel { display: grid; gap: 16px; justify-items: center; }
+.eat-list { display: grid; gap: 18px; }
+
+/* Food type buttons: a round icon that tilts a little (never a full turn) when pointed at or picked */
+.type-filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px 6px; width: 100%; max-width: 460px; }
+.type-btn {
+  font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer; padding: 4px 2px;
+  display: grid; justify-items: center; gap: 6px;
+}
+.type-icon {
+  position: relative; display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%;
+  font-size: 24px; background: var(--panel); box-shadow: var(--shadow);
+  transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background .2s ease;
+}
+.type-btn:hover .type-icon { transform: rotate(-14deg) scale(1.05); }
+.type-btn[aria-pressed="true"] .type-icon { transform: rotate(12deg) scale(1.1); background: var(--blush); box-shadow: 0 0 0 3px var(--green); }
+.type-btn.empty .type-icon { opacity: .45; }
+.type-n {
+  position: absolute; top: -4px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--green); color: var(--green-ink);
+}
+.type-label { font-size: 12px; font-weight: 800; line-height: 1.2; text-align: center; }
+.type-btn:focus-visible { outline: none; }
+.type-btn:focus-visible .type-icon { outline: 3px solid var(--green); outline-offset: 3px; }
+
+/* The fridge: four sections plus the door, each glowing green / yellow / red */
+.fridge-map { width: 100%; max-width: 420px; display: grid; justify-items: center; }
+.fridge-body {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 8px;
+  padding: 12px; border-radius: 30px; background: var(--panel); box-shadow: var(--shadow), inset 0 0 0 3px var(--line);
+}
+.fridge-main { display: grid; gap: 8px; }
+.fridge-door { position: relative; display: grid; padding-left: 10px; border-left: 3px dashed var(--line); }
+.fridge-handle { position: absolute; left: -9px; top: 22px; width: 6px; height: 48px; border-radius: 999px; background: var(--leaf); }
+.fridge-feet { display: flex; justify-content: space-between; width: 82%; }
+.fridge-feet span { width: 26px; height: 10px; border-radius: 0 0 10px 10px; background: var(--line); }
+.zone {
+  --g: #8FB35F;
+  font: inherit; color: var(--ink); cursor: pointer; text-align: left; min-height: 74px;
+  display: grid; align-content: center; gap: 2px; padding: 10px 14px; border-radius: 18px;
+  border: 2px solid color-mix(in srgb, var(--g) 70%, transparent);
+  background: color-mix(in srgb, var(--g) 14%, var(--panel));
+  box-shadow: 0 0 14px 1px color-mix(in srgb, var(--g) 45%, transparent);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.zone.soon { --g: #E9C14A; }
+.zone.expired { --g: #E2607F; animation: glow 1.8s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 24px 5px color-mix(in srgb, var(--g) 60%, transparent); } }
+.zone:hover { transform: scale(1.02); }
+.zone[aria-pressed="true"] { border-width: 3px; border-color: var(--green); transform: scale(1.03); }
+.zone:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.zone.drawer { border-radius: 18px 18px 26px 26px; min-height: 86px; }
+.zone.door { align-content: start; padding: 12px 10px; }
+.zone-name { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 14px; }
+.zone-led { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--g); box-shadow: 0 0 8px 2px color-mix(in srgb, var(--g) 70%, transparent); }
+.zone-icons { font-size: 17px; letter-spacing: 2px; }
+.zone-count { font-size: 12px; color: var(--muted); font-weight: 700; }
+.zone.door .zone-icons { font-size: 15px; letter-spacing: 0; line-height: 1.5; }
+
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px;
+  width: 100%; max-width: 420px; padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--mint); font-weight: 800;
+}
+
 /* ---------- Recipes ---------- */
 .uses { display: flex; flex-wrap: wrap; gap: 6px; }
 .ing { background: var(--panel); border: 2px solid var(--line); }
@@ -379,6 +441,26 @@ h3 { text-wrap: balance; }
 .facts dd { margin: 0; }
 .facts dd.warn { padding-left: 12px; border-left: 4px solid var(--soon); border-radius: 2px; }
 
+/* ---------- Round buttons: home top-left, scroll up/down middle of the left side ---------- */
+.fab {
+  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--panel); color: var(--ink); box-shadow: 0 6px 18px rgba(48, 59, 43, .18);
+  transition: opacity .2s ease, transform .15s ease;
+}
+.fab:hover { transform: scale(1.06); }
+.fab:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.fab.off { opacity: 0; pointer-events: none; }
+.fab-home {
+  position: fixed; z-index: 16; background: var(--blush); color: #3B4733;
+  top: calc(16px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+}
+.fab-scroll {
+  position: fixed; z-index: 15; display: grid; gap: 10px;
+  left: max(10px, env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%);
+}
+.fab-scroll .fab { width: 40px; height: 40px; opacity: .92; }
+.fab-scroll .fab.off { opacity: 0; }
+
 /* ---------- Popup and toast ---------- */
 .modal {
   position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
@@ -400,6 +482,8 @@ h3 { text-wrap: balance; }
 
 /* ---------- Computer layout ---------- */
 @media (min-width: 900px) {
+  .eat-layout { grid-template-columns: minmax(340px, 440px) minmax(0, 1fr); }
+  .fridge-panel { position: sticky; top: 16px; }
   .home-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
   .review-grid:has(.photo-block:not([hidden])) { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
   .photo-block { position: sticky; top: 16px; }
@@ -411,6 +495,7 @@ h3 { text-wrap: balance; }
   .rrow { grid-template-columns: minmax(0, 1fr) auto 38px; }
   .rrow .rname { grid-column: 1 / -1; }
   .add-grid { grid-template-columns: minmax(0, 1fr); }
+  .fridge-body { grid-template-columns: minmax(0, 1fr) 82px; }
   .erow { grid-template-columns: 8px minmax(0, 1fr); }
   .erow .right { grid-column: 2; justify-items: start; }
   .erow .actions, .erow .edit { justify-content: flex-start; }
@@ -424,12 +509,9 @@ h3 { text-wrap: balance; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<!-- App header: the name, and a back button on inner screens -->
+<!-- App header: the name -->
 <header class="app-header">
   <div class="app-header-inner">
-    <button class="header-back" id="header-back" type="button" aria-label="Back to home" hidden>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-    </button>
     <div class="logo">
       <span class="logo-badge">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
@@ -490,39 +572,6 @@ h3 { text-wrap: balance; }
           </span>
         </button>
 
-        <div class="nav-pair">
-          <button class="nav-card" id="open-recipes" type="button">
-            <span class="nav-icon" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>
-            </span>
-            <span class="nav-title">Recipes</span>
-          </button>
-          <button class="nav-card sky" id="open-health" type="button">
-            <span class="nav-icon" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>
-            </span>
-            <span class="nav-title">Food &amp; your body</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="col">
-        <section class="card" aria-labelledby="sensor-title">
-          <h2 id="sensor-title">Fridge sensors</h2>
-          <div class="readings">
-            <div class="reading safe" id="sensor-temp-box">
-              <span class="reading-label"><span class="dot"></span>Temperature</span>
-              <span class="reading-value" id="sensor-temp"></span>
-              <span class="reading-text" id="sensor-temp-text"></span>
-            </div>
-            <div class="reading safe" id="sensor-door-box">
-              <span class="reading-label"><span class="dot"></span>Door</span>
-              <span class="reading-value" id="sensor-door"></span>
-              <span class="reading-text" id="sensor-door-text"></span>
-            </div>
-          </div>
-        </section>
-
         <section class="card scan" aria-labelledby="scan-title">
           <h2 id="scan-title">Scan your food</h2>
           <ol class="steps" id="scan-steps" aria-label="Scan progress"></ol>
@@ -553,6 +602,41 @@ h3 { text-wrap: balance; }
 
         <button class="link" id="add-by-hand" type="button">Add an item by hand</button>
       </div>
+
+      <div class="col">
+        <section class="card" aria-labelledby="sensor-title">
+          <h2 id="sensor-title">Fridge sensors</h2>
+          <div class="readings">
+            <div class="reading safe" id="sensor-temp-box">
+              <span class="reading-label"><span class="dot"></span>Temperature</span>
+              <span class="reading-value" id="sensor-temp"></span>
+              <span class="reading-text" id="sensor-temp-text"></span>
+            </div>
+            <div class="reading safe" id="sensor-door-box">
+              <span class="reading-label"><span class="dot"></span>Door</span>
+              <span class="reading-value" id="sensor-door"></span>
+              <span class="reading-text" id="sensor-door-text"></span>
+            </div>
+          </div>
+        </section>
+
+        <div class="nav-pair">
+          <button class="nav-card" id="open-recipes" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>
+            </span>
+            <span class="nav-title">Recipes</span>
+            <span class="nav-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          </button>
+          <button class="nav-card sky" id="open-health" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>
+            </span>
+            <span class="nav-title">Food &amp; your body</span>
+            <span class="nav-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -560,7 +644,7 @@ h3 { text-wrap: balance; }
   <section class="screen" id="screen-review" hidden>
     <div>
       <h1>Check the dates</h1>
-      <p class="lead" id="review-lead"></p>
+      <p class="summary-line" id="review-lead"></p>
     </div>
     <div class="door-warn" id="review-door" role="alert" hidden>
       <span class="led"></span>
@@ -598,13 +682,23 @@ h3 { text-wrap: balance; }
   </section>
 
   <!-- EAT ME FIRST -->
-  <section class="screen narrow" id="screen-eat" hidden>
+  <section class="screen" id="screen-eat" hidden>
     <div>
       <h1>Eat Me First</h1>
-      <p class="lead" id="eat-lead"></p>
+      <p class="summary-line" id="eat-lead"></p>
     </div>
-    <div id="eat-groups"></div>
-    <input type="file" id="label-input" accept="image/*" capture="environment" hidden>
+    <div class="eat-layout">
+      <div class="fridge-panel">
+        <div class="type-filters" id="type-filters" role="group" aria-label="Show one type of food"></div>
+        <div class="fridge-map" id="fridge-map" role="group" aria-label="Your fridge: tap a section to see its food"></div>
+        <div class="filter-bar" id="filter-bar" hidden>
+          <span id="filter-text"></span>
+          <button class="btn small" id="filter-clear" type="button">Show all</button>
+        </div>
+      </div>
+      <div class="eat-list">
+        <div id="eat-groups"></div>
+        <input type="file" id="label-input" accept="image/*" capture="environment" hidden>
     <form class="card form" id="add-form" novalidate>
       <h2>Add an item by hand</h2>
       <div class="add-grid">
@@ -620,10 +714,16 @@ h3 { text-wrap: balance; }
           <label for="add-shelf">Shelf</label>
           <select class="field" id="add-shelf"></select>
         </div>
+        <div class="field-group">
+          <label for="add-type">Type</label>
+          <select class="field" id="add-type"></select>
+        </div>
       </div>
       <p class="error" id="add-error" role="alert" hidden></p>
       <button class="btn primary" type="submit">Add to list</button>
     </form>
+      </div>
+    </div>
   </section>
 
   <!-- RECIPES -->
@@ -675,6 +775,18 @@ h3 { text-wrap: balance; }
   </section>
 
 </div>
+<!-- Always-visible round buttons: home in the top-left corner, scroll up/down in the middle of the left side -->
+<button class="fab fab-home" id="fab-home" type="button" aria-label="Go to the home page" hidden>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-6h4v6"/></svg>
+</button>
+<nav class="fab-scroll" id="fab-scroll" aria-label="Scroll the page" hidden>
+  <button class="fab" id="fab-up" type="button" aria-label="Scroll to the top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+  </button>
+  <button class="fab" id="fab-down" type="button" aria-label="Scroll to the bottom">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+</nav>
 <div class="modal" id="warn-modal" hidden>
   <div class="modal-card" role="alertdialog" aria-labelledby="warn-title" aria-describedby="warn-text">
     <span class="warn-badge">Can't check this photo</span>
@@ -848,6 +960,32 @@ const DATE_SOURCES = {
   unknown: { text: "Printed date couldn't be read. Tap “Scan date” or set it yourself.", rank: 0 }
 };
 
+// Food types for the filters. Dairy is extra to the plan's list: cheese, yogurt and butter fit nowhere else.
+const CATEGORIES = [
+  { id: "fruit", label: "Fruit", icon: "🍓" },
+  { id: "veg", label: "Vegetables", icon: "🥕" },
+  { id: "protein", label: "Meat, fish & eggs", icon: "🍗" },
+  { id: "dairy", label: "Dairy", icon: "🧀" },
+  { id: "drink", label: "Liquids", icon: "🥛" },
+  { id: "nuts", label: "Nuts", icon: "🥜" },
+  { id: "snack", label: "Snacks", icon: "🍪" },
+  { id: "cooked", label: "Cooked meals", icon: "🍲" },
+  { id: "unknown", label: "Unknown", icon: "❔" }
+];
+const CATEGORY_IDS = CATEGORIES.map(c => c.id);
+// For items saved before types existed, or when the AI says "unknown": guess from the name.
+// Order matters: "ice cream" is a snack, "peanut butter" nuts, "apple juice" a liquid, "eggplant" a vegetable.
+const CATEGORY_WORDS = [
+  ["cooked", /leftover|soup|stew|cooked|curry|lasagn|casserole|pizza|noodle|risotto|goulash|meal/],
+  ["snack", /chip|crisp|cookie|biscuit|chocolate|candy|\bsweets?\b|cracker|cake|dessert|ice cream|snack|wafer|gummy|popcorn/],
+  ["nuts", /nut|almond|cashew|pistachio|hazelnut|walnut|pecan|seed/],
+  ["drink", /milk|juice|water|soda|cola|wine|beer|drink|smoothie|lemonade|half & half|tea|coffee|kefir/],
+  ["dairy", /cheese|cheddar|feta|parm|mozzarella|yog|butter|cream|curd|ricotta|spread/],
+  ["veg", /spinach|lettuce|salad|tomato|carrot|cucumber|pepper|onion|garlic|broccoli|cabbage|mushroom|green|herb|kale|zucchini|eggplant|potato|celery|leek|\bpeas?\b|bean|veg|produce/],
+  ["fruit", /apple|banana|berr|grape|orange|lemon|lime|pear|peach|plum|melon|kiwi|mango|cherr|fruit|avocado|pineapple/],
+  ["protein", /chicken|beef|pork|meat|ham|bacon|sausage|salami|fish|salmon|tuna|shrimp|egg|turkey|mince|tofu/]
+];
+
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const norm = s => String(s || "").trim().toLowerCase();
 
@@ -872,6 +1010,18 @@ const Food = {
     if (d < 0) return `Expired ${plural(-d, "day")} ago`;
     if (d === 0) return "Eat today";
     return `${plural(d, "day")} left`;
+  },
+
+  categoryOf(item) {
+    if (CATEGORY_IDS.includes(item.category) && item.category !== "unknown") return item.category;
+    const name = norm(item.name);
+    const hit = CATEGORY_WORDS.find(([, re]) => re.test(name));
+    if (hit) return hit[0];
+    return item.kind === "cooked" ? "cooked" : "unknown";
+  },
+
+  category(item) {
+    return CATEGORIES.find(c => c.id === Food.categoryOf(item));
   },
 
   sourceText(item) {
@@ -933,6 +1083,7 @@ const Food = {
       const info = {
         condition: s.condition || "", confidence: s.confidence || "high", note: s.note || "",
         container: s.container || e?.container || "",
+        category: CATEGORY_IDS.includes(s.category) && s.category !== "unknown" ? s.category : (e?.category || s.category || ""),
         box: s.box || null   // where it is in this photo; only used to draw the circles, not saved
       };
 
@@ -1040,6 +1191,7 @@ For "fridge" and "food", list every food item you can see. For each item give:
 - container: a short description of the packaging as it looks, e.g. "vanilla ice cream tub", "blue opaque box, white lid". Use "" for loose food.
 - knownId: the id from the list above if this is one of those containers, otherwise "".
 - kind: "packaged" (shop packaging), "cooked" (home-cooked food or leftovers), "fresh" (fruit, vegetables, eggs, loose items) or "other".
+- category: one of "fruit", "veg" (vegetables, salad, herbs), "protein" (meat, fish, eggs, tofu), "dairy" (cheese, yogurt, butter, cream), "drink" (milk, juice, any liquid), "nuts", "snack" (chips, sweets, chocolate, crackers, biscuits, cake), "cooked" (cooked meals, leftovers), or "unknown" if you can't tell.
 - qty: a short amount if you can tell, e.g. "1 L", "6 pcs", "half a pack", otherwise "".
 - shelf: for "fridge", the shelf it is on; for "food", the shelf where it should be stored, or "" if it doesn't belong in a fridge (bread, bananas). One of ${shelves}.
 - dateText: the use-by, best-before or expiry date EXACTLY as printed, character by character, e.g. "28.10.26" or "BB 03 NOV". Write a "?" for every character you can't read with certainty. Use "" if no date is visible.
@@ -1051,12 +1203,12 @@ For "fridge" and "food", list every food item you can see. For each item give:
 - box: [x1, y1, x2, y2] in pixels read off the rulers: the left, top, right and bottom edges of this one item. Make it tight around the whole item, edge to edge, without the shelf or neighbouring items.
 Transparent packaging: judge the food you see through it.
 
-For "bill": set "billDateText" to the purchase date exactly as printed ("?" for unreadable characters, "" if none) and "purchaseDate" as YYYY-MM-DD only if it is fully readable, otherwise "". Set "store", and list the food items that are kept in a fridge (skip non-food and shelf-stable items) with name, qty, kind, shelf, and shelfLifeDays (typical fridge life from the purchase date, unopened). No boxes.
+For "bill": set "billDateText" to the purchase date exactly as printed ("?" for unreadable characters, "" if none) and "purchaseDate" as YYYY-MM-DD only if it is fully readable, otherwise "". Set "store", and list the food items that are kept in a fridge (skip non-food and shelf-stable items) with name, qty, kind, category, shelf, and shelfLifeDays (typical fridge life from the purchase date, unopened). No boxes.
 
 For "fridge" only: set "doorOpen" to true if the photo was clearly taken with the fridge door open (you can see the door edge, the room outside, or a hand).
 
 Reply with only JSON:
-{"type": "fridge", "unclear": false, "doorOpen": false, "store": "", "billDateText": "", "purchaseDate": "", "items": [{"name": "", "container": "", "knownId": "", "kind": "packaged", "qty": "", "shelf": "Middle shelf", "dateText": "", "printedDate": "", "daysLeft": 5, "shelfLifeDays": 0, "condition": "", "confidence": "high", "note": "", "box": [120, 340, 260, 470]}]}`, blob);
+{"type": "fridge", "unclear": false, "doorOpen": false, "store": "", "billDateText": "", "purchaseDate": "", "items": [{"name": "", "container": "", "knownId": "", "kind": "packaged", "category": "dairy", "qty": "", "shelf": "Middle shelf", "dateText": "", "printedDate": "", "daysLeft": 5, "shelfLifeDays": 0, "condition": "", "confidence": "high", "note": "", "box": [120, 340, 260, 470]}]}`, blob);
 
     const type = ["fridge", "food", "bill", "other"].includes(res?.type) ? res.type : "fridge";
     if (type === "other") return { type, items: [] };
@@ -1279,6 +1431,7 @@ function cleanScanItem(i, w, h) {
     container: String(i?.container || "").trim().slice(0, 60),
     knownId: String(i?.knownId || "").slice(0, 20),
     kind: pick(i?.kind, ["packaged", "cooked", "fresh", "other"], "other"),
+    category: pick(i?.category, CATEGORY_IDS, "unknown"),
     qty: String(i?.qty || "").trim().slice(0, 20),
     shelf: pick(i?.shelf, SHELVES, ""),
     dateText: String(i?.dateText || "").trim().slice(0, 30),
@@ -1746,11 +1899,27 @@ const SCREENS = ["setup", "home", "review", "eat", "recipes", "health"];
 const render = { recipes: () => Recipes.render(), health: () => Health.render() };
 function go(name) {
   SCREENS.forEach(s => { $("screen-" + s).hidden = s !== name; });
-  $("header-back").hidden = name === "home" || name === "setup";
+  $("fab-home").hidden = $("fab-scroll").hidden = name === "setup";
   render[name]?.();
   window.scrollTo(0, 0);
+  updateFabs();
 }
-$("header-back").addEventListener("click", () => go("home"));
+
+// Round buttons: home in the top-left corner, jump to top / bottom in the middle of the left side
+const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+function updateFabs() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  $("fab-up").classList.toggle("off", scrollY < 150);
+  $("fab-down").classList.toggle("off", max - scrollY < 150);
+}
+addEventListener("scroll", updateFabs, { passive: true });
+addEventListener("resize", updateFabs);
+$("fab-up").addEventListener("click", () => scrollTo({ top: 0, behavior: smooth() }));
+$("fab-down").addEventListener("click", () => scrollTo({ top: document.documentElement.scrollHeight, behavior: smooth() }));
+$("fab-home").addEventListener("click", () => {
+  if ($("screen-home").hidden) go("home");
+  else scrollTo({ top: 0, behavior: smooth() });
+});
 
 /* ---------- Setup ---------- */
 const CODE_RE = /^CC-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
@@ -1970,30 +2139,22 @@ $("phone-cam").addEventListener("click", () => {
 });
 
 /* ---------- Review the scan ---------- */
-const KIND_LABEL = { packaged: "Packaged", cooked: "Cooked", fresh: "Fresh", other: "Other" };
 
 render.review = () => {
   if (!draft) return go("home");
   const n = draft.rows.length;
   const fresh = draft.rows.filter(r => r.isNew).length;
-  const redated = draft.rows.filter(r => r.dateChanged).length;
   const toCheck = draft.rows.filter(r => r.confidence === "low").length;
-  const taken = `Photo taken today at ${Dates.stamp(draft.takenAt)}`;
-  const counts = `${fresh} new, ${n - fresh} already in your list` + (redated ? `, ${redated} with a new date` : "") + "." +
-    (toCheck ? ` ${plural(toCheck, "item")} marked “Check this”.` : "");
   const unread = draft.rows.filter(r => r.dateSource === "unknown").length;
-  $("review-lead").textContent =
-    draft.type === "bill"
-      ? `Shop bill${draft.store ? ` from ${draft.store}` : ""}: ${plural(n, "fridge item")}. ` +
-        (draft.billDateRead
-          ? `Bought ${Dates.format(draft.purchaseDate)}. Each date is the purchase date plus the item's usual shelf life.`
-          : `The date on the bill couldn't be read${draft.billDateText ? ` (“${draft.billDateText}”)` : ""}, so today is used as the purchase date. Change the dates if you bought it earlier.`)
-      : draft.type === "food"
-        ? `${taken}: ${plural(n, "food")} outside the fridge, ${counts} Dates assume you store them the right way from now.`
-        : `${taken}: ${plural(n, "item")} in your fridge, ${counts}`;
-  if (unread && draft.type !== "bill") {
-    $("review-lead").textContent += ` ${plural(unread, "package")} with a date we couldn't read: set ${unread === 1 ? "it" : "them"} or use “Scan date” later.`;
-  }
+  const facts = draft.type === "bill"
+    ? [`Shop bill${draft.store ? ` · ${draft.store}` : ""}`,
+       draft.billDateRead ? `bought ${Dates.format(draft.purchaseDate)}` : "date unreadable, today used",
+       plural(n, "item")]
+    : [draft.type === "food" ? `${plural(n, "food")} outside the fridge` : plural(n, "item"),
+       fresh && `${fresh} new`,
+       toCheck && `${toCheck} to check`,
+       unread && `${unread} without a date`];
+  $("review-lead").textContent = facts.filter(Boolean).join(" · ");
 
   $("review-door").hidden = !draft.doorOpen;
   const photo = $("review-photo");
@@ -2107,7 +2268,7 @@ function reviewRow(row) {
       }),
       el("span", { class: "rmeta" },
         el("span", { class: "tag" + (row.isNew ? " new" : "") }, row.isNew ? "New" : "Seen before"),
-        row.kind && el("span", { class: "tag" }, KIND_LABEL[row.kind] || "Other"),
+        el("span", { class: "tag" }, `${Food.category(row).icon} ${Food.category(row).label}`),
         row.confidence === "low" && el("span", { class: "tag check-tag" }, "Check this"),
         [row.shelf, row.qty].filter(Boolean).join(" · ")),
       row.container && el("span", { class: "source" }, `Container: ${row.container}`),
@@ -2152,24 +2313,84 @@ $("review-save").addEventListener("click", () => {
 });
 
 /* ---------- Eat Me First ---------- */
+// The list can be narrowed to one fridge section OR one food type, never both, to keep it simple
+let eatFilter = { section: null, type: null };
+const SECTION_SHORT = { "Top shelf": "Top shelf", "Middle shelf": "Middle shelf", "Bottom shelf": "Bottom shelf", "Crisper drawer": "Drawer", "Door rack": "Door" };
+
+// A section glows red if anything in it has expired, yellow if something must be eaten soon, else green
+function sectionStatus(items) {
+  const st = items.map(i => Food.status(i));
+  return st.includes("expired") ? "expired" : st.includes("soon") ? "soon" : "safe";
+}
+
+function renderTypeFilters() {
+  $("type-filters").replaceChildren(...CATEGORIES.map(c => {
+    const n = state.items.filter(i => Food.categoryOf(i) === c.id).length;
+    return el("button", {
+      class: "type-btn" + (n ? "" : " empty"), type: "button", id: "type-" + c.id,
+      "aria-pressed": String(eatFilter.type === c.id), "aria-label": `${c.label}: ${plural(n, "item")}`,
+      onclick: () => { eatFilter = { section: null, type: eatFilter.type === c.id ? null : c.id }; render.eat(); }
+    },
+      el("span", { class: "type-icon", "aria-hidden": "true" }, c.icon, n ? el("span", { class: "type-n" }, String(n)) : null),
+      el("span", { class: "type-label" }, c.label));
+  }));
+}
+
+function renderFridgeMap() {
+  const zone = (shelf, extra = "") => {
+    const inside = state.items.filter(i => i.shelf === shelf);
+    const st = sectionStatus(inside);
+    const icons = [...new Set(inside.map(i => Food.category(i).icon))].slice(0, 4).join(" ");
+    return el("button", {
+      class: `zone ${st} ${extra}`, type: "button", id: "zone-" + SHELVES.indexOf(shelf),
+      "aria-pressed": String(eatFilter.section === shelf),
+      "aria-label": `${shelf}: ${plural(inside.length, "item")}, ${st === "expired" ? "something expired" : st === "soon" ? "something to eat soon" : "all fine"}`,
+      onclick: () => { eatFilter = { type: null, section: eatFilter.section === shelf ? null : shelf }; render.eat(); }
+    },
+      el("span", { class: "zone-name" }, el("span", { class: "zone-led" }), SECTION_SHORT[shelf]),
+      el("span", { class: "zone-icons", "aria-hidden": "true" }, icons || "·"),
+      el("span", { class: "zone-count" }, inside.length ? plural(inside.length, "item") : "Empty"));
+  };
+  $("fridge-map").replaceChildren(
+    el("div", { class: "fridge-body" },
+      el("div", { class: "fridge-main" },
+        zone("Top shelf"), zone("Middle shelf"), zone("Bottom shelf"), zone("Crisper drawer", "drawer")),
+      el("div", { class: "fridge-door" }, el("span", { class: "fridge-handle" }), zone("Door rack", "door"))),
+    el("div", { class: "fridge-feet", "aria-hidden": "true" }, el("span"), el("span")));
+}
+
 render.eat = () => {
   const c = Food.counts(state.items);
-  $("eat-lead").textContent =
-    !state.items.length ? "Nothing here yet. Run a scan, or add an item by hand." :
-    [
-      c.expired && `${plural(c.expired, "item")} expired: throw ${c.expired === 1 ? "it" : "them"} away.`,
-      c.soon && `${plural(c.soon, "item")} to eat in the next ${EAT_SOON_DAYS} days.`,
-      c.unknown && `${plural(c.unknown, "item")} with a date we couldn't read: tap “Scan date” or “Set date”.`,
-      !c.expired && !c.soon && !c.unknown && "Everything is fresh."
-    ].filter(Boolean).join(" ") + (state.lastScan ? ` Last photo: ${Dates.stamp(state.lastScan)}.` : "");
+  $("eat-lead").textContent = !state.items.length ? "Nothing here yet. Scan your fridge or add an item." : [
+    c.expired && `${c.expired} expired`,
+    c.soon && `${c.soon} eat soon`,
+    c.unknown && `${c.unknown} without a date`,
+    `${c.safe} fresh`
+  ].filter(Boolean).join(" · ");
+
+  renderTypeFilters();
+  renderFridgeMap();
+
+  let shown = state.items;
+  let label = "";
+  if (eatFilter.section) {
+    shown = shown.filter(i => i.shelf === eatFilter.section);
+    label = eatFilter.section;
+  } else if (eatFilter.type) {
+    shown = shown.filter(i => Food.categoryOf(i) === eatFilter.type);
+    const cat = CATEGORIES.find(x => x.id === eatFilter.type);
+    label = `${cat.icon} ${cat.label}`;
+  }
+  $("filter-bar").hidden = !label;
+  $("filter-text").textContent = label ? `${label} · ${plural(shown.length, "item")}` : "";
 
   const groups = $("eat-groups");
   groups.replaceChildren();
-  if (!state.items.length) {
-    groups.append(el("div", { class: "empty" }, "Your food list is empty."));
+  if (!shown.length) {
+    groups.append(el("div", { class: "empty" }, state.items.length ? "Nothing here." : "Your food list is empty."));
     return;
   }
-  const sorted = Food.byUrgency(state.items);
+  const sorted = Food.byUrgency(shown);
   STATUS_ORDER.forEach(s => {
     const list = sorted.filter(i => Food.status(i) === s);
     if (!list.length) return;
@@ -2179,10 +2400,11 @@ render.eat = () => {
     ));
   });
 };
+$("filter-clear").addEventListener("click", () => { eatFilter = { section: null, type: null }; render.eat(); });
 
 function eatRow(item) {
   const s = Food.status(item);
-  const meta = [item.shelf, item.qty, item.firstSeen && `in since ${Dates.format(item.firstSeen)}`, item.barcode && `barcode ${item.barcode}`]
+  const meta = [`${Food.category(item).icon} ${Food.category(item).label}`, item.shelf, item.qty, item.firstSeen && `in since ${Dates.format(item.firstSeen)}`, item.barcode && `barcode ${item.barcode}`]
     .filter(Boolean).join(" · ");
 
   let right;
@@ -2261,6 +2483,8 @@ pickFile($("label-input"), async file => {
 
 // Manual add: for food the camera can't see or didn't recognize
 $("add-shelf").replaceChildren(el("option", { value: "" }, "Not sure"), ...SHELVES.map(s => el("option", { value: s }, s)));
+$("add-type").replaceChildren(...CATEGORIES.map(c => el("option", { value: c.id }, `${c.icon} ${c.label}`)));
+$("add-type").value = "unknown";
 $("add-date").value = Dates.addDays(Dates.today(), 3);
 $("add-form").addEventListener("submit", e => {
   e.preventDefault();
@@ -2271,7 +2495,7 @@ $("add-form").addEventListener("submit", e => {
   $("add-error").hidden = !error;
   if (error) return;
   state.items.push({
-    id: Food.newId(), name, qty: "", shelf: $("add-shelf").value, kind: "other",
+    id: Food.newId(), name, qty: "", shelf: $("add-shelf").value, kind: "other", category: $("add-type").value,
     expires, dateSource: "manual", firstSeen: Dates.today()
   });
   Store.save();

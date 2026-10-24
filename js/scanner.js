@@ -51,6 +51,7 @@ For "fridge" and "food", list every food item you can see. For each item give:
 - container: a short description of the packaging as it looks, e.g. "vanilla ice cream tub", "blue opaque box, white lid". Use "" for loose food.
 - knownId: the id from the list above if this is one of those containers, otherwise "".
 - kind: "packaged" (shop packaging), "cooked" (home-cooked food or leftovers), "fresh" (fruit, vegetables, eggs, loose items) or "other".
+- category: one of "fruit", "veg" (vegetables, salad, herbs), "protein" (meat, fish, eggs, tofu), "dairy" (cheese, yogurt, butter, cream), "drink" (milk, juice, any liquid), "nuts", "snack" (chips, sweets, chocolate, crackers, biscuits, cake), "cooked" (cooked meals, leftovers), or "unknown" if you can't tell.
 - qty: a short amount if you can tell, e.g. "1 L", "6 pcs", "half a pack", otherwise "".
 - shelf: for "fridge", the shelf it is on; for "food", the shelf where it should be stored, or "" if it doesn't belong in a fridge (bread, bananas). One of ${shelves}.
 - dateText: the use-by, best-before or expiry date EXACTLY as printed, character by character, e.g. "28.10.26" or "BB 03 NOV". Write a "?" for every character you can't read with certainty. Use "" if no date is visible.
@@ -62,12 +63,12 @@ For "fridge" and "food", list every food item you can see. For each item give:
 - box: [x1, y1, x2, y2] in pixels read off the rulers: the left, top, right and bottom edges of this one item. Make it tight around the whole item, edge to edge, without the shelf or neighbouring items.
 Transparent packaging: judge the food you see through it.
 
-For "bill": set "billDateText" to the purchase date exactly as printed ("?" for unreadable characters, "" if none) and "purchaseDate" as YYYY-MM-DD only if it is fully readable, otherwise "". Set "store", and list the food items that are kept in a fridge (skip non-food and shelf-stable items) with name, qty, kind, shelf, and shelfLifeDays (typical fridge life from the purchase date, unopened). No boxes.
+For "bill": set "billDateText" to the purchase date exactly as printed ("?" for unreadable characters, "" if none) and "purchaseDate" as YYYY-MM-DD only if it is fully readable, otherwise "". Set "store", and list the food items that are kept in a fridge (skip non-food and shelf-stable items) with name, qty, kind, category, shelf, and shelfLifeDays (typical fridge life from the purchase date, unopened). No boxes.
 
 For "fridge" only: set "doorOpen" to true if the photo was clearly taken with the fridge door open (you can see the door edge, the room outside, or a hand).
 
 Reply with only JSON:
-{"type": "fridge", "unclear": false, "doorOpen": false, "store": "", "billDateText": "", "purchaseDate": "", "items": [{"name": "", "container": "", "knownId": "", "kind": "packaged", "qty": "", "shelf": "Middle shelf", "dateText": "", "printedDate": "", "daysLeft": 5, "shelfLifeDays": 0, "condition": "", "confidence": "high", "note": "", "box": [120, 340, 260, 470]}]}`, blob);
+{"type": "fridge", "unclear": false, "doorOpen": false, "store": "", "billDateText": "", "purchaseDate": "", "items": [{"name": "", "container": "", "knownId": "", "kind": "packaged", "category": "dairy", "qty": "", "shelf": "Middle shelf", "dateText": "", "printedDate": "", "daysLeft": 5, "shelfLifeDays": 0, "condition": "", "confidence": "high", "note": "", "box": [120, 340, 260, 470]}]}`, blob);
 
     const type = ["fridge", "food", "bill", "other"].includes(res?.type) ? res.type : "fridge";
     if (type === "other") return { type, items: [] };
@@ -290,6 +291,7 @@ function cleanScanItem(i, w, h) {
     container: String(i?.container || "").trim().slice(0, 60),
     knownId: String(i?.knownId || "").slice(0, 20),
     kind: pick(i?.kind, ["packaged", "cooked", "fresh", "other"], "other"),
+    category: pick(i?.category, CATEGORY_IDS, "unknown"),
     qty: String(i?.qty || "").trim().slice(0, 20),
     shelf: pick(i?.shelf, SHELVES, ""),
     dateText: String(i?.dateText || "").trim().slice(0, 30),

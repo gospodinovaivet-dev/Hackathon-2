@@ -23,6 +23,32 @@ const DATE_SOURCES = {
   unknown: { text: "Printed date couldn't be read. Tap “Scan date” or set it yourself.", rank: 0 }
 };
 
+// Food types for the filters. Dairy is extra to the plan's list: cheese, yogurt and butter fit nowhere else.
+const CATEGORIES = [
+  { id: "fruit", label: "Fruit", icon: "🍓" },
+  { id: "veg", label: "Vegetables", icon: "🥕" },
+  { id: "protein", label: "Meat, fish & eggs", icon: "🍗" },
+  { id: "dairy", label: "Dairy", icon: "🧀" },
+  { id: "drink", label: "Liquids", icon: "🥛" },
+  { id: "nuts", label: "Nuts", icon: "🥜" },
+  { id: "snack", label: "Snacks", icon: "🍪" },
+  { id: "cooked", label: "Cooked meals", icon: "🍲" },
+  { id: "unknown", label: "Unknown", icon: "❔" }
+];
+const CATEGORY_IDS = CATEGORIES.map(c => c.id);
+// For items saved before types existed, or when the AI says "unknown": guess from the name.
+// Order matters: "ice cream" is a snack, "peanut butter" nuts, "apple juice" a liquid, "eggplant" a vegetable.
+const CATEGORY_WORDS = [
+  ["cooked", /leftover|soup|stew|cooked|curry|lasagn|casserole|pizza|noodle|risotto|goulash|meal/],
+  ["snack", /chip|crisp|cookie|biscuit|chocolate|candy|\bsweets?\b|cracker|cake|dessert|ice cream|snack|wafer|gummy|popcorn/],
+  ["nuts", /nut|almond|cashew|pistachio|hazelnut|walnut|pecan|seed/],
+  ["drink", /milk|juice|water|soda|cola|wine|beer|drink|smoothie|lemonade|half & half|tea|coffee|kefir/],
+  ["dairy", /cheese|cheddar|feta|parm|mozzarella|yog|butter|cream|curd|ricotta|spread/],
+  ["veg", /spinach|lettuce|salad|tomato|carrot|cucumber|pepper|onion|garlic|broccoli|cabbage|mushroom|green|herb|kale|zucchini|eggplant|potato|celery|leek|\bpeas?\b|bean|veg|produce/],
+  ["fruit", /apple|banana|berr|grape|orange|lemon|lime|pear|peach|plum|melon|kiwi|mango|cherr|fruit|avocado|pineapple/],
+  ["protein", /chicken|beef|pork|meat|ham|bacon|sausage|salami|fish|salmon|tuna|shrimp|egg|turkey|mince|tofu/]
+];
+
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const norm = s => String(s || "").trim().toLowerCase();
 
@@ -47,6 +73,18 @@ const Food = {
     if (d < 0) return `Expired ${plural(-d, "day")} ago`;
     if (d === 0) return "Eat today";
     return `${plural(d, "day")} left`;
+  },
+
+  categoryOf(item) {
+    if (CATEGORY_IDS.includes(item.category) && item.category !== "unknown") return item.category;
+    const name = norm(item.name);
+    const hit = CATEGORY_WORDS.find(([, re]) => re.test(name));
+    if (hit) return hit[0];
+    return item.kind === "cooked" ? "cooked" : "unknown";
+  },
+
+  category(item) {
+    return CATEGORIES.find(c => c.id === Food.categoryOf(item));
   },
 
   sourceText(item) {
@@ -108,6 +146,7 @@ const Food = {
       const info = {
         condition: s.condition || "", confidence: s.confidence || "high", note: s.note || "",
         container: s.container || e?.container || "",
+        category: CATEGORY_IDS.includes(s.category) && s.category !== "unknown" ? s.category : (e?.category || s.category || ""),
         box: s.box || null   // where it is in this photo; only used to draw the circles, not saved
       };
 

@@ -12,11 +12,27 @@ const SCREENS = ["setup", "home", "review", "eat", "recipes", "health"];
 const render = { recipes: () => Recipes.render(), health: () => Health.render() };
 function go(name) {
   SCREENS.forEach(s => { $("screen-" + s).hidden = s !== name; });
-  $("header-back").hidden = name === "home" || name === "setup";
+  $("fab-home").hidden = $("fab-scroll").hidden = name === "setup";
   render[name]?.();
   window.scrollTo(0, 0);
+  updateFabs();
 }
-$("header-back").addEventListener("click", () => go("home"));
+
+// Round buttons: home in the top-left corner, jump to top / bottom in the middle of the left side
+const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+function updateFabs() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  $("fab-up").classList.toggle("off", scrollY < 150);
+  $("fab-down").classList.toggle("off", max - scrollY < 150);
+}
+addEventListener("scroll", updateFabs, { passive: true });
+addEventListener("resize", updateFabs);
+$("fab-up").addEventListener("click", () => scrollTo({ top: 0, behavior: smooth() }));
+$("fab-down").addEventListener("click", () => scrollTo({ top: document.documentElement.scrollHeight, behavior: smooth() }));
+$("fab-home").addEventListener("click", () => {
+  if ($("screen-home").hidden) go("home");
+  else scrollTo({ top: 0, behavior: smooth() });
+});
 
 /* ---------- Setup ---------- */
 const CODE_RE = /^CC-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
@@ -236,30 +252,22 @@ $("phone-cam").addEventListener("click", () => {
 });
 
 /* ---------- Review the scan ---------- */
-const KIND_LABEL = { packaged: "Packaged", cooked: "Cooked", fresh: "Fresh", other: "Other" };
 
 render.review = () => {
   if (!draft) return go("home");
   const n = draft.rows.length;
   const fresh = draft.rows.filter(r => r.isNew).length;
-  const redated = draft.rows.filter(r => r.dateChanged).length;
   const toCheck = draft.rows.filter(r => r.confidence === "low").length;
-  const taken = `Photo taken today at ${Dates.stamp(draft.takenAt)}`;
-  const counts = `${fresh} new, ${n - fresh} already in your list` + (redated ? `, ${redated} with a new date` : "") + "." +
-    (toCheck ? ` ${plural(toCheck, "item")} marked “Check this”.` : "");
   const unread = draft.rows.filter(r => r.dateSource === "unknown").length;
-  $("review-lead").textContent =
-    draft.type === "bill"
-      ? `Shop bill${draft.store ? ` from ${draft.store}` : ""}: ${plural(n, "fridge item")}. ` +
-        (draft.billDateRead
-          ? `Bought ${Dates.format(draft.purchaseDate)}. Each date is the purchase date plus the item's usual shelf life.`
-          : `The date on the bill couldn't be read${draft.billDateText ? ` (“${draft.billDateText}”)` : ""}, so today is used as the purchase date. Change the dates if you bought it earlier.`)
-      : draft.type === "food"
-        ? `${taken}: ${plural(n, "food")} outside the fridge, ${counts} Dates assume you store them the right way from now.`
-        : `${taken}: ${plural(n, "item")} in your fridge, ${counts}`;
-  if (unread && draft.type !== "bill") {
-    $("review-lead").textContent += ` ${plural(unread, "package")} with a date we couldn't read: set ${unread === 1 ? "it" : "them"} or use “Scan date” later.`;
-  }
+  const facts = draft.type === "bill"
+    ? [`Shop bill${draft.store ? ` · ${draft.store}` : ""}`,
+       draft.billDateRead ? `bought ${Dates.format(draft.purchaseDate)}` : "date unreadable, today used",
+       plural(n, "item")]
+    : [draft.type === "food" ? `${plural(n, "food")} outside the fridge` : plural(n, "item"),
+       fresh && `${fresh} new`,
+       toCheck && `${toCheck} to check`,
+       unread && `${unread} without a date`];
+  $("review-lead").textContent = facts.filter(Boolean).join(" · ");
 
   $("review-door").hidden = !draft.doorOpen;
   const photo = $("review-photo");
@@ -373,7 +381,7 @@ function reviewRow(row) {
       }),
       el("span", { class: "rmeta" },
         el("span", { class: "tag" + (row.isNew ? " new" : "") }, row.isNew ? "New" : "Seen before"),
-        row.kind && el("span", { class: "tag" }, KIND_LABEL[row.kind] || "Other"),
+        el("span", { class: "tag" }, `${Food.category(row).icon} ${Food.category(row).label}`),
         row.confidence === "low" && el("span", { class: "tag check-tag" }, "Check this"),
         [row.shelf, row.qty].filter(Boolean).join(" · ")),
       row.container && el("span", { class: "source" }, `Container: ${row.container}`),
@@ -418,24 +426,84 @@ $("review-save").addEventListener("click", () => {
 });
 
 /* ---------- Eat Me First ---------- */
+// The list can be narrowed to one fridge section OR one food type, never both, to keep it simple
+let eatFilter = { section: null, type: null };
+const SECTION_SHORT = { "Top shelf": "Top shelf", "Middle shelf": "Middle shelf", "Bottom shelf": "Bottom shelf", "Crisper drawer": "Drawer", "Door rack": "Door" };
+
+// A section glows red if anything in it has expired, yellow if something must be eaten soon, else green
+function sectionStatus(items) {
+  const st = items.map(i => Food.status(i));
+  return st.includes("expired") ? "expired" : st.includes("soon") ? "soon" : "safe";
+}
+
+function renderTypeFilters() {
+  $("type-filters").replaceChildren(...CATEGORIES.map(c => {
+    const n = state.items.filter(i => Food.categoryOf(i) === c.id).length;
+    return el("button", {
+      class: "type-btn" + (n ? "" : " empty"), type: "button", id: "type-" + c.id,
+      "aria-pressed": String(eatFilter.type === c.id), "aria-label": `${c.label}: ${plural(n, "item")}`,
+      onclick: () => { eatFilter = { section: null, type: eatFilter.type === c.id ? null : c.id }; render.eat(); }
+    },
+      el("span", { class: "type-icon", "aria-hidden": "true" }, c.icon, n ? el("span", { class: "type-n" }, String(n)) : null),
+      el("span", { class: "type-label" }, c.label));
+  }));
+}
+
+function renderFridgeMap() {
+  const zone = (shelf, extra = "") => {
+    const inside = state.items.filter(i => i.shelf === shelf);
+    const st = sectionStatus(inside);
+    const icons = [...new Set(inside.map(i => Food.category(i).icon))].slice(0, 4).join(" ");
+    return el("button", {
+      class: `zone ${st} ${extra}`, type: "button", id: "zone-" + SHELVES.indexOf(shelf),
+      "aria-pressed": String(eatFilter.section === shelf),
+      "aria-label": `${shelf}: ${plural(inside.length, "item")}, ${st === "expired" ? "something expired" : st === "soon" ? "something to eat soon" : "all fine"}`,
+      onclick: () => { eatFilter = { type: null, section: eatFilter.section === shelf ? null : shelf }; render.eat(); }
+    },
+      el("span", { class: "zone-name" }, el("span", { class: "zone-led" }), SECTION_SHORT[shelf]),
+      el("span", { class: "zone-icons", "aria-hidden": "true" }, icons || "·"),
+      el("span", { class: "zone-count" }, inside.length ? plural(inside.length, "item") : "Empty"));
+  };
+  $("fridge-map").replaceChildren(
+    el("div", { class: "fridge-body" },
+      el("div", { class: "fridge-main" },
+        zone("Top shelf"), zone("Middle shelf"), zone("Bottom shelf"), zone("Crisper drawer", "drawer")),
+      el("div", { class: "fridge-door" }, el("span", { class: "fridge-handle" }), zone("Door rack", "door"))),
+    el("div", { class: "fridge-feet", "aria-hidden": "true" }, el("span"), el("span")));
+}
+
 render.eat = () => {
   const c = Food.counts(state.items);
-  $("eat-lead").textContent =
-    !state.items.length ? "Nothing here yet. Run a scan, or add an item by hand." :
-    [
-      c.expired && `${plural(c.expired, "item")} expired: throw ${c.expired === 1 ? "it" : "them"} away.`,
-      c.soon && `${plural(c.soon, "item")} to eat in the next ${EAT_SOON_DAYS} days.`,
-      c.unknown && `${plural(c.unknown, "item")} with a date we couldn't read: tap “Scan date” or “Set date”.`,
-      !c.expired && !c.soon && !c.unknown && "Everything is fresh."
-    ].filter(Boolean).join(" ") + (state.lastScan ? ` Last photo: ${Dates.stamp(state.lastScan)}.` : "");
+  $("eat-lead").textContent = !state.items.length ? "Nothing here yet. Scan your fridge or add an item." : [
+    c.expired && `${c.expired} expired`,
+    c.soon && `${c.soon} eat soon`,
+    c.unknown && `${c.unknown} without a date`,
+    `${c.safe} fresh`
+  ].filter(Boolean).join(" · ");
+
+  renderTypeFilters();
+  renderFridgeMap();
+
+  let shown = state.items;
+  let label = "";
+  if (eatFilter.section) {
+    shown = shown.filter(i => i.shelf === eatFilter.section);
+    label = eatFilter.section;
+  } else if (eatFilter.type) {
+    shown = shown.filter(i => Food.categoryOf(i) === eatFilter.type);
+    const cat = CATEGORIES.find(x => x.id === eatFilter.type);
+    label = `${cat.icon} ${cat.label}`;
+  }
+  $("filter-bar").hidden = !label;
+  $("filter-text").textContent = label ? `${label} · ${plural(shown.length, "item")}` : "";
 
   const groups = $("eat-groups");
   groups.replaceChildren();
-  if (!state.items.length) {
-    groups.append(el("div", { class: "empty" }, "Your food list is empty."));
+  if (!shown.length) {
+    groups.append(el("div", { class: "empty" }, state.items.length ? "Nothing here." : "Your food list is empty."));
     return;
   }
-  const sorted = Food.byUrgency(state.items);
+  const sorted = Food.byUrgency(shown);
   STATUS_ORDER.forEach(s => {
     const list = sorted.filter(i => Food.status(i) === s);
     if (!list.length) return;
@@ -445,10 +513,11 @@ render.eat = () => {
     ));
   });
 };
+$("filter-clear").addEventListener("click", () => { eatFilter = { section: null, type: null }; render.eat(); });
 
 function eatRow(item) {
   const s = Food.status(item);
-  const meta = [item.shelf, item.qty, item.firstSeen && `in since ${Dates.format(item.firstSeen)}`, item.barcode && `barcode ${item.barcode}`]
+  const meta = [`${Food.category(item).icon} ${Food.category(item).label}`, item.shelf, item.qty, item.firstSeen && `in since ${Dates.format(item.firstSeen)}`, item.barcode && `barcode ${item.barcode}`]
     .filter(Boolean).join(" · ");
 
   let right;
@@ -527,6 +596,8 @@ pickFile($("label-input"), async file => {
 
 // Manual add: for food the camera can't see or didn't recognize
 $("add-shelf").replaceChildren(el("option", { value: "" }, "Not sure"), ...SHELVES.map(s => el("option", { value: s }, s)));
+$("add-type").replaceChildren(...CATEGORIES.map(c => el("option", { value: c.id }, `${c.icon} ${c.label}`)));
+$("add-type").value = "unknown";
 $("add-date").value = Dates.addDays(Dates.today(), 3);
 $("add-form").addEventListener("submit", e => {
   e.preventDefault();
@@ -537,7 +608,7 @@ $("add-form").addEventListener("submit", e => {
   $("add-error").hidden = !error;
   if (error) return;
   state.items.push({
-    id: Food.newId(), name, qty: "", shelf: $("add-shelf").value, kind: "other",
+    id: Food.newId(), name, qty: "", shelf: $("add-shelf").value, kind: "other", category: $("add-type").value,
     expires, dateSource: "manual", firstSeen: Dates.today()
   });
   Store.save();

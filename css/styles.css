@@ -23,7 +23,7 @@
   --bad: #B83C57;
   --unknown: #6E4BC4;
   --shadow: 0 8px 24px rgba(48, 59, 43, .08);
-  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
@@ -89,14 +89,7 @@ body {
   display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
   background: #A8B98A; color: #3B4733; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
 }
-.logo-name { font-family: var(--font-display); font-weight: 700; font-size: 28px; letter-spacing: .01em; }
-.header-back {
-  position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%);
-  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
-  background: rgba(255, 255, 255, .16); color: #FFFFFF;
-}
-.header-back:hover { background: rgba(255, 255, 255, .26); }
-.header-back:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
+.logo-name { font-family: var(--font-display); font-weight: 800; font-size: 28px; letter-spacing: -0.01em; }
 
 /* ---------- Page ---------- */
 .app {
@@ -109,10 +102,11 @@ body {
 .screen { display: grid; gap: 22px; }
 .screen.narrow { max-width: 720px; width: 100%; margin-inline: auto; }
 
-h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(28px, 5vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
-h2 { font-family: var(--font-display); font-weight: 600; font-size: 21px; line-height: 1.2; margin: 0; text-wrap: balance; }
+h1 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; font-size: clamp(28px, 5vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; font-size: 21px; line-height: 1.2; margin: 0; text-wrap: balance; }
 h3 { text-wrap: balance; }
 .lead { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.summary-line { margin: 8px 0 0; color: var(--ink); font-weight: 800; font-size: 17px; }
 .note { margin: 0; font-size: 13px; color: var(--muted); }
 .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 .hello { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
@@ -156,7 +150,7 @@ h3 { text-wrap: balance; }
 .grow { flex: 1 1 240px; width: auto; }
 .hint { color: var(--muted); font-size: 13px; }
 .error { margin: 0; color: var(--bad); font-weight: 800; font-size: 14px; }
-.add-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.add-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* Segmented switch and chips */
@@ -215,7 +209,7 @@ h3 { text-wrap: balance; }
 .eat-btn::before, .eat-btn::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .35); }
 .eat-btn::before { width: 160px; height: 160px; right: -50px; bottom: -70px; }
 .eat-btn::after { width: 60px; height: 60px; right: 90px; top: -24px; }
-.eat-title { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1; }
+.eat-title { font-family: var(--font-display); font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -0.02em; }
 .eat-sub { opacity: .95; font-weight: 700; }
 .eat-arrow {
   position: absolute; right: 22px; top: 50%; transform: translateY(-50%); z-index: 1;
@@ -226,16 +220,18 @@ h3 { text-wrap: balance; }
 .count.expired { --c: #B83C57; } .count.soon { --c: #957011; } .count.unknown { --c: #6E4BC4; } .count.safe { --c: #5C7041; }
 .count .n { margin-left: auto; font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 
-.nav-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.nav-pair { display: grid; gap: 12px; }
 .nav-card {
   font: inherit; color: var(--ink); text-align: left; cursor: pointer;
-  display: grid; gap: 4px; align-content: start; padding: 18px; border-radius: 26px; border: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px;
+  padding: 14px 18px 14px 14px; border-radius: 26px; border: 0;
   background: var(--sky-deep); transition: transform .15s ease;
 }
 .nav-card.sky { background: var(--mint); }
 .nav-card:hover { transform: translateY(-2px); }
-.nav-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--panel); color: var(--ink); margin-bottom: 6px; }
-.nav-title { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.15; }
+.nav-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--panel); color: var(--ink); }
+.nav-title { font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 1.15; }
+.nav-arrow { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--panel); color: var(--ink); }
 
 .readings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .reading { display: grid; gap: 2px; padding: 16px; border-radius: 22px; background: color-mix(in srgb, var(--c) 10%, var(--panel)); }
@@ -337,6 +333,72 @@ h3 { text-wrap: balance; }
 .erow .edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
 .erow .edit .field { width: auto; padding: 7px 12px; }
 
+/* ---------- Eat Me First: type buttons + fridge map ---------- */
+.eat-layout { display: grid; gap: 24px; align-items: start; }
+.fridge-panel { display: grid; gap: 16px; justify-items: center; }
+.eat-list { display: grid; gap: 18px; }
+
+/* Food type buttons: a round icon that tilts a little (never a full turn) when pointed at or picked */
+.type-filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px 6px; width: 100%; max-width: 460px; }
+.type-btn {
+  font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer; padding: 4px 2px;
+  display: grid; justify-items: center; gap: 6px;
+}
+.type-icon {
+  position: relative; display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%;
+  font-size: 24px; background: var(--panel); box-shadow: var(--shadow);
+  transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background .2s ease;
+}
+.type-btn:hover .type-icon { transform: rotate(-14deg) scale(1.05); }
+.type-btn[aria-pressed="true"] .type-icon { transform: rotate(12deg) scale(1.1); background: var(--blush); box-shadow: 0 0 0 3px var(--green); }
+.type-btn.empty .type-icon { opacity: .45; }
+.type-n {
+  position: absolute; top: -4px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--green); color: var(--green-ink);
+}
+.type-label { font-size: 12px; font-weight: 800; line-height: 1.2; text-align: center; }
+.type-btn:focus-visible { outline: none; }
+.type-btn:focus-visible .type-icon { outline: 3px solid var(--green); outline-offset: 3px; }
+
+/* The fridge: four sections plus the door, each glowing green / yellow / red */
+.fridge-map { width: 100%; max-width: 420px; display: grid; justify-items: center; }
+.fridge-body {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 8px;
+  padding: 12px; border-radius: 30px; background: var(--panel); box-shadow: var(--shadow), inset 0 0 0 3px var(--line);
+}
+.fridge-main { display: grid; gap: 8px; }
+.fridge-door { position: relative; display: grid; padding-left: 10px; border-left: 3px dashed var(--line); }
+.fridge-handle { position: absolute; left: -9px; top: 22px; width: 6px; height: 48px; border-radius: 999px; background: var(--leaf); }
+.fridge-feet { display: flex; justify-content: space-between; width: 82%; }
+.fridge-feet span { width: 26px; height: 10px; border-radius: 0 0 10px 10px; background: var(--line); }
+.zone {
+  --g: #8FB35F;
+  font: inherit; color: var(--ink); cursor: pointer; text-align: left; min-height: 74px;
+  display: grid; align-content: center; gap: 2px; padding: 10px 14px; border-radius: 18px;
+  border: 2px solid color-mix(in srgb, var(--g) 70%, transparent);
+  background: color-mix(in srgb, var(--g) 14%, var(--panel));
+  box-shadow: 0 0 14px 1px color-mix(in srgb, var(--g) 45%, transparent);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.zone.soon { --g: #E9C14A; }
+.zone.expired { --g: #E2607F; animation: glow 1.8s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 24px 5px color-mix(in srgb, var(--g) 60%, transparent); } }
+.zone:hover { transform: scale(1.02); }
+.zone[aria-pressed="true"] { border-width: 3px; border-color: var(--green); transform: scale(1.03); }
+.zone:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.zone.drawer { border-radius: 18px 18px 26px 26px; min-height: 86px; }
+.zone.door { align-content: start; padding: 12px 10px; }
+.zone-name { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 14px; }
+.zone-led { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--g); box-shadow: 0 0 8px 2px color-mix(in srgb, var(--g) 70%, transparent); }
+.zone-icons { font-size: 17px; letter-spacing: 2px; }
+.zone-count { font-size: 12px; color: var(--muted); font-weight: 700; }
+.zone.door .zone-icons { font-size: 15px; letter-spacing: 0; line-height: 1.5; }
+
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px;
+  width: 100%; max-width: 420px; padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--mint); font-weight: 800;
+}
+
 /* ---------- Recipes ---------- */
 .uses { display: flex; flex-wrap: wrap; gap: 6px; }
 .ing { background: var(--panel); border: 2px solid var(--line); }
@@ -373,6 +435,26 @@ h3 { text-wrap: balance; }
 .facts dd { margin: 0; }
 .facts dd.warn { padding-left: 12px; border-left: 4px solid var(--soon); border-radius: 2px; }
 
+/* ---------- Round buttons: home top-left, scroll up/down middle of the left side ---------- */
+.fab {
+  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--panel); color: var(--ink); box-shadow: 0 6px 18px rgba(48, 59, 43, .18);
+  transition: opacity .2s ease, transform .15s ease;
+}
+.fab:hover { transform: scale(1.06); }
+.fab:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.fab.off { opacity: 0; pointer-events: none; }
+.fab-home {
+  position: fixed; z-index: 16; background: var(--blush); color: #3B4733;
+  top: calc(16px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+}
+.fab-scroll {
+  position: fixed; z-index: 15; display: grid; gap: 10px;
+  left: max(10px, env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%);
+}
+.fab-scroll .fab { width: 40px; height: 40px; opacity: .92; }
+.fab-scroll .fab.off { opacity: 0; }
+
 /* ---------- Popup and toast ---------- */
 .modal {
   position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
@@ -394,6 +476,8 @@ h3 { text-wrap: balance; }
 
 /* ---------- Computer layout ---------- */
 @media (min-width: 900px) {
+  .eat-layout { grid-template-columns: minmax(340px, 440px) minmax(0, 1fr); }
+  .fridge-panel { position: sticky; top: 16px; }
   .home-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
   .review-grid:has(.photo-block:not([hidden])) { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
   .photo-block { position: sticky; top: 16px; }
@@ -405,6 +489,7 @@ h3 { text-wrap: balance; }
   .rrow { grid-template-columns: minmax(0, 1fr) auto 38px; }
   .rrow .rname { grid-column: 1 / -1; }
   .add-grid { grid-template-columns: minmax(0, 1fr); }
+  .fridge-body { grid-template-columns: minmax(0, 1fr) 82px; }
   .erow { grid-template-columns: 8px minmax(0, 1fr); }
   .erow .right { grid-column: 2; justify-items: start; }
   .erow .actions, .erow .edit { justify-content: flex-start; }
