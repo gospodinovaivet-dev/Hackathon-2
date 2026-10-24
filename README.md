@@ -29,7 +29,11 @@ Login the type of fridge and authiication number
 - User: HouseKeeper
 
 ## DoD
-- [] Pesho can see expired foods and camera works
-- [] Pesho can see recepies
-- [] Pesho can see the what he got in storage from distance
+- [] Pesho takes a photo, and at least 3 foods appear in the list with expiry dates
+- [] Each item shows a status: Safe / Eat soon / Throw away
+- [] Pesho taps “Recipes” and gets at least 2 recipes using items that expire soon
+- [] The LED for a section turns red when an item there is expired
+- [] The app sends an alert when the door is open for 60+ seconds
+- [] Pesho can see his food list when away from home
+
   
