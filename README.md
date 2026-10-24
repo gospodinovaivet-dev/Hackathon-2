@@ -1,39 +1,63 @@
-# ChillCheck
+# ChillCheck – MVP Plan
 
-## Problem
-- Expired food
-- Food waste
-- Open doors of the fridge
+## Target audience
+- **Housekeepers:** busy households that forget what's in the fridge (Katerina)
+- **Big retailers:** online grocery stores and supermarkets like eBag that lose money on expired stock in many fridges (Georgi, warehouse manager)
 
-## Solution
-- Sensors with LED
-- Open the app and check what you got in your fridge
-- Magnet sensor on the door
+## Why it matters
+Research found that at least 23–24% of expiration waste at one retailer came from mixed expiry dates on the same shelf: old items hidden behind new ones. Manual checks miss them. Cameras don't.
 
-## Users
-- Housekeepers (Pesho)
-
-## Features 
-- HouseKeepers: Get the app, take a pic of the inside of your fridge and see which food will get expired soon
-- LED lights, on each seaction they will glow in GREEN-Safe; YELLOW-Is good to eat but watch out; RED-WARNING there is an expired food on this section
-- Magnet sensors: If you leave the door open for too long it will close automatcally
-- From a distance you can open the app and by LOGING the type of fridge you got from our comapny it will show you the foods that you have and will expire, but for this it either needs a camera inside or taking a pic befoehead
+## Requirements
+- Cameras take a photo of the shelves every time the door closes
+- The app recognizes food and gives each item an expiry date (editable)
+- Statuses: 🟢 Safe / 🟡 Eat soon (≤2 days) / 🔴 Expired, sorted by urgency
+- Door open too long → buzzer + app alert (60s for homes, adjustable for warehouses)
+- Temperature sensor: fridge too warm → app alert ("Your fridge is at 9°C, food may spoil faster")
+- Remote view of the food list, latest photo and current temperature
+- Retailers: dashboard with all fridges in one warehouse, and alerts for expired items
+- Retailers: staff roles (manager sees everything, workers see only their section)
+- Retailers: identical products grouped (e.g. 50 yoghurts → one row with the earliest date)
+- Photos encrypted, only the latest one kept, unique device code, no default passwords
 
 ## Flows
-Pesho -> Opens App -> HomePage -> 
-Login the type of fridge and authiication number
--> BClicks the camera and takes a picture of the food 
--> Two buttons: Recepies and EatMeFirst? -> Recepies -> Generates him a bung of different recepies he make with what he got 
--> Clicks EatMeFirst? -> Sends him a pop out on the screen: Safe; Eat before it too late; Warning, throw away; 
-## Data
-- User: HouseKeeper
+**Setup:** User → opens app → logs in → enters the device code → fridge is paired
 
-## DoD
-- [] Pesho takes a photo, and at least 3 foods appear in the list with expiry dates
-- [] Each item shows a status: Safe / Eat soon / Throw away
-- [] Pesho taps “Recipes” and gets at least 2 recipes using items that expire soon
-- [] The LED for a section turns red when an item there is expired
-- [] The app sends an alert when the door is open for 60+ seconds
-- [] Pesho can see his food list when away from home
+**Auto-scan (Katerina):** Closes fridge door → cameras take a photo → app updates the food list → Katerina checks/edits expiry dates → sees Eat Me First list
 
+**Eat Me First (Katerina):** Opens app → Home → taps "Eat Me First" → sees items sorted by status: 🟢 Safe / 🟡 Eat soon / 🔴 Expired
+
+**Warehouse check (Georgi):** Opens app → Dashboard → sees all fridges with their status and temperature → taps a fridge with 🔴 → sees which products expired and on which shelf → marks them "removed"
+
+**Door alarm (both):** Door opens → timer starts → time limit passes → buzzer beeps + app shows "Your fridge door is open!" → door closes → alert clears
+
+**Temperature alert (both):** Temperature rises above 8°C for 10+ minutes → app shows "Your fridge is too warm!" → temperature returns to normal → alert clears
+
+## Edge cases
+- **Food not recognized or hidden** → user adds or names it manually
+- **Wrong expiry estimate** → user edits the date
+- **Hundreds of identical items** → grouped, with the earliest expiry date shown
+- **Warehouse fridges opened all day** → alarm time is adjustable
+- **Short temperature rise when the door opens** → alert only if it stays high for 10+ minutes
+- **Foggy/dark photo** → LED light on before each photo; if unclear, the app asks for a manual check
+- **No internet / power cut** → device reconnects by itself; app shows "Last updated: [time]"
+
+## Hardware
+- 2 cameras (cold and humidity rated) + LED light
+- Controller with secure boot (e.g. ESP32-S3)
+- Magnetic door sensor + buzzer
+- Temperature sensor (e.g. DS18B20, ~€2)
+
+## Priorities
+### 1. Главна цел (Main goal)
+**Auto-scan + Eat Me First list:** door closes → photo → food list with expiry dates, sorted by urgency.
+
+### 2. Пожелателни (Nice to have)
+- Door alarm
+- Temperature alert
+- Retailer dashboard for many fridges
+- Remote view of the latest photo
+- *(Future)* recipe suggestions for housekeepers
+- *(Future)* automatic "sell soon" discounts on eBag's website
+- *(Future)* reading printed expiry dates and barcodes
+- *(Future)* flagging expiring items for donation to food banks
   
