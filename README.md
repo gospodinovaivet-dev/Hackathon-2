@@ -61,3 +61,4 @@ Research found that at least 23–24% of expiration waste at one retailer came f
 - *(Future)* reading printed expiry dates and barcodes
 - *(Future)* flagging expiring items for donation to food banks
   
+## The app recognizes food and gives each item an expiry date (editable)
