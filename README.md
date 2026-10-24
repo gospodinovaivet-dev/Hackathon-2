@@ -52,11 +52,15 @@ Research found that at least 23–24% of expiration waste at one retailer came f
 **Auto-scan + Eat Me First list:** door closes → photo → food list with expiry dates, sorted by urgency.
 
 ### 2. Пожелателни (Nice to have)
+- recipe suggestions for housekeepers
+- analysis of your most bought things
+- shoppig list suggestion
+- if smth in unknown, circle it in purple
 - Door alarm
 - Temperature alert
 - Retailer dashboard for many fridges
 - Remote view of the latest photo
-- *(Future)* recipe suggestions for housekeepers
+- 
 - *(Future)* automatic "sell soon" discounts on eBag's website
 - *(Future)* reading printed expiry dates and barcodes
 - *(Future)* flagging expiring items for donation to food banks
