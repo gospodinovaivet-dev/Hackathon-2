@@ -134,7 +134,7 @@ Reply with only JSON:
     Scanner.ready.then(() => {
       if (Scanner.sample) return;
       $("gen-recipes").hidden = true;
-      $("rec-status").textContent = "Example recipes. AI recipes work when the app is open on the shared claude.ai link.";
+      $("rec-status").textContent = "Example recipes.";
     });
     // Redraw the dish pictures when the theme changes so their background matches
     const redraw = () => { if (!$("screen-recipes").hidden) renderList(); };

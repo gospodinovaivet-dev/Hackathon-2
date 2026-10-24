@@ -2,338 +2,454 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-/* ChillCheck MVP styles
-   Layout: one phone-width column, screens swapped in place (setup, home, review, Eat Me First) */
+/* ChillCheck styles: playful and rounded. Dark-olive header with a curved bottom, cream page,
+   white rounded cards, soft pastel tiles.
+   Palette "Matcha & Blush": #A8B98A matcha · #F5C9D3 baby pink · #FFF9F0 cream · #303B2B dark olive · #F5E6A8 butter
+   Layout: one column on phones; on computers home and the review screen split into two columns. */
 :root {
-  --ice: #EDF3F5;
-  --panel: #FFFFFF;
-  --ink: #11222C;
-  --muted: #587079;
-  --line: #D2DEE3;
-  --accent: #0D6A86;
-  --accent-ink: #FFFFFF;
-  --safe: #23935A;
-  --soon: #B98800;
-  --bad: #D2423A;
-  --unknown: #7A4FD6;
-  --well: #F7FAFB;
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --sky: #FFF9F0;        /* page background (cream) */
+  --sky-deep: #F5E6A8;   /* butter tiles */
+  --mint: #E3EAD5;       /* light matcha fills */
+  --blush: #F5C9D3;      /* baby pink */
+  --panel: #FFFFFF;      /* cards */
+  --well: #FBF4E8;       /* inputs, inner wells */
+  --green: #303B2B;      /* main action colour (dark olive) */
+  --green-ink: #FFF9F0;
+  --leaf: #A8B98A;       /* matcha */
+  --lime: #A8B98A;
+  --forest: #303B2B;     /* header */
+  --ink: #303B2B;
+  --muted: #6E7365;
+  --line: #EEE4D3;
+  --accent: var(--green);
+  --safe: #5C7041;
+  --soon: #957011;
+  --bad: #B83C57;
+  --unknown: #6E4BC4;
+  --shadow: 0 8px 24px rgba(48, 59, 43, .08);
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --ice: #0C151A; --panel: #142228; --ink: #E3EDF1; --muted: #8DA3AC; --line: #253841;
-    --accent: #52B8D8; --accent-ink: #062029; --safe: #3CC47D; --soon: #F0BE2E; --bad: #FF6B60; --unknown: #B394FF; --well: #101C22;
+    --sky: #1C2219; --sky-deep: #4A4326; --mint: #343F2D; --blush: #F5C9D3; --panel: #262E22; --well: #20271C;
+    --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #303B2B;
+    --ink: #FFF9F0; --muted: #C3C5B4; --line: #3A4434;
+    --safe: #BCCD9C; --soon: #F0D77A; --bad: #F290A6; --unknown: #B394FF;
+    --shadow: 0 8px 24px rgba(0, 0, 0, .35);
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ice: #0C151A; --panel: #142228; --ink: #E3EDF1; --muted: #8DA3AC; --line: #253841;
-  --accent: #52B8D8; --accent-ink: #062029; --safe: #3CC47D; --soon: #F0BE2E; --bad: #FF6B60; --unknown: #B394FF; --well: #101C22;
+  --sky: #1C2219; --sky-deep: #4A4326; --mint: #343F2D; --blush: #F5C9D3; --panel: #262E22; --well: #20271C;
+  --green: #A8B98A; --green-ink: #1C2219; --leaf: #A8B98A; --lime: #A8B98A; --forest: #303B2B;
+  --ink: #FFF9F0; --muted: #C3C5B4; --line: #3A4434;
+  --safe: #BCCD9C; --soon: #F0D77A; --bad: #F290A6; --unknown: #B394FF;
+  --shadow: 0 8px 24px rgba(0, 0, 0, .35);
 }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {
   margin: 0;
-  background: var(--ice);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 92% 18%, color-mix(in srgb, var(--blush) 35%, transparent) 0 140px, transparent 141px),
+    radial-gradient(circle at 4% 62%, color-mix(in srgb, var(--sky-deep) 45%, transparent) 0 110px, transparent 111px),
+    var(--sky);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
-  padding-block: 24px 64px;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  position: relative;
+  overflow: hidden;
+  color: #FFF9F0;
+  background: linear-gradient(135deg, var(--forest), color-mix(in srgb, var(--forest) 82%, var(--leaf)));
+  border-radius: 0 0 40px 40px;
+  padding-block: 18px 30px;
+  box-shadow: 0 10px 30px rgba(11, 90, 66, .22);
+}
+.app-header::before, .app-header::after {            /* playful bubbles */
+  content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .08);
+}
+.app-header::before { width: 180px; height: 180px; right: -40px; top: -70px; }
+.app-header::after { width: 90px; height: 90px; left: 8%; bottom: -46px; }
+.app-header-inner {
+  position: relative; z-index: 1;
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; justify-content: center; min-height: 48px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-badge {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: #A8B98A; color: #303B2B; box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+.logo-name { font-family: var(--font-display); font-weight: 700; font-size: 28px; letter-spacing: .01em; }
+.header-back {
+  position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%);
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(255, 255, 255, .16); color: #FFFFFF;
+}
+.header-back:hover { background: rgba(255, 255, 255, .26); }
+.header-back:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
+
+/* ---------- Page ---------- */
+.app {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-block: 26px 72px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.app { max-width: 680px; margin: 0 auto; }
 .screen { display: grid; gap: 22px; }
+.screen.narrow { max-width: 720px; width: 100%; margin-inline: auto; }
 
-/* Type */
-h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 6vw, 40px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
-h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.15; margin: 0; text-wrap: balance; }
-.lead { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(28px, 5vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 21px; line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { text-wrap: balance; }
+.lead { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
 .note { margin: 0; font-size: 13px; color: var(--muted); }
 .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 20px; }
-.brand svg { color: var(--accent); }
-.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.fridge-line { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.hello { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
+.fridge-line { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
 .fridge-line b { color: var(--ink); font-size: 13px; }
 
-/* Surfaces */
-.card { display: grid; gap: 14px; padding: 20px; border-radius: 18px; background: var(--panel); border: 1.5px solid var(--line); }
+/* ---------- Surfaces ---------- */
+.card { display: grid; gap: 14px; padding: 22px; border-radius: 28px; background: var(--panel); box-shadow: var(--shadow); }
 .card p { margin: 0; }
 
-/* Controls */
+/* ---------- Controls ---------- */
 .btn {
-  font: inherit; font-weight: 700; cursor: pointer; border-radius: 12px; padding: 13px 18px;
-  border: 1.5px solid var(--line); background: var(--panel); color: var(--ink);
-  transition: transform .12s ease, border-color .12s ease;
+  font: inherit; font-weight: 800; line-height: 1.2; cursor: pointer; border-radius: 999px; padding: 10px 22px;
+  display: inline-flex; align-items: center; justify-content: center; text-align: center; min-height: 48px;
+  border: 2px solid var(--green); background: var(--panel); color: var(--green);
+  transition: transform .12s ease, background .12s ease;
 }
-.btn:hover { border-color: var(--accent); }
-.btn:active { transform: scale(.98); }
+.btn:hover { background: var(--mint); }
+.btn.primary:hover { background: color-mix(in srgb, var(--green) 85%, var(--leaf)); }
+.btn:active { transform: scale(.97); }
 .btn:disabled { opacity: .55; cursor: progress; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn.small { padding: 7px 12px; font-size: 14px; border-radius: 10px; }
-.link { font: inherit; font-size: 14px; font-weight: 700; color: var(--accent); background: none; border: 0; padding: 6px 0; cursor: pointer; justify-self: start; text-decoration: underline; text-underline-offset: 3px; }
-.back { font: inherit; font-weight: 700; font-size: 14px; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; justify-self: start; }
-.icon-btn { font: inherit; font-size: 20px; line-height: 1; width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; }
-.icon-btn:hover { color: var(--bad); border-color: var(--bad); }
-:is(.btn, .link, .back, .icon-btn, .eat-btn):focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: var(--green); color: var(--green-ink); box-shadow: 0 6px 16px color-mix(in srgb, var(--green) 25%, transparent); }
+.btn.small { min-height: 34px; min-width: 104px; padding: 4px 14px; font-size: 14px; border-width: 1.5px; }
+.link { font: inherit; font-size: 14px; font-weight: 800; color: var(--green); background: none; border: 0; padding: 6px 0; cursor: pointer; justify-self: start; text-decoration: underline; text-underline-offset: 3px; }
+.icon-btn { font: inherit; font-size: 20px; line-height: 1; width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--well); color: var(--muted); cursor: pointer; }
+.icon-btn:hover { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--panel)); }
+:is(.btn, .link, .icon-btn, .eat-btn, .nav-card, .seg, .chip, .photo-pick):focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }   /* side-by-side buttons share one width */
 
 .form { gap: 16px; }
 .field-group { display: grid; gap: 6px; }
-.field-group label { font-weight: 700; font-size: 14px; }
+.field-group label { font-weight: 800; font-size: 14px; }
 .field {
-  font: inherit; width: 100%; min-width: 0; padding: 11px 13px; border-radius: 10px;
-  border: 1.5px solid var(--line); background: var(--well); color: var(--ink);
+  font: inherit; width: 100%; min-width: 0; padding: 11px 16px; border-radius: 16px;
+  border: 2px solid var(--line); background: var(--well); color: var(--ink);
 }
+.field:focus { border-color: var(--green); outline: none; }
+.field:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent); }
 .field.mono { font-size: 15px; }
-.field:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.grow { flex: 1 1 240px; width: auto; }
 .hint { color: var(--muted); font-size: 13px; }
-.error { margin: 0; color: var(--bad); font-weight: 700; font-size: 14px; }
+.error { margin: 0; color: var(--bad); font-weight: 800; font-size: 14px; }
 .add-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-/* Status colours */
+/* Segmented switch and chips */
+.mode { display: flex; flex-wrap: wrap; gap: 4px; padding: 5px; border-radius: 999px; background: var(--mint); width: fit-content; max-width: 100%; }
+.seg { font: inherit; font-weight: 800; font-size: 14px; cursor: pointer; border: 0; border-radius: 999px; padding: 8px 16px; background: transparent; color: var(--muted); }
+.seg[aria-selected="true"] { background: var(--green); color: var(--green-ink); box-shadow: 0 4px 10px color-mix(in srgb, var(--green) 30%, transparent); }
+.prefs { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { cursor: pointer; border: 2px solid var(--line); background: var(--panel); color: var(--ink); }
+.chip[aria-pressed="true"] { border-color: var(--green); background: var(--green); color: var(--green-ink); }
+
+/* ---------- Status colours ---------- */
 .expired { --c: var(--bad); }
 .soon { --c: var(--soon); }
-.safe { --c: var(--safe); }
 .unknown { --c: var(--unknown); }
+.safe { --c: var(--safe); }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
-.pill { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); white-space: nowrap; }
-.tag { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1.5px solid var(--line); color: var(--muted); }
-.tag.new { border-color: var(--accent); color: var(--accent); }
+.pill { color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); }
+.tag { background: var(--well); color: var(--muted); }
+.tag.new { background: var(--mint); color: var(--green); }
+.check-tag { background: color-mix(in srgb, var(--soon) 16%, var(--panel)); color: var(--soon); }
 
-/* Home: Eat Me First entry */
-.eat-btn {
-  font: inherit; color: var(--accent-ink); text-align: left; cursor: pointer; position: relative;
-  display: grid; gap: 6px; padding: 24px 64px 24px 24px; border-radius: 22px; border: 0;
-  background: var(--accent);
+/* Even labels: every pill-shaped label shares one height, font, weight and padding */
+.pill, .tag, .ing, .step, .count, .chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 30px; padding: 4px 14px; border-radius: 999px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 800; line-height: 1.15; text-align: center;
 }
-.eat-title { font-family: var(--font-display); font-weight: 800; font-size: 32px; line-height: 1; letter-spacing: -0.02em; }
-.eat-sub { opacity: .9; }
-.eat-arrow { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); }
-.counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.count { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; background: var(--panel); color: var(--ink); font-size: 14px; font-weight: 700; }
-.count .n { font-family: var(--font-data); font-weight: 500; }
+.pill, .tag, .step, .count { white-space: nowrap; }
+.chip { min-height: 36px; }
+.count { min-width: 112px; }
+.rmeta .tag { min-height: 26px; padding: 2px 10px; font-size: 12px; }
 
-/* Home: scan steps */
-.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.step { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); font-size: 14px; color: var(--muted); }
-.step::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
-.step[data-state="active"] { border-color: var(--accent); color: var(--ink); }
-.step[data-state="active"]::before { background: var(--accent); animation: blink .8s ease-in-out infinite; }
-.step[data-state="done"] { color: var(--ink); }
-.step[data-state="done"]::before { background: var(--safe); }
-@keyframes blink { 50% { opacity: .25; } }
-.status { margin: 0; font-size: 14px; font-weight: 700; }
-.status:empty { display: none; }
-
-/* Lists */
-.list { display: grid; gap: 8px; }
-.group { display: grid; gap: 8px; margin-bottom: 18px; }
-.group-head { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.group-head .n { font-family: var(--font-data); }
-.empty { padding: 22px; border-radius: 14px; border: 1.5px dashed var(--line); color: var(--muted); text-align: center; }
-
-/* Review rows */
-.rrow {
-  display: grid; grid-template-columns: minmax(0, 1fr) 160px auto 36px; gap: 10px; align-items: center;
-  padding: 12px; border-radius: 14px; background: var(--panel); border: 1.5px solid var(--line);
-}
-.rname { display: grid; gap: 4px; }
-.rmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
-/* Review photo with coloured circles; the wrapper hugs the image so the circles line up */
-.photo-block { display: grid; gap: 8px; }
-.photo-wrap { position: relative; width: fit-content; max-width: 100%; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--line); }
-.photo-wrap img { display: block; max-width: 100%; max-height: 70vh; width: auto; height: auto; }
-.photo-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.legend-block { display: grid; gap: 8px; }
-.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0; font-size: 13px; font-weight: 700; }
-.legend > span { display: inline-flex; align-items: center; gap: 6px; }
-.rrow:hover, .rrow:focus-within { border-color: var(--accent); }
-
-/* "Can't check this photo" warning */
-.modal {
-  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
-  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
-  background: color-mix(in srgb, var(--ink) 45%, transparent);
-}
-.modal-card {
-  width: min(380px, 100%); display: grid; gap: 10px; padding: 22px; border-radius: 18px;
-  background: var(--panel); border: 2px solid var(--soon); box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
-}
-.modal-card h2 { font-size: 20px; }
-.modal-card p { margin: 0; color: var(--muted); font-size: 15px; }
-.warn-badge { justify-self: start; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 3px 10px; border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--soon) 35%, var(--panel)); }
-.missing { display: grid; gap: 8px; }
-.missing .note { margin-bottom: 4px; }
-.check { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1.5px solid var(--line); cursor: pointer; }
-.check span { font-weight: 700; }
-.check small { color: var(--muted); font-weight: 400; }
-.check input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
-.save-bar {
-  position: sticky; bottom: 0; padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(transparent, var(--ice) 30%); display: grid;
-}
-
-/* Eat Me First rows */
-.erow {
-  display: grid; grid-template-columns: 6px minmax(0, 1fr) auto; gap: 14px; align-items: center;
-  padding: 12px 14px 12px 0; border-radius: 14px; background: var(--panel); border: 1.5px solid var(--line); overflow: hidden;
-}
-.erow .bar { align-self: stretch; background: var(--c); }
-.erow .name { font-weight: 700; }
-.erow .meta { font-size: 13px; color: var(--muted); }
-.erow .right { display: grid; justify-items: end; gap: 6px; }
-.erow .date { font-size: 13px; color: var(--muted); }
-.erow .actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
-.erow .edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
-.erow .edit .field { width: auto; padding: 7px 10px; }
-
-/* Sensor alerts (every screen) */
-.alerts { display: grid; gap: 8px; margin-bottom: 16px; }
+/* ---------- Alerts ---------- */
+.alerts { display: grid; gap: 8px; margin-bottom: 18px; }
 .alerts:empty { display: none; }
 .alert-item {
   --c: var(--bad);
-  display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; font-weight: 700;
-  background: color-mix(in srgb, var(--bad) 14%, var(--panel)); border: 1.5px solid var(--bad);
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 22px; font-weight: 800;
+  background: color-mix(in srgb, var(--bad) 14%, var(--panel)); border: 2px solid var(--bad);
 }
 .alert-item .dot { width: 12px; height: 12px; animation: blink .9s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .25; } }
 
-/* Home: sensor readings */
+/* ---------- Home ---------- */
+.home-grid { display: grid; gap: 18px; align-items: start; }
+.col { display: grid; gap: 18px; }
+
+.eat-btn {
+  font: inherit; color: #303B2B; text-align: left; cursor: pointer; position: relative; overflow: hidden;
+  display: grid; gap: 6px; padding: 28px 80px 28px 26px; border-radius: 32px; border: 0;
+  background: #F5C9D3;
+  box-shadow: 0 12px 28px rgba(184, 60, 87, .14);
+  transition: transform .15s ease;
+}
+.eat-btn:hover { transform: translateY(-2px); }
+.eat-btn::before, .eat-btn::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .35); }
+.eat-btn::before { width: 160px; height: 160px; right: -50px; bottom: -70px; }
+.eat-btn::after { width: 60px; height: 60px; right: 90px; top: -24px; }
+.eat-title { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1; }
+.eat-sub { opacity: .95; font-weight: 700; }
+.eat-arrow {
+  position: absolute; right: 22px; top: 50%; transform: translateY(-50%); z-index: 1;
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #303B2B; color: #FFF9F0;
+}
+.counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; position: relative; z-index: 1; }
+.count { justify-content: flex-start; background: #FFFFFF; color: #303B2B; }
+.count.expired { --c: #B83C57; } .count.soon { --c: #957011; } .count.unknown { --c: #6E4BC4; } .count.safe { --c: #5C7041; }
+.count .n { margin-left: auto; font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+
+.nav-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.nav-card {
+  font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+  display: grid; gap: 4px; align-content: start; padding: 18px; border-radius: 26px; border: 0;
+  background: var(--sky-deep); transition: transform .15s ease;
+}
+.nav-card.sky { background: var(--mint); }
+.nav-card:hover { transform: translateY(-2px); }
+.nav-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--panel); color: var(--ink); margin-bottom: 6px; }
+.nav-title { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.15; }
+
 .readings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.reading { display: grid; gap: 2px; padding: 14px; border-radius: 14px; background: color-mix(in srgb, var(--c) 8%, var(--panel)); border: 1.5px solid color-mix(in srgb, var(--c) 40%, var(--line)); }
-.reading-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--muted); }
-.reading-value { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1.1; }
-.reading-value.mono { font-family: var(--font-data); font-weight: 500; font-size: 26px; }
+.reading { display: grid; gap: 2px; padding: 16px; border-radius: 22px; background: color-mix(in srgb, var(--c) 10%, var(--panel)); }
+.reading-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--muted); }
+.reading-value { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .reading-text { font-size: 13px; color: var(--muted); }
-/* Home: use the phone's camera from a computer */
-.phone-panel { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; padding: 16px; border-radius: 14px; background: var(--well); border: 1.5px solid var(--line); }
-.qr { flex: none; padding: 10px; border-radius: 12px; background: #FFFFFF; line-height: 0; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.step { background: var(--well); color: var(--muted); }
+.step::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.step[data-state="active"] { background: var(--mint); color: var(--ink); }
+.step[data-state="active"]::before { background: var(--green); animation: blink .8s ease-in-out infinite; }
+.step[data-state="done"] { color: var(--ink); }
+.step[data-state="done"]::before { background: var(--safe); }
+.status { margin: 0; font-size: 14px; font-weight: 800; }
+.status:empty { display: none; }
+
+.picker { display: grid; gap: 8px; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.photo-pick {
+  font: inherit; font-size: 13px; font-weight: 700; color: var(--ink); cursor: pointer; padding: 0; overflow: hidden; text-align: left;
+  display: grid; border-radius: 18px; border: 2px solid var(--line); background: var(--panel);
+}
+.photo-pick:hover { border-color: var(--green); }
+.photo-pick img, .photo-pick .no-photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.photo-pick .no-photo { display: grid; place-items: center; background: var(--well); color: var(--muted); }
+.photo-pick > span:last-child { padding: 6px 10px; overflow-wrap: anywhere; }
+
+.phone-panel { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; padding: 16px; border-radius: 22px; background: var(--well); }
+.qr { flex: none; padding: 10px; border-radius: 18px; background: #FFFFFF; line-height: 0; }
 .qr img, .qr canvas { display: block; max-width: 100%; }
 .phone-steps { flex: 1 1 240px; display: grid; gap: 10px; min-width: 0; }
 .phone-steps .mono { font-size: 12px; overflow-wrap: anywhere; }
 .howto { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
 
-/* Review: date sources, uncertain items, open door */
+/* ---------- Lists ---------- */
+.list { display: grid; gap: 10px; }
+.group { display: grid; gap: 10px; margin-bottom: 20px; }
+.group-head { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-body); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.group-head .n { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px; background: var(--panel); color: var(--ink); font-family: var(--font-display); letter-spacing: 0; }
+.empty { padding: 24px; border-radius: 22px; border: 2px dashed var(--line); color: var(--muted); text-align: center; }
+
+/* Review: photo beside the list on computers */
+.review-grid { display: grid; gap: 22px; align-items: start; }
+.review-list { display: grid; gap: 12px; }
+.rrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) 168px auto 38px; gap: 10px; align-items: center;
+  padding: 14px; border-radius: 22px; background: var(--panel); box-shadow: var(--shadow); border: 2px solid transparent;
+}
+.rrow.uncertain { border-color: color-mix(in srgb, var(--soon) 55%, transparent); }
+.rrow:hover, .rrow:focus-within { border-color: var(--green); }
+.rname { display: grid; gap: 4px; }
+.rmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.condition { font-size: 13px; }
 .source { font-size: 12px; color: var(--muted); }
-.warn-note { font-size: 13px; font-weight: 700; color: var(--soon); }
-.check-tag { border-color: var(--soon); color: var(--soon); }
-.rrow.uncertain { border-color: color-mix(in srgb, var(--soon) 60%, var(--line)); }
+.warn-note { font-size: 13px; font-weight: 800; color: var(--soon); }
+.missing { display: grid; gap: 8px; }
+.missing .note { margin-bottom: 4px; }
+.check { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 20px; background: var(--panel); box-shadow: var(--shadow); cursor: pointer; }
+.check span { font-weight: 800; }
+.check small { color: var(--muted); font-weight: 400; }
+.check input { width: 20px; height: 20px; accent-color: var(--green); flex: none; }
+.save-bar {
+  position: sticky; bottom: 0; display: grid;
+  padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(transparent, var(--sky) 35%);
+}
+
 .door-warn {
   --c: var(--bad);
-  display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px;
-  background: color-mix(in srgb, var(--bad) 12%, var(--panel)); border: 1.5px solid var(--bad);
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 22px;
+  background: color-mix(in srgb, var(--bad) 12%, var(--panel)); border: 2px solid var(--bad);
 }
 .door-warn .led { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--bad); box-shadow: 0 0 12px 2px color-mix(in srgb, var(--bad) 60%, transparent); animation: blink 1s ease-in-out infinite; }
 
-/* Home: secondary nav card */
-.nav-card {
-  font: inherit; color: var(--ink); text-align: left; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 18px 22px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--panel);
+/* Photo with coloured squares; the wrapper hugs the image so the squares line up */
+.photo-block { display: grid; gap: 10px; }
+.photo-wrap { position: relative; width: fit-content; max-width: 100%; border-radius: 26px; overflow: hidden; box-shadow: var(--shadow); }
+.photo-wrap img { display: block; max-width: 100%; max-height: 70vh; width: auto; height: auto; }
+.photo-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.legend-block { display: grid; gap: 8px; }
+.legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; font-size: 13px; font-weight: 800; }
+.legend > span {
+  display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 4px 8px;
+  border-radius: 999px; background: color-mix(in srgb, var(--c) 12%, var(--panel)); text-align: center;
 }
-.nav-card:hover { border-color: var(--accent); }
-.nav-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.nav-card svg { color: var(--accent); flex: none; }
-.nav-title { display: block; font-family: var(--font-display); font-weight: 700; font-size: 22px; }
-.nav-sub { display: block; font-size: 14px; color: var(--muted); }
 
-/* Home: "Check inside" photo picker */
-.picker { display: grid; gap: 8px; }
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-.photo-pick {
-  font: inherit; font-size: 13px; color: var(--ink); cursor: pointer; padding: 0; overflow: hidden; text-align: left;
-  display: grid; border-radius: 12px; border: 1.5px solid var(--line); background: var(--panel);
+/* Eat Me First rows */
+.erow {
+  display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; gap: 14px; align-items: center;
+  padding: 14px 16px 14px 12px; border-radius: 22px; background: var(--panel); box-shadow: var(--shadow);
 }
-.photo-pick:hover { border-color: var(--accent); }
-.photo-pick:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.photo-pick img, .photo-pick .no-photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
-.photo-pick .no-photo { display: grid; place-items: center; background: var(--well); color: var(--muted); }
-.photo-pick > span:last-child { padding: 6px 10px; overflow-wrap: anywhere; }
-.condition { font-size: 13px; color: var(--ink); }
+.erow .bar { align-self: stretch; border-radius: 999px; background: var(--c); }
+.erow .name { font-weight: 800; font-size: 17px; }
+.erow .meta { font-size: 13px; color: var(--muted); }
+.erow .right { display: grid; justify-items: end; gap: 6px; }
+.erow .date { font-size: 13px; color: var(--muted); }
+.erow .actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.erow .edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.erow .edit .field { width: auto; padding: 7px 12px; }
 
-/* Food & your body */
-.ing .times { color: var(--muted); font-size: 12px; }
-.ai-summary { margin: 0; font-size: 17px; max-width: 60ch; }
-.ai-summary:empty { display: none; }
-.food-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-.food-card { display: grid; gap: 10px; align-content: start; padding: 18px; border-radius: 16px; background: var(--panel); border: 1.5px solid var(--line); }
-.food-card p { margin: 0; }
-.food-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
-.food-head h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 21px; }
-.facts { margin: 0; display: grid; gap: 4px; font-size: 14px; }
-.facts dt { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 4px; }
-.facts dd { margin: 0; }
-.facts dd.warn { color: var(--ink); padding-left: 10px; border-left: 3px solid var(--soon); }
-
-/* Recipes */
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.grow { flex: 1 1 240px; width: auto; }
-.mode { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: var(--well); border: 1.5px solid var(--line); width: fit-content; max-width: 100%; }
-.seg { font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; border: 0; border-radius: 8px; padding: 8px 14px; background: transparent; color: var(--muted); }
-.seg[aria-selected="true"] { background: var(--ink); color: var(--ice); }
-.prefs { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { font: inherit; font-size: 14px; cursor: pointer; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); }
-.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--ice); }
-:is(.seg, .chip):focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* ---------- Recipes ---------- */
 .uses { display: flex; flex-wrap: wrap; gap: 6px; }
-.ing { font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); }
-.ing.soon { border-color: color-mix(in srgb, var(--soon) 60%, var(--line)); background: color-mix(in srgb, var(--soon) 14%, var(--panel)); }
+.ing { background: var(--panel); border: 2px solid var(--line); }
+.ing.soon { border-color: color-mix(in srgb, var(--soon) 55%, var(--line)); background: color-mix(in srgb, var(--soon) 14%, var(--panel)); }
 .ing.pantry { border-style: dashed; color: var(--muted); }
-.ing.buy { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
-.recipes { display: grid; gap: 14px; }
-.recipe { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 18px; padding: 16px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 18px; }
+.ing.buy { border-color: color-mix(in srgb, var(--green) 50%, var(--line)); background: var(--mint); }
+.ing .times { color: var(--muted); font-size: 12px; font-weight: 600; }
+.recipes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 16px; }
+.recipe { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 18px; padding: 18px; border-radius: 28px; background: var(--panel); box-shadow: var(--shadow); }
 .recipe figure { margin: 0; display: grid; gap: 6px; align-content: start; }
-.recipe canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 1; border-radius: 14px; }
-.recipe figcaption { font-size: 12px; color: var(--muted); }
+.recipe canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 1; border-radius: 50%; }
+.recipe figcaption { font-size: 12px; color: var(--muted); text-align: center; }
 .rbody { display: grid; gap: 10px; align-content: start; }
-.rbody h3 { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.rbody h3 { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.15; margin: 0; }
 .rbody .why { margin: 0; color: var(--muted); font-size: 14px; }
-.rmeta2 { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-data); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.rmeta2 b { color: var(--ink); font-weight: 500; }
-.recipe summary { cursor: pointer; font-weight: 700; font-size: 14px; color: var(--accent); }
-.recipe summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.rmeta2 { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rmeta2 b { color: var(--ink); font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+.recipe summary { cursor: pointer; font-weight: 800; font-size: 14px; color: var(--green); }
+.recipe summary:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 6px; }
 .recipe ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
 
+/* ---------- Food & your body ---------- */
+.ai-summary { margin: 0; font-size: 18px; font-weight: 700; max-width: 60ch; }
+.ai-summary:empty { display: none; }
+.food-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.food-card { display: grid; gap: 10px; align-content: start; padding: 20px; border-radius: 28px; background: var(--panel); box-shadow: var(--shadow); }
+.food-card:nth-child(3n + 2) { background: color-mix(in srgb, var(--mint) 60%, var(--panel)); }
+.food-card:nth-child(3n + 3) { background: color-mix(in srgb, var(--sky-deep) 45%, var(--panel)); }
+.food-card p { margin: 0; }
+.food-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.food-head h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 22px; }
+.facts { margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.facts dt { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 4px; }
+.facts dd { margin: 0; }
+.facts dd.warn { padding-left: 12px; border-left: 4px solid var(--soon); border-radius: 2px; }
+
+/* ---------- Popup and toast ---------- */
+.modal {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  background: color-mix(in srgb, #0B2A22 50%, transparent);
+}
+.modal-card {
+  width: min(380px, 100%); display: grid; gap: 10px; padding: 24px; border-radius: 30px;
+  background: var(--panel); box-shadow: 0 16px 48px rgba(0, 0, 0, .25);
+}
+.modal-card h2 { font-size: 21px; }
+.modal-card p { margin: 0; color: var(--muted); font-size: 15px; }
+.warn-badge { justify-self: start; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 4px 12px; border-radius: 999px; color: #12352C; background: color-mix(in srgb, var(--soon) 35%, #FFFFFF); }
 .toast {
-  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 5;
-  background: var(--ink); color: var(--ice); padding: 12px 18px; border-radius: 12px; font-size: 14px; max-width: calc(100% - 32px);
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 25;
+  background: var(--forest); color: #FFFFFF; font-weight: 700; padding: 12px 20px; border-radius: 999px; font-size: 14px;
+  max-width: calc(100% - 32px); box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
 }
 
+/* ---------- Computer layout ---------- */
+@media (min-width: 900px) {
+  .home-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+  .review-grid:has(.photo-block:not([hidden])) { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+  .photo-block { position: sticky; top: 16px; }
+  .eat-title { font-size: 40px; }
+}
+
+/* ---------- Phones ---------- */
 @media (max-width: 560px) {
-  .rrow { grid-template-columns: minmax(0, 1fr) auto 36px; }
+  .rrow { grid-template-columns: minmax(0, 1fr) auto 38px; }
   .rrow .rname { grid-column: 1 / -1; }
   .add-grid { grid-template-columns: minmax(0, 1fr); }
-  .erow { grid-template-columns: 6px minmax(0, 1fr); }
+  .erow { grid-template-columns: 8px minmax(0, 1fr); }
   .erow .right { grid-column: 2; justify-items: start; }
   .erow .actions, .erow .edit { justify-content: flex-start; }
   .recipe { grid-template-columns: minmax(0, 1fr); }
-  .recipe canvas { max-width: 240px; }
+  .recipe canvas { max-width: 200px; justify-self: center; }
   .readings { grid-template-columns: minmax(0, 1fr); }
+  .logo-name { font-size: 24px; }
+  .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .eat-btn { padding-right: 72px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- App header: the name, and a back button on inner screens -->
+<header class="app-header">
+  <div class="app-header-inner">
+    <button class="header-back" id="header-back" type="button" aria-label="Back to home" hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="logo">
+      <span class="logo-badge">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
+      </span>
+      <span class="logo-name">ChillCheck</span>
+    </div>
+  </div>
+</header>
+
 <div class="app">
 
   <!-- Sensor alerts: shown on every screen while a problem lasts -->
   <div class="alerts" id="alerts" aria-live="assertive"></div>
 
   <!-- SETUP: sign in + pair the fridge with its device code -->
-  <section class="screen" id="screen-setup" hidden>
-    <div class="brand">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
-      ChillCheck
+  <section class="screen narrow" id="screen-setup" hidden>
+    <div>
+      <h1>Pair your fridge</h1>
+      <p class="lead">Sign in, then enter the device code from the sticker inside your fridge door.</p>
     </div>
-    <h1>Pair your fridge</h1>
-    <p class="lead">Sign in, then enter the device code from the sticker inside your fridge door.</p>
     <form class="card form" id="setup-form" novalidate>
       <div class="field-group">
         <label for="user-name">Your name</label>
@@ -346,7 +462,6 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
       <div class="field-group">
         <label for="device-code">Device code</label>
         <input class="field mono" id="device-code" placeholder="CC-XXXX-XXXX" autocapitalize="characters" spellcheck="false" maxlength="12">
-        <small class="hint">Every fridge has its own code. There is no default password.</small>
       </div>
       <p class="error" id="setup-error" role="alert" hidden></p>
       <button class="btn primary" type="submit">Pair fridge</button>
@@ -356,89 +471,93 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
 
   <!-- HOME -->
   <section class="screen" id="screen-home" hidden>
-    <div class="topbar">
-      <div class="brand">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>
-        ChillCheck
+    <div class="hello">
+      <div>
+        <h1 id="hello">Hi</h1>
+        <p class="fridge-line">Fridge <b class="mono" id="device-label"></b> · <span id="last-scan"></span></p>
       </div>
       <button class="link" id="unpair" type="button">Unpair fridge</button>
     </div>
-    <div>
-      <h1 id="hello">Hi</h1>
-      <p class="fridge-line">Fridge <b class="mono" id="device-label"></b> · <span id="last-scan"></span></p>
+
+    <div class="home-grid">
+      <div class="col">
+        <button class="eat-btn" id="open-eat" type="button">
+          <span class="eat-title">Eat Me First</span>
+          <span class="eat-sub" id="eat-sub"></span>
+          <span class="counts" id="eat-counts"></span>
+          <span class="eat-arrow" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </button>
+
+        <div class="nav-pair">
+          <button class="nav-card" id="open-recipes" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>
+            </span>
+            <span class="nav-title">Recipes</span>
+          </button>
+          <button class="nav-card sky" id="open-health" type="button">
+            <span class="nav-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>
+            </span>
+            <span class="nav-title">Food &amp; your body</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="col">
+        <section class="card" aria-labelledby="sensor-title">
+          <h2 id="sensor-title">Fridge sensors</h2>
+          <div class="readings">
+            <div class="reading safe" id="sensor-temp-box">
+              <span class="reading-label"><span class="dot"></span>Temperature</span>
+              <span class="reading-value" id="sensor-temp"></span>
+              <span class="reading-text" id="sensor-temp-text"></span>
+            </div>
+            <div class="reading safe" id="sensor-door-box">
+              <span class="reading-label"><span class="dot"></span>Door</span>
+              <span class="reading-value" id="sensor-door"></span>
+              <span class="reading-text" id="sensor-door-text"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card scan" aria-labelledby="scan-title">
+          <h2 id="scan-title">Scan your food</h2>
+          <ol class="steps" id="scan-steps" aria-label="Scan progress"></ol>
+          <div class="btn-row">
+            <button class="btn primary" id="check-inside" type="button">Check inside</button>
+            <button class="btn" id="scan-photo" type="button">Take a photo</button>
+            <button class="btn" id="phone-cam" type="button">Use my phone's camera</button>
+          </div>
+          <div class="picker" id="inside-picker" hidden>
+            <p class="note">Pick the photo the fridge camera takes:</p>
+            <div class="photo-grid" id="photo-grid"></div>
+          </div>
+          <div class="phone-panel" id="phone-panel" hidden>
+            <div class="qr" id="phone-qr"></div>
+            <div class="phone-steps">
+              <ol class="howto">
+                <li>Point your phone's camera at the QR code and open the link.</li>
+                <li>Sign in to Claude with the same account as on this computer.</li>
+                <li>Tap <b>Take a photo</b>. Your phone's camera opens.</li>
+                <li>Check the dates and tap <b>Save</b>. The list on this computer updates by itself.</li>
+              </ol>
+              <p class="note mono" id="phone-link"></p>
+            </div>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
+          <p class="status" id="scan-status" role="status"></p>
+        </section>
+
+        <button class="link" id="add-by-hand" type="button">Add an item by hand</button>
+      </div>
     </div>
-
-    <button class="eat-btn" id="open-eat" type="button">
-      <span class="eat-title">Eat Me First</span>
-      <span class="eat-sub" id="eat-sub"></span>
-      <span class="counts" id="eat-counts"></span>
-      <svg class="eat-arrow" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
-
-    <button class="nav-card" id="open-recipes" type="button">
-      <span><span class="nav-title">Recipes</span><span class="nav-sub">Ideas from what's in your fridge, or anything you crave</span></span>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
-
-    <button class="nav-card" id="open-health" type="button">
-      <span><span class="nav-title">Food &amp; your body</span><span class="nav-sub">What the food you eat most does for you, and how much is enough</span></span>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
-
-    <section class="card" aria-labelledby="sensor-title">
-      <h2 id="sensor-title">Fridge sensors</h2>
-      <div class="readings">
-        <div class="reading safe" id="sensor-temp-box">
-          <span class="reading-label"><span class="dot"></span>Temperature</span>
-          <span class="reading-value mono" id="sensor-temp"></span>
-          <span class="reading-text" id="sensor-temp-text"></span>
-        </div>
-        <div class="reading safe" id="sensor-door-box">
-          <span class="reading-label"><span class="dot"></span>Door</span>
-          <span class="reading-value" id="sensor-door"></span>
-          <span class="reading-text" id="sensor-door-text"></span>
-        </div>
-      </div>
-      <p class="note">If the temperature or the door stays wrong for 10 minutes, you get an alert. The door closes itself after 60 seconds. <span id="sensor-source"></span></p>
-    </section>
-
-    <section class="card scan" aria-labelledby="scan-title">
-      <h2 id="scan-title">Scan your food</h2>
-      <p>The fridge camera takes a photo every time the door closes. You can also use your phone's camera.</p>
-      <ol class="steps" id="scan-steps" aria-label="Scan progress"></ol>
-      <div class="row">
-        <button class="btn primary" id="check-inside" type="button">Check inside</button>
-        <button class="btn" id="scan-photo" type="button">Take a photo</button>
-        <button class="btn" id="phone-cam" type="button">Use my phone's camera</button>
-      </div>
-      <div class="picker" id="inside-picker" hidden>
-        <p class="note">Pick the photo the fridge camera takes:</p>
-        <div class="photo-grid" id="photo-grid"></div>
-      </div>
-      <div class="phone-panel" id="phone-panel" hidden>
-        <div class="qr" id="phone-qr"></div>
-        <div class="phone-steps">
-          <ol class="howto">
-            <li>Point your phone's camera at the QR code and open the link.</li>
-            <li>Sign in to Claude with the same account as on this computer.</li>
-            <li>Tap <b>Take a photo</b>. Your phone's camera opens.</li>
-            <li>Check the dates and tap <b>Save</b>. The list on this computer updates by itself.</li>
-          </ol>
-          <p class="note mono" id="phone-link"></p>
-        </div>
-      </div>
-      <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
-      <p class="status" id="scan-status" role="status"></p>
-      <p class="note">“Take a photo” opens your phone's camera. Photograph the open fridge, any food (on the table, from the shop), a shop bill or a package's printed date. The AI works out which one it is. Demo: there is no fridge camera yet, so “Check inside” uses the photos from the photos folder.</p>
-      <p class="note" id="sync-status"></p>
-    </section>
-
-    <button class="link" id="add-by-hand" type="button">Add an item by hand</button>
   </section>
 
   <!-- REVIEW: check what the scan found and fix the dates -->
   <section class="screen" id="screen-review" hidden>
-    <button class="back" type="button" data-go="home">← Home</button>
     <div>
       <h1>Check the dates</h1>
       <p class="lead" id="review-lead"></p>
@@ -447,36 +566,39 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
       <span class="led"></span>
       <span><b>The fridge door was open in this photo.</b> Close it to keep your food cold. Your food list is still updated below.</span>
     </div>
-    <div class="photo-block" id="review-photo-wrap" hidden>
-      <div class="photo-wrap">
-        <img id="review-photo" alt="Photo from this scan, with a coloured square around each food">
-        <svg id="review-overlay" aria-hidden="true"></svg>
-      </div>
-      <div class="legend-block" id="review-legend" hidden>
-        <div class="mode" role="group" aria-label="Which squares to show">
-          <button class="seg" id="boxes-attention" type="button" aria-selected="true">Needs attention</button>
-          <button class="seg" id="boxes-all" type="button" aria-selected="false">All food</button>
+    <div class="review-grid">
+      <div class="photo-block" id="review-photo-wrap" hidden>
+        <div class="photo-wrap">
+          <img id="review-photo" alt="Photo from this scan, with a coloured square around each food">
+          <svg id="review-overlay" aria-hidden="true"></svg>
         </div>
-        <p class="legend">
-          <span class="expired"><span class="dot"></span>Expired</span>
-          <span class="soon"><span class="dot"></span>Eat soon</span>
-          <span class="unknown"><span class="dot"></span>Date unrecognised</span>
-          <span class="safe"><span class="dot"></span>Safe</span>
-        </p>
-        <p class="note">Point at or tap an item in the list below to find it in the photo. <span id="legend-note">Squares are placed by the AI and can be slightly off.</span></p>
+        <div class="legend-block" id="review-legend" hidden>
+          <div class="mode" role="group" aria-label="Which squares to show">
+            <button class="seg" id="boxes-attention" type="button" aria-selected="true">Needs attention</button>
+            <button class="seg" id="boxes-all" type="button" aria-selected="false">All food</button>
+          </div>
+          <p class="legend">
+            <span class="expired"><span class="dot"></span>Expired</span>
+            <span class="soon"><span class="dot"></span>Eat soon</span>
+            <span class="unknown"><span class="dot"></span>Date unrecognised</span>
+            <span class="safe"><span class="dot"></span>Safe</span>
+          </p>
+          <p class="note" id="legend-note"></p>
+        </div>
+      </div>
+      <div class="review-list">
+        <div class="list" id="review-list"></div>
+        <button class="btn" id="review-add" type="button">+ Add an item the camera missed</button>
+        <div id="review-missing"></div>
       </div>
     </div>
-    <div class="list" id="review-list"></div>
-    <button class="btn" id="review-add" type="button">+ Add an item the camera missed</button>
-    <div id="review-missing"></div>
     <div class="save-bar">
       <button class="btn primary" id="review-save" type="button">Save food list</button>
     </div>
   </section>
 
   <!-- EAT ME FIRST -->
-  <section class="screen" id="screen-eat" hidden>
-    <button class="back" type="button" data-go="home">← Home</button>
+  <section class="screen narrow" id="screen-eat" hidden>
     <div>
       <h1>Eat Me First</h1>
       <p class="lead" id="eat-lead"></p>
@@ -485,7 +607,6 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
     <input type="file" id="label-input" accept="image/*" capture="environment" hidden>
     <form class="card form" id="add-form" novalidate>
       <h2>Add an item by hand</h2>
-      <p class="note">For food the camera can't see or didn't recognize.</p>
       <div class="add-grid">
         <div class="field-group">
           <label for="add-name">Food</label>
@@ -507,7 +628,6 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
 
   <!-- RECIPES -->
   <section class="screen" id="screen-recipes" hidden>
-    <button class="back" type="button" data-go="home">← Home</button>
     <div>
       <h1>Recipes</h1>
       <p class="lead" id="mode-hint"></p>
@@ -523,7 +643,7 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
         <input class="field grow" id="pref-text" type="text" maxlength="200">
         <button class="btn primary" id="gen-recipes" type="button">Get recipes</button>
       </div>
-      <p class="note" id="rec-status">Example recipes. Pick your preferences and tap “Get recipes”.</p>
+      <p class="note" id="rec-status"></p>
     </section>
     <div class="list">
       <h2 class="group-head">Eat these first</h2>
@@ -537,7 +657,6 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
 
   <!-- FOOD & YOUR BODY -->
   <section class="screen" id="screen-health" hidden>
-    <button class="back" type="button" data-go="home">← Home</button>
     <div>
       <h1>Food &amp; your body</h1>
       <p class="lead">What the food you eat most does for you, what it gives you, and how often is good before it becomes too much.</p>
@@ -549,10 +668,10 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
     <div class="row">
       <button class="btn primary" id="health-ask" type="button">Get AI advice</button>
     </div>
-    <p class="note" id="health-status">Example advice. Tap “Get AI advice” for advice on your own food.</p>
+    <p class="note" id="health-status"></p>
     <p class="ai-summary" id="health-summary"></p>
     <div class="food-cards" id="health-cards"></div>
-    <p class="note">General information, not medical advice. If you have a health condition, ask your doctor what suits you.</p>
+    <p class="note">Not medical advice.</p>
   </section>
 
 </div>
@@ -561,7 +680,7 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-h
     <span class="warn-badge">Can't check this photo</span>
     <h2 id="warn-title"></h2>
     <p id="warn-text"></p>
-    <div class="row">
+    <div class="btn-row">
       <button class="btn primary" id="warn-retry" type="button">Try again</button>
       <button class="btn" id="warn-close" type="button">Close</button>
     </div>
@@ -1411,7 +1530,7 @@ Reply with only JSON:
     Scanner.ready.then(() => {
       if (Scanner.sample) return;
       $("gen-recipes").hidden = true;
-      $("rec-status").textContent = "Example recipes. AI recipes work when the app is open on the shared claude.ai link.";
+      $("rec-status").textContent = "Example recipes.";
     });
     // Redraw the dish pictures when the theme changes so their background matches
     const redraw = () => { if (!$("screen-recipes").hidden) renderList(); };
@@ -1532,7 +1651,7 @@ Reply with only JSON: {"summary": "", "foods": [{"name": "", "helps": "", "nutri
     Scanner.ready.then(() => {
       if (Scanner.sample) return;
       $("health-ask").hidden = true;
-      $("health-status").textContent = "Example advice. AI advice works when the app is open on the shared claude.ai link.";
+      $("health-status").textContent = "Example advice.";
     });
   }
 
@@ -1599,7 +1718,6 @@ const Sensors = (() => {
       : s.doorSecs >= SENSOR_RULES.autoCloseSec
         ? `Open for ${duration(s.doorSecs)}. Buzzer on: something is blocking it.`
         : `Open for ${duration(s.doorSecs)}. Closes itself at ${SENSOR_RULES.autoCloseSec} s.`;
-    $("sensor-source").textContent = s.live ? "Live from your fridge." : "Simulated reading until the fridge hardware is connected.";
 
     $("alerts").replaceChildren(...Object.entries(active).map(([kind, text]) =>
       el("div", { class: "alert-item", role: "alert" }, el("span", { class: "dot" }), el("span", {}, text))));
@@ -1628,10 +1746,11 @@ const SCREENS = ["setup", "home", "review", "eat", "recipes", "health"];
 const render = { recipes: () => Recipes.render(), health: () => Health.render() };
 function go(name) {
   SCREENS.forEach(s => { $("screen-" + s).hidden = s !== name; });
+  $("header-back").hidden = name === "home" || name === "setup";
   render[name]?.();
   window.scrollTo(0, 0);
 }
-document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+$("header-back").addEventListener("click", () => go("home"));
 
 /* ---------- Setup ---------- */
 const CODE_RE = /^CC-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
@@ -1905,7 +2024,7 @@ render.review = () => {
 // Squares on the photo around each food, in its status colour. No names, to keep the photo calm:
 // by default only food that needs attention is marked, and the item under the pointer in the list
 // is highlighted while the rest fade.
-const BOX_COLORS = { safe: "#2FB36B", soon: "#F5B82E", expired: "#F0524A", unknown: "#A877FF" };
+const BOX_COLORS = { safe: "#B5CC8E", soon: "#F5D76E", expired: "#F0708C", unknown: "#A877FF" };
 let boxFilter = "attention";   // "attention" or "all"
 let highlightId = null;
 
@@ -1915,10 +2034,8 @@ async function tightenSquares(d, photo) {
   note.textContent = "Tightening the squares…";
   try {
     await Scanner.refineBoxes(photo, d.rows, () => { if (draft === d) renderOverlay(); });
-    if (draft === d) note.textContent = "Squares placed by the AI, checked close up. They can still be slightly off.";
-  } catch {
-    if (draft === d) note.textContent = "Squares placed by the AI. They can be slightly off.";
-  }
+  } catch { /* keep the first squares */ }
+  if (draft === d) note.textContent = "";
 }
 function svgEl(tag, attrs, text) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
@@ -2174,11 +2291,7 @@ Store.onRemoteChange(() => {
   if (screen !== "review") render[screen]?.();   // never wipe a scan the user is checking
   toast("Updated from your other device");
 });
-Store.connect().then(ok => {
-  $("sync-status").textContent = ok
-    ? "Live sync is on: your phone and computer show the same list."
-    : "Live sync works on the shared claude.ai link.";
-});
+Store.connect();
 
 /* ---------- Start ---------- */
 Scanner.init();

@@ -12,10 +12,11 @@ const SCREENS = ["setup", "home", "review", "eat", "recipes", "health"];
 const render = { recipes: () => Recipes.render(), health: () => Health.render() };
 function go(name) {
   SCREENS.forEach(s => { $("screen-" + s).hidden = s !== name; });
+  $("header-back").hidden = name === "home" || name === "setup";
   render[name]?.();
   window.scrollTo(0, 0);
 }
-document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+$("header-back").addEventListener("click", () => go("home"));
 
 /* ---------- Setup ---------- */
 const CODE_RE = /^CC-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
@@ -289,7 +290,7 @@ render.review = () => {
 // Squares on the photo around each food, in its status colour. No names, to keep the photo calm:
 // by default only food that needs attention is marked, and the item under the pointer in the list
 // is highlighted while the rest fade.
-const BOX_COLORS = { safe: "#2FB36B", soon: "#F5B82E", expired: "#F0524A", unknown: "#A877FF" };
+const BOX_COLORS = { safe: "#B5CC8E", soon: "#F5D76E", expired: "#F0708C", unknown: "#A877FF" };
 let boxFilter = "attention";   // "attention" or "all"
 let highlightId = null;
 
@@ -299,10 +300,8 @@ async function tightenSquares(d, photo) {
   note.textContent = "Tightening the squares…";
   try {
     await Scanner.refineBoxes(photo, d.rows, () => { if (draft === d) renderOverlay(); });
-    if (draft === d) note.textContent = "Squares placed by the AI, checked close up. They can still be slightly off.";
-  } catch {
-    if (draft === d) note.textContent = "Squares placed by the AI. They can be slightly off.";
-  }
+  } catch { /* keep the first squares */ }
+  if (draft === d) note.textContent = "";
 }
 function svgEl(tag, attrs, text) {
   const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
@@ -558,11 +557,7 @@ Store.onRemoteChange(() => {
   if (screen !== "review") render[screen]?.();   // never wipe a scan the user is checking
   toast("Updated from your other device");
 });
-Store.connect().then(ok => {
-  $("sync-status").textContent = ok
-    ? "Live sync is on: your phone and computer show the same list."
-    : "Live sync works on the shared claude.ai link.";
-});
+Store.connect();
 
 /* ---------- Start ---------- */
 Scanner.init();

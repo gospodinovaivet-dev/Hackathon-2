@@ -57,7 +57,6 @@ const Sensors = (() => {
       : s.doorSecs >= SENSOR_RULES.autoCloseSec
         ? `Open for ${duration(s.doorSecs)}. Buzzer on: something is blocking it.`
         : `Open for ${duration(s.doorSecs)}. Closes itself at ${SENSOR_RULES.autoCloseSec} s.`;
-    $("sensor-source").textContent = s.live ? "Live from your fridge." : "Simulated reading until the fridge hardware is connected.";
 
     $("alerts").replaceChildren(...Object.entries(active).map(([kind, text]) =>
       el("div", { class: "alert-item", role: "alert" }, el("span", { class: "dot" }), el("span", {}, text))));

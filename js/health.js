@@ -104,7 +104,7 @@ Reply with only JSON: {"summary": "", "foods": [{"name": "", "helps": "", "nutri
     Scanner.ready.then(() => {
       if (Scanner.sample) return;
       $("health-ask").hidden = true;
-      $("health-status").textContent = "Example advice. AI advice works when the app is open on the shared claude.ai link.";
+      $("health-status").textContent = "Example advice.";
     });
   }
 
