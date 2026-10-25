@@ -11,7 +11,7 @@ window.ChillAI = (() => {
   async function json(prompt,{images=[]}={}) {
     const image=images[0]?await imageData(images[0]):null;
     const {data,error}=await ChillAPI.client().functions.invoke('chill-ai',{body:{prompt,image}});
-    if(error){let message='Live AI is unavailable. Deploy chill-ai and configure ANTHROPIC_API_KEY and ANTHROPIC_MODEL in Supabase Edge Function secrets.';
+    if(error){let message='Live AI is unavailable. Deploy chill-ai and configure its AI provider secrets (Anthropic or Gemini) in Supabase Edge Function secrets.';
       try {const body=await error.context.json();message=body.error||message;}catch{}
       throw Error(message);
     }
