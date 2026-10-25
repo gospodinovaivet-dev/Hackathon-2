@@ -31,6 +31,15 @@ async function request(body={prompt:'Scan food',image:null},auth='Bearer test-us
  scenario='blocked';res=await request();assert.equal(res.status,502);
  scenario='provider-error';res=await request();assert.equal(res.status,502);assert.match((await res.json()).error,/busy/);
  scenario='invalid-json';res=await request();assert.equal(res.status,502);
+ // Split routing: photo requests use AI_PROVIDER_SCAN, text-only requests AI_PROVIDER_CHAT; both fall back to AI_PROVIDER.
+ delete env.AI_PROVIDER;Object.assign(env,{AI_PROVIDER_SCAN:'anthropic',AI_PROVIDER_CHAT:'gemini'});scenario='ok';
+ res=await request({prompt:'Scan food',image:'aGVsbG8='});assert.equal(res.status,200);assert.match(sent[0].url,/api\.anthropic\.com/);assert.equal(sent[0].body.messages[0].content[0].type,'image');
+ res=await request({prompt:'Recipe idea'});assert.equal(res.status,200);assert.match(sent[0].url,/generativelanguage\.googleapis\.com/);
+ delete env.ANTHROPIC_API_KEY;res=await request({prompt:'Scan food',image:'aGVsbG8='});assert.equal(res.status,503);assert.match((await res.json()).error,/ANTHROPIC_API_KEY/);assert.equal(calls.length,1);
+ res=await request({prompt:'Recipe idea'});assert.equal(res.status,200);assert.match(sent[0].url,/generativelanguage/);env.ANTHROPIC_API_KEY='test-only';
+ delete env.AI_PROVIDER_SCAN;env.AI_PROVIDER='gemini';res=await request({prompt:'Scan food',image:'aGVsbG8='});assert.equal(res.status,200);assert.match(sent[0].url,/generativelanguage/);
+ env.AI_PROVIDER_CHAT='nope';res=await request({prompt:'Recipe idea'});assert.equal(res.status,503);assert.match((await res.json()).error,/AI_PROVIDER_CHAT/);assert.equal(calls.length,1);
+ delete env.AI_PROVIDER_CHAT;
  delete env.AI_PROVIDER;scenario='ok';res=await request();assert.equal(res.status,200);assert.match(sent[0].url,/api\.anthropic\.com/);
- console.log('PASS: Edge Function authentication, missing secrets, payload validation, quota, provider errors and JSON parsing for Anthropic and Gemini.');
+ console.log('PASS: Edge Function authentication, missing secrets, payload validation, quota, provider errors and JSON parsing for Anthropic, Gemini and photo/text provider routing.');
 })().catch(e=>{console.error(e);process.exit(1)});

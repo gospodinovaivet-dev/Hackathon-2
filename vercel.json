@@ -1,0 +1,5 @@
+{
+  "framework": null,
+  "buildCommand": "python3 scripts/setup.py && node build.js --configured && mkdir -p public && cp dist/chillcheck.local.html public/index.html",
+  "outputDirectory": "public"
+}
