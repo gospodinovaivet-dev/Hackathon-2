@@ -16,7 +16,7 @@ async function request(body={prompt:'Scan food',image:null},auth='Bearer test-us
  scenario='quota';res=await request();assert.equal(res.status,429);assert.equal(calls.length,2);
  scenario='provider-error';res=await request();assert.equal(res.status,502);
  scenario='invalid-json';res=await request();assert.equal(res.status,502);
- scenario='ok';res=await request();assert.equal(res.status,200);assert.deepEqual(await res.json(),{items:[]});assert.equal(calls.length,3);assert.match(sent[0].url,/api\.anthropic\.com/);
+ scenario='ok';res=await request();assert.equal(res.status,200);assert.deepEqual(await res.json(),{items:[]});assert.equal(calls.length,3);assert.match(sent[0].url,/api\.anthropic\.com/);assert.deepEqual(sent[0].body.output_config,{effort:'low'});assert.equal(sent[0].body.max_tokens,6000);
  // Gemini provider: same auth, quota and validation path; only the upstream call differs.
  env.AI_PROVIDER='unknown';res=await request();assert.equal(res.status,503);assert.equal(calls.length,1);
  env.AI_PROVIDER='Gemini';res=await request();assert.equal(res.status,503);assert.match((await res.json()).error,/GEMINI_API_KEY/);assert.equal(calls.length,1);

@@ -7,7 +7,8 @@ const providers:Record<string,any>={
  anthropic:{key:'ANTHROPIC_API_KEY',model:'ANTHROPIC_MODEL',
   request(key:string,model:string,prompt:string,image:string|null){const content:any[]=[{type:'text',text:prompt}];
    if(image)content.unshift({type:'image',source:{type:'base64',media_type:'image/jpeg',data:image}});
-   return {url:'https://api.anthropic.com/v1/messages',headers:{'x-api-key':key,'anthropic-version':'2023-06-01'},body:{model,max_tokens:6000,system,messages:[{role:'user',content}]}};},
+   // Low effort keeps thinking short, so cheap models stay cheap and JSON fits within max_tokens.
+   return {url:'https://api.anthropic.com/v1/messages',headers:{'x-api-key':key,'anthropic-version':'2023-06-01'},body:{model,max_tokens:6000,output_config:{effort:'low'},system,messages:[{role:'user',content}]}};},
   text:(answer:any)=>answer.content?.filter((b:any)=>b.type==='text').map((b:any)=>b.text).join('')||''},
  gemini:{key:'GEMINI_API_KEY',model:'GEMINI_MODEL',
   request(key:string,model:string,prompt:string,image:string|null){const parts:any[]=[{text:prompt}];
