@@ -239,3 +239,52 @@ button:focus-visible, summary:focus-visible { outline:3px solid var(--green); ou
 
 /* The recipe assistant stays beside the conversation instead of walking. */
 .recipe-chat{gap:0;padding:0;overflow:hidden}.recipe-chat-header{display:flex;align-items:center;gap:18px;padding:20px 24px;background:var(--mint)}.recipe-chat-header h2{margin:0 0 5px}.recipe-chat-header .eyebrow{margin-bottom:4px}.recipe-chat .chef-art *{animation:none!important}.recipe-chat-header>.chef-art{width:72px;height:96px}.recipe-conversation{max-height:340px;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px;scrollbar-gutter:stable}.chat-message{display:flex;align-items:flex-end;gap:10px;max-width:88%;flex-shrink:0}.chat-message>div{background:var(--well);padding:12px 16px;border-radius:18px 18px 18px 4px;min-width:0}.chat-message strong{font-size:12px;color:var(--green)}.chat-message p{margin:4px 0 0;line-height:1.5;font-size:14px;overflow-wrap:anywhere}.chat-message.user{align-self:flex-end}.chat-message.user>div{background:var(--sky-deep);border-radius:18px 18px 4px 18px}.chat-message>.chef-art{width:36px;height:40px}.recipe-composer{padding:18px 24px;border-top:1px solid var(--line);display:grid;gap:12px}.recipe-prompt-chips{display:flex;gap:8px;flex-wrap:wrap}.recipe-prompt-chips .chip{font-size:12px}.recipe-send-row{display:flex;gap:12px;align-items:flex-end}.recipe-send-row .field-group{flex:1;min-width:0}.recipe-send-row .btn{flex:none}.recipe-composer details .btn-row{margin:12px 0;flex-wrap:wrap}.recipe-composer summary{font-size:13px;cursor:pointer}.recipe-composer .field-group>span{font-size:12px}.recipe-composer .field{width:100%}@media(max-width:600px){.recipe-chat-header{padding:16px;gap:12px}.recipe-chat-header h2{font-size:24px}.recipe-chat-header>.chef-art{width:60px;height:80px}.recipe-conversation{padding:14px;max-height:320px}.chat-message{max-width:100%;gap:6px}.chat-message>div{padding:10px 12px}.recipe-composer{padding:14px}.recipe-send-row{flex-direction:column;align-items:stretch}.recipe-send-row .field-group{width:100%}}
+
+/* Header buttons: on hover they turn a soft matcha green and pop up a little */
+.app-header .header-shell .chip,
+.app-header .header-shell .header-actions .btn {
+  transition: transform .28s cubic-bezier(.34, 1.56, .64, 1), background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.app-header .header-shell .chip:hover:not(:disabled):not([aria-current=page]),
+.app-header .header-shell .header-actions .btn:hover:not(:disabled) {
+  background: #DDE8C9; color: #3B4733; transform: translateY(-2px) scale(1.07);
+  box-shadow: 0 6px 14px rgba(59, 71, 51, .18);
+}
+.app-header .header-shell .chip:active:not(:disabled),
+.app-header .header-shell .header-actions .btn:active:not(:disabled) { transform: scale(.96); }
+.app-header .header-shell .brand { transition: transform .28s cubic-bezier(.34, 1.56, .64, 1); }
+.app-header .header-shell .brand:hover:not(:disabled) { transform: scale(1.04); }
+
+/* Login: the headline rises in softly, then the three photos float slowly and tilt a little each way */
+/* Each line rises in slowly (no blur: blur on large text stalls the browser). Afterwards a soft
+   light drifts across "remembered." every few seconds; only its colour moves, so nothing jitters. */
+.auth-title .title-line { display: inline-block; opacity: 0; }
+.auth-title.go .title-line { opacity: 1; animation: title-in 1.5s cubic-bezier(.22, 1, .36, 1) both; }
+.auth-title .title-line.pink-text {
+  background: linear-gradient(100deg, #a84665 0%, #a84665 42%, #ec9bb3 50%, #a84665 58%, #a84665 100%);
+  background-size: 300% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.auth-title.go .title-line.pink-text { animation: title-in 1.5s cubic-bezier(.22, 1, .36, 1) .5s both, shimmer 6s ease-in-out 2.4s infinite; }
+.auth-intro .eyebrow { animation: fade-in 1.2s ease .3s both; }
+@keyframes title-in { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { 0%, 55% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+/* Shown only if the app hasn't started after 3 s, so it no longer flashes on every visit */
+.boot-message { opacity: 0; animation: fade-in .4s ease 3s forwards; }
+.auth-photos .product-photo { animation: float-a 7s ease-in-out infinite; will-change: transform; }
+.auth-photos .product-photo:nth-child(2) { animation-name: float-b; animation-duration: 8s; animation-delay: -2s; }
+.auth-photos .product-photo:nth-child(3) { animation-duration: 7.5s; animation-delay: -4.5s; }
+@keyframes float-a { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+@keyframes float-b { 0%, 100% { transform: translateY(-6px) rotate(2.5deg); } 50% { transform: translateY(6px) rotate(-3deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .auth-title .title-line, .auth-title.go .title-line, .auth-title.go .title-line.pink-text, .auth-intro .eyebrow, .auth-photos .product-photo { animation: none; opacity: 1; }
+  .boot-message { opacity: 1; }
+}
+
+/* Buttons on the pages (Take / upload photo, Scan a receipt, Log opening, View door log…):
+   the same pop as the header buttons; outlined ones also turn a soft matcha green */
+.app .btn { transition: transform .28s cubic-bezier(.34, 1.56, .64, 1), background-color .2s ease, color .2s ease, box-shadow .2s ease; }
+.app .btn:hover:not(:disabled) { transform: translateY(-2px) scale(1.04); box-shadow: 0 6px 14px rgba(59, 71, 51, .16); }
+.app .btn:not(.primary):hover:not(:disabled) { background: #DDE8C9; color: #3B4733; }
+.app .btn:active:not(:disabled) { transform: scale(.96); }

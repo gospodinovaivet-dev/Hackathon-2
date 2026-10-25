@@ -26,3 +26,7 @@ Add private photo storage and server-side AI functions for recognition and recip
 Run migrations through 004. Demo view state lives in memory and resets on reload; saved inventory is selected with View saved fridge. The phone inbox only exposes records to the owning account. Original image blobs are used in local review and sent to the AI function, but not stored as public photos. The catalog bucket is only for shared illustrations.
 
 Run `tests/dashboard.cjs` and `tests/browser.cjs` with Playwright/Chrome, `tests/edge.cjs` with Node 24, and `supabase/tests/scan_integration.sql` against a disposable database after migrations. The edge and browser tests mock network services; they do not prove live deployment or real phone connectivity. The AI deployment handoff is in `docs/AI_SETUP_PROMPT.md`.
+
+## Legacy app with AI (local)
+
+`legacy.html` also has the chef button and an AI connection (`js/ai.js`) through a small local Node server that keeps the Claude key off the browser: put `ANTHROPIC_API_KEY=sk-ant-...` in `.env`, run `npm install` once, then `npm start` (in PowerShell: `npm.cmd start`) and open http://localhost:3000/legacy.html. The React app does not use this server yet.

@@ -17,6 +17,15 @@
   function Auth({onError}) {
     const [mode,setMode]=useState('signin'),[email,setEmail]=useState(''),[password,setPassword]=useState('');
     const [name,setName]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+    // Start the headline animation only once fonts are in and the page has painted; while the page is
+    // still loading the browser draws nothing, and the animation would be over before it showed.
+    const [titleGo,setTitleGo]=useState(false);
+    useEffect(()=>{
+      let alive=true;
+      Promise.race([document.fonts?.ready||Promise.resolve(),new Promise(r=>setTimeout(r,1500))])
+        .then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{if(alive)setTitleGo(true);})));
+      return ()=>{alive=false;};
+    },[]);
     async function submit(e) {
       e.preventDefault();setBusy(true);setMessage('');onError('');
       try {
@@ -30,8 +39,7 @@
     }
     return h('section',{className:'auth-layout'},
       h('div',{className:'auth-intro'},h('span',{className:'eyebrow'},'A little less waste. A little more care.'),
-        h('h1',null,'Good food,',' ',h('span',{className:'pink-text'},'remembered.')),
-        h('p',{className:'lead'},'Your fridge, your leftovers, and a gentle nudge to eat the good stuff first.'),
+        h('h1',{className:'auth-title'+(titleGo?' go':'')},h('span',{className:'title-line'},'Good food,'),' ',h('span',{className:'title-line pink-text'},'remembered.')),
         h('div',{className:'auth-photos'},['Rice-stuffed peppers','Tomatoes','Eggs'].map(name=>h(Picture,{key:name,name})))),
       h('form',{className:'card auth-card',onSubmit:submit},
         h('h2',null,mode==='signup'?'Make yourself at home':'Welcome back'),
@@ -171,13 +179,19 @@
       const context=messages.slice(-6).map(m=>({role:m.role,text:m.text}));
       setMessages(old=>[...old,{role:'user',text:request+(prefs.length?' · '+prefs.join(', '):'')+(shop?' · Extra shopping is okay.':' · Use my fridge and pantry.')}]);setWishes('');setWorking(true);setError('');try{
       const usable=items.filter(i=>Food.status(i)!=='expired');
-      const result=await ChillAI.json(`You are Chef Byte, a friendly robot chef. Continue this recipe conversation, applying the latest request to previous ideas when relevant. Conversation: ${JSON.stringify(context)}. Previous recipe details: ${JSON.stringify((generated||[]).map(r=>({name:r.name,uses:r.uses,steps:r.steps})))}. Suggest 3 recipes. Return JSON {"recipes":[{"name":"","minutes":10,"servings":2,"kcal":400,"why":"","uses":["exact fridge item name"],"extra":["pantry item"],"buy":[],"steps":["step with amounts"]}]}. Prioritize expiring ingredients. Never use expired foods. ${shop?'Shopping is allowed; list missing items in buy.':'Use only available fridge foods and pantry staples; buy must be empty.'} ${ingredient?'Every recipe must include '+ingredient+'.':''} Preferences: ${prefs.join(', ')}. Request: ${request.slice(0,300)}. Available: ${JSON.stringify(usable.map(i=>({name:i.name,quantity:i.qty,days:i.expires?Dates.daysUntil(i.expires):null})))}. Expired, exclude: ${items.filter(i=>Food.status(i)==='expired').map(i=>i.name).join(', ')}. Pantry: oil,salt,pepper,garlic,onion,rice,pasta,oats,flour,spices.`);
+      const result=await ChillAI.json(`You are Chef Byte, a friendly robot chef. Continue this recipe conversation, applying the latest request to previous ideas when relevant. Conversation: ${JSON.stringify(context)}. Previous recipe details: ${JSON.stringify((generated||[]).map(r=>({name:r.name,uses:r.uses,steps:r.steps})))}. Write Chef Byte's answer to the latest request in "reply": friendly, plain text, 1 to 4 short sentences. Suggest 3 recipes when the user wants new or changed ideas (e.g. "something with spinach", "make it dairy-free", "for two people"). When they only ask about the current recipes (e.g. "explain step two") or you need to ask a clarifying question, answer in "reply" and return an empty "recipes" list. Return JSON {"reply":"","recipes":[{"name":"","minutes":10,"servings":2,"kcal":400,"why":"","uses":["exact fridge item name"],"extra":["pantry item"],"buy":[],"steps":["step with amounts"]}]}. Prioritize expiring ingredients. Never use expired foods. ${shop?'Shopping is allowed; list missing items in buy.':'Use only available fridge foods and pantry staples; buy must be empty.'} ${ingredient?'Every recipe must include '+ingredient+'.':''} Preferences: ${prefs.join(', ')}. Request: ${request.slice(0,300)}. Available: ${JSON.stringify(usable.map(i=>({name:i.name,quantity:i.qty,days:i.expires?Dates.daysUntil(i.expires):null})))}. Expired, exclude: ${items.filter(i=>Food.status(i)==='expired').map(i=>i.name).join(', ')}. Pantry: oil,salt,pepper,garlic,onion,rice,pasta,oats,flour,spices.`);
       if(version!==requestVersion.current)return;
-      if(!Array.isArray(result?.recipes)||!result.recipes.length)throw Error('No recipes returned. Try a different request.');
+      const reply=typeof result?.reply==='string'?result.reply.trim().slice(0,1200):'';
       const strings=value=>Array.isArray(value)?value.filter(v=>typeof v==='string').slice(0,20):[];
-      const recipes=result.recipes.slice(0,6).map(r=>({name:String(r.name||'Recipe'),minutes:Number(r.minutes)||0,servings:Number(r.servings)||1,kcal:Number(r.kcal)||0,why:String(r.why||''),uses:strings(r.uses),pantry:strings(r.extra),buy:strings(r.buy),steps:strings(r.steps),photo:ChillData.photo(r.uses?.[0]||'').key}));
-      if(recipes.some(r=>r.uses.some(name=>items.some(i=>sameFood(i.name,name)&&Food.status(i)==='expired'))))throw Error('A suggestion included expired food and was rejected. Please try again.');
-      setGenerated(recipes);setQuick(false);setMessages(old=>[...old,{role:'assistant',text:'I’ve cooked up '+recipes.length+(recipes.length===1?' idea':' ideas')+' for you: '+recipes.map(r=>r.name).join(', ')+'. You’ll find the recipes below. Want them quicker, dairy-free, or for more people? Just ask.'}]);
+      const offered=(Array.isArray(result?.recipes)?result.recipes:[]).filter(r=>r&&typeof r==='object').slice(0,6).map(r=>({name:String(r.name||'Recipe').slice(0,120),minutes:Number(r.minutes)||0,servings:Number(r.servings)||1,kcal:Number(r.kcal)||0,why:String(r.why||'').slice(0,300),uses:strings(r.uses),pantry:strings(r.extra),buy:strings(r.buy),steps:strings(r.steps),photo:ChillData.photo(r.uses?.[0]||'').key}));
+      if(offered.some(r=>r.uses.some(name=>items.some(i=>sameFood(i.name,name)&&Food.status(i)==='expired'))))throw Error('A suggestion included expired food and was rejected. Please try again.');
+      // The rules hold even if the AI ignores them: no shopping unless allowed, and the chosen ingredient must be used
+      const recipes=offered.filter(r=>r.steps.length&&(shop||!r.buy.length)&&(!ingredient||r.uses.some(name=>sameFood(name,ingredient))));
+      if(!reply&&!recipes.length)throw Error(offered.length?'The suggestions did not fit your settings. Please try again.':'No recipes returned. Try a different request.');
+      if(recipes.length){setGenerated(recipes);setQuick(false);}
+      // Claude's own reply; older answers without one get the fixed introduction
+      const text=reply||'I’ve cooked up '+recipes.length+(recipes.length===1?' idea':' ideas')+' for you: '+recipes.map(r=>r.name).join(', ')+'. You’ll find the recipes below. Want them quicker, dairy-free, or for more people? Just ask.';
+      setMessages(old=>[...old,{role:'assistant',text}]);
     }catch(e){if(version===requestVersion.current){setError(e.message);setMessages(old=>[...old,{role:'assistant',text:'I couldn’t finish that request. Your earlier ideas are still here—please try again.',failed:true}]);}}finally{if(version===requestVersion.current)setWorking(false);}}
     const recipes=(generated||ChillData.recipes).filter(r=>(!quick||r.minutes<15)&&(!ingredient||r.uses.some(name=>sameFood(name,ingredient))));
     return h('section',{className:'screen'},h('span',{className:'eyebrow'},'Something lovely from what’s left'),h('h1',null,ingredient?`Cook with ${ingredient}`:'Recipes'),
@@ -360,7 +374,7 @@
     const top=h('header',{className:'app-header'},h('div',{className:'header-shell'},
       btn(h('img',{src:window.CHILLCHECK_LOGO||'assets/brand/chillcheck-header.png',alt:'ChillCheck',className:'brand-logo'}),()=>navigate('home'),{className:'brand','aria-label':'ChillCheck home',disabled:busy||!!draft}),
       fridges.length>0&&h('div',{className:'workspace-toolbar'},
-        h('nav',{'aria-label':'Main navigation'},[['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft})))),
+        h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft})))),
       session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))));
     return h(React.Fragment,null,top,h('main',{className:'app'},
       error&&h('div',{className:'alert-item',role:'alert'},h('span',null,error),btn('Dismiss',()=>setError(''),{className:'btn small'})),
@@ -377,8 +391,7 @@
           screen==='eat'?h(Inventory,{items,busy,fridgeId,onResult:scanned,onExample:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'}),initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
           screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events,fridgeId,demo,shopping}),
           editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
-      session&&fridges.length>0&&screen!=='recipes'&&editor===undefined&&!draft&&h(ChillWidgets.Mascot,{screen}),
-      h('footer',{className:'app-footer'},'Made for the food you almost forgot.')));
+      session&&fridges.length>0&&screen!=='recipes'&&editor===undefined&&!draft&&h(ChillWidgets.Mascot,{screen})));
   }
   class ErrorBoundary extends React.Component {
     constructor(props){super(props);this.state={failed:false};}

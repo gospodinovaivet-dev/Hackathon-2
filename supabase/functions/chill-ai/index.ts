@@ -49,6 +49,8 @@ Deno.serve(async(req:Request)=>{
   if(!upstream.ok)return reply({error:upstream.status===429?'The AI provider is busy or the free-tier limit was reached. Please try again shortly.':'The AI provider rejected the request. Check the API key, model access and billing in your provider account.'},502);
   const answer=await upstream.json();
   if(answer.promptFeedback?.blockReason)return reply({error:'The AI provider declined this request. Try a different photo or wording.'},502);
+  if(answer.stop_reason==='refusal')return reply({error:'The AI declined this request. Try a different photo or wording.'},422);
+  if(answer.stop_reason==='max_tokens'||answer.candidates?.[0]?.finishReason==='MAX_TOKENS')return reply({error:'The AI answer was too long and got cut off. Try a photo with fewer items.'},502);
   const text=provider.text(answer);
   try{return reply(JSON.parse(text.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'')));}
   catch{return reply({error:'The AI returned an incomplete response. Please try again.'},502);}

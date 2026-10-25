@@ -66,6 +66,13 @@ const path=require('path');
  await page.waitForFunction(()=>document.querySelectorAll('.chat-message.assistant').length===3);
  const followup=await page.evaluate(()=>window.testAIRequests.at(-1).prompt);
  if(!followup.includes('Make those dairy-free')||!followup.includes('Spinach test omelette')||!followup.includes('What can I make'))throw Error('Conversation context missing');
+ await page.getByLabel('Message Chef Byte',{exact:true}).fill('Explain step one');await page.getByLabel('Message Chef Byte',{exact:true}).press('Enter');
+ await page.getByText('Step one: crack the eggs into a bowl and whisk them until smooth.',{exact:true}).waitFor();
+ if(!await page.getByRole('heading',{name:'Spinach test omelette',exact:true}).count())throw Error('Recipe cards were lost after a follow-up question');
+ await page.getByLabel('Message Chef Byte',{exact:true}).fill('Add a shopping item');await page.getByLabel('Message Chef Byte',{exact:true}).press('Enter');
+ await page.getByText('Here is one that needs a trip to the shop.',{exact:true}).waitFor();
+ if(await page.getByRole('heading',{name:'Shopping test tart',exact:true}).count())throw Error('A recipe needing shopping was shown with shopping turned off');
+ if(!await page.getByRole('heading',{name:'Spinach test omelette',exact:true}).count())throw Error('Earlier recipes were lost');
  for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Recipe chat overflow at '+width);}
  await page.screenshot({path:'/tmp/chill-recipe-chat.png',fullPage:true});
  await page.evaluate(()=>window.testAIError=true);await page.getByRole('button',{name:'Ask Chef Byte',exact:true}).click();await page.getByText('Live AI setup is incomplete.',{exact:true}).waitFor();

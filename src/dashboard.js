@@ -67,14 +67,14 @@ window.ChillWidgets = (() => {
   const local=['127.0.0.1','localhost','::1','[::1]'].includes(location.hostname);
   const [base,setBase]=useState(local?'':location.origin+location.pathname),[error,setError]=useState('');const ref=useRef(null),seen=useRef(new Set());
   const [since]=useState(()=>new Date().toISOString());
+  // On this computer the page is at localhost, which a phone cannot open: use this computer's Wi-Fi address instead
+  useEffect(()=>{if(!local)return;let alive=true;fetch('/phone-url.json').then(r=>r.ok?r.json():null).then(d=>{if(alive&&d?.url)setBase(d.url);}).catch(()=>{});return()=>{alive=false;};},[]);
   let url='';try{const u=new URL(base);if(!['http:','https:'].includes(u.protocol)||['localhost','127.0.0.1','[::1]'].includes(u.hostname))throw Error();u.searchParams.set('phone','1');u.searchParams.set('fridge',fridgeId);url=u.href;}catch{}
   useEffect(()=>{if(ref.current){ref.current.replaceChildren();if(url)new QRCode(ref.current,{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}},[url]);
   useEffect(()=>{let alive=true,running=false;async function poll(){if(running)return;running=true;try{const rows=await ChillAPI.phoneInbox(fridgeId,since);if(alive){const next=rows.find(r=>!seen.current.has(r.id));if(next){seen.current.add(next.id);onReceive(next);}}}catch(e){if(alive)setError(e.message);}finally{running=false;}}const t=setInterval(poll,4000);return()=>{alive=false;clearInterval(t);};},[fridgeId,since]);
   return h('section',{className:'card qr-panel'},h('h3',null,'Your phone is the fridge camera'),h('p',null,'Scan the QR, sign in to the same account, take a photo and send it here for review.'),
-   h('label',{className:'field-group'},h('span',null,'Phone-accessible app URL'),h('input',{className:'field',value:base,placeholder:'https://your-app.example',onChange:e=>setBase(e.target.value)})),
-   local&&h('p',{className:'note'},'localhost points to your phone, not this computer. Use your deployed HTTPS app URL, or start with --host 0.0.0.0 and enter this computer’s Wi-Fi address and port. On HTTP, use the photo picker; live camera preview requires HTTPS.'),
    h('div',{ref,className:'qr-code','aria-label':'Scan to open the phone camera page'}),url&&h('a',{href:url,target:'_blank',rel:'noreferrer'},'Open phone page'),
-   h('p',{className:'note'},'Waiting for a photo from your phone… No passwords or API keys are included in this QR.'),error&&h('p',{role:'alert'},error),button('Close phone pairing',onClose));
+   error&&h('p',{role:'alert'},error),button('Close phone pairing',onClose));
  }
  function ScanControls({items,onResult,onExample,busy,phone,fridgeId}){
   const [working,setWorking]=useState(false),[error,setError]=useState(''),[qr,setQr]=useState(false),[status,setStatus]=useState(''),[camera,setCamera]=useState(false);

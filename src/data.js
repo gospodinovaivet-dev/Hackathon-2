@@ -34,7 +34,7 @@ window.ChillData = (() => {
   let remotePhotos = {};
   let scans = EXAMPLE_SCANS;
   const localAsset = value => {const key=photoKey(value)||'container';return window.CHILLCHECK_IMAGES?.[key] || `assets/products/${files[key]}`;};
-  const asset = value => remotePhotos[photoKey(value)] || localAsset(value);
+  const asset = value => localAsset(value);
   function photo(name, storedKey) {
     const rules = [[/soup/i,'soup'],[/stuffed.*(?:pepper|paprica)|(?:pepper|paprica).*rice/i,'stuffed-peppers'],
       [/\bchicken\b/i,'chicken'],[/\bpasta\b/i,'pasta'],[/spinach/i,'spinach'],[/milk/i,'milk'],
@@ -61,7 +61,7 @@ window.ChillData = (() => {
   const isUnrecognized = item => /unknown|unidentified|unrecognized|unrecognised/i.test(item.name||'') || (item.category==='unknown' && !!item.container);
   const isBalkan = item => /ice.?cream (?:tub|box|container)|biscuit tin|cookie tin|reused|repurposed/i.test((item.container||'')+' '+(item.note||''));
   return {photo,photoKey,recipes,asset,localAsset,isUnrecognized,isBalkan,
-    fallbackImage(e,key) { const img=e.currentTarget;if(img.dataset.fallback)return;img.dataset.fallback='true';img.src=localAsset(key); },
+    fallbackImage(e,key) { const img=e.currentTarget,remote=remotePhotos[photoKey(key)];if(remote&&img.getAttribute('src')!==remote)img.src=remote; },
     example(n=0) { return scans[n%scans.length].map(i=>{const date=i.printedIn==null?'':Dates.addDays(Dates.today(),i.printedIn);return {...i,...(date?{printedDate:date,dateText:date.split('-').reverse().join('.')}:{})};}); },
     demoItems() {
       const examples=this.example().map(i=>/greek yog[hu]?urt/i.test(i.name)?{...i,qty:'6 cups',printedIn:10,printedDate:Dates.addDays(Dates.today(),10),dateText:Dates.addDays(Dates.today(),10).split('-').reverse().join('.')}:i);

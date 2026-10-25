@@ -66,7 +66,7 @@ const Health = (() => {
   }
 
   async function generate() {
-    if (!Scanner.sample) return;
+    if (!AI.available) return;
     const top = topFoods();
     if (!top.length) { $("health-status").textContent = "Scan your fridge or mark food as eaten first."; return; }
     const btn = $("health-ask");
@@ -86,7 +86,7 @@ And "summary": one sentence about their overall pattern.
 Plain, friendly and factual. General information, not medical advice: no diagnoses or cures.
 Reply with only JSON: {"summary": "", "foods": [{"name": "", "helps": "", "nutrients": [""], "howOften": "", "tooMuch": "", "yourIntake": ""}]}`;
     try {
-      const res = await Scanner.sample.json(prompt, { modelTier: "quick", cache: false });
+      const res = await AI.json(prompt, { quick: true });
       if (!Array.isArray(res?.foods) || !res.foods.length) throw { code: "invalid_json" };
       current = { summary: String(res.summary || ""), foods: res.foods.slice(0, 6) };
       isExample = false;
@@ -102,8 +102,8 @@ Reply with only JSON: {"summary": "", "foods": [{"name": "", "helps": "", "nutri
 
   function init() {
     $("health-ask").addEventListener("click", generate);
-    Scanner.ready.then(() => {
-      if (Scanner.sample) return;
+    AI.ready.then(() => {
+      if (AI.available) return;
       $("health-ask").hidden = true;
       $("health-status").textContent = "Example advice.";
     });
