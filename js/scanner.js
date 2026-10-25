@@ -167,6 +167,7 @@ dateType is one of "use by", "best before", "expiry", "other".`, file);
       no_ai: "The AI isn't connected. Start the app with “npm start” and open http://localhost:3000, or use the shared claude.ai link.",
       server_down: "The ChillCheck server stopped. Run “npm start” again and reload the page.",
       no_key: "The server has no Claude API key. Set ANTHROPIC_API_KEY, then run “npm start” again.",
+      no_credit: "The Claude API account behind this key has no credit left. Add credit in the Claude Console (Settings → Billing) or use a key from a funded organisation.",
       refused: "The AI declined this request. Try a different photo or wording.",
       not_granted: "The app wasn't allowed to send the photo to the AI. Allow it and try again.",
       sampling_disabled: "AI isn't available on this account.",

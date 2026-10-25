@@ -4,6 +4,7 @@ window.ChillAI = (() => {
   const localServer = fetch('/api/status').then(r => r.ok ? r.json() : null).then(d => !!d?.ok).catch(() => false);
   const LOCAL_ERRORS = {
     no_key: 'The AI has no Claude API key yet. Add ANTHROPIC_API_KEY=sk-ant-… to .env, then restart npm start.',
+    no_credit: 'The Claude API account behind this key has no credit left. Add credit in the Claude Console (Settings → Billing) or use a key from a funded organisation.',
     rate_limited: 'The AI is busy right now. Please try again in a minute.',
     image_rejected: 'This photo could not be read. Try a sharper or smaller photo.',
     bad_request: 'The AI could not read that request. Please try again.',

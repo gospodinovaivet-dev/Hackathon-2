@@ -29,4 +29,4 @@ Run `tests/dashboard.cjs` and `tests/browser.cjs` with Playwright/Chrome, `tests
 
 ## Legacy app with AI (local)
 
-`legacy.html` also has the chef button and an AI connection (`js/ai.js`) through a small local Node server that keeps the Claude key off the browser: put `ANTHROPIC_API_KEY=sk-ant-...` in `.env`, run `npm install` once, then `npm start` (in PowerShell: `npm.cmd start`) and open http://localhost:3000/legacy.html. The React app does not use this server yet.
+`legacy.html` also has the chef button and an AI connection (`js/ai.js`) through a small local Node server that keeps the Claude key off the browser: put `ANTHROPIC_API_KEY=sk-ant-...` in `.env`, run `npm install` once, then `npm start` (in PowerShell: `npm.cmd start`) and open http://localhost:3000/legacy.html. The React app at http://localhost:3000 uses it too instead of the `chill-ai` Supabase function, so AI requests there use the key in `.env`, not the Supabase secrets. `ANTHROPIC_MODEL` sets the model (default `claude-haiku-5-5`). The server listens on this computer only; set `HOST=0.0.0.0` for the phone QR on trusted Wi-Fi, where anyone on that network can then use the key.

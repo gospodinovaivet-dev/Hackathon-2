@@ -2,7 +2,8 @@
 // requests (photos, Chef Byte, food advice) to Claude, so the API key stays on this computer and never
 // reaches the browser. It stands in for the chill-ai Supabase function until that is deployed.
 // Start: put ANTHROPIC_API_KEY in .env, run `python scripts/setup.py` once, then `npm start` and open
-// http://localhost:3000
+// http://localhost:3000. ANTHROPIC_MODEL picks the model (default claude-haiku-5-5). It listens on this
+// computer only; HOST=0.0.0.0 opens it to the Wi-Fi for the phone QR, and then anyone on that network can use the key.
 import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -12,7 +13,10 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 3000;
-const MODEL = "claude-opus-5-5";
+const HOST = process.env.HOST || "127.0.0.1";
+const MODEL = process.env.ANTHROPIC_MODEL || "claude-haiku-5-5";
+// Server-side refusal fallback exists only for these models (not Haiku)
+const FALLBACK = /^claude-(fable-5-1|opus-5-5|opus-5|sonnet-5-5)$/.test(MODEL);
 const MAX_BODY = 30 * 1024 * 1024;   // a few photos as base64
 // Same standing instructions as the chill-ai Supabase function
 const SYSTEM = "You are ChillCheck, a food inventory assistant. Return ONLY valid JSON matching the requested shape. " +
@@ -36,8 +40,8 @@ async function ask({ prompt, images = [], effort = "medium" }) {
   const response = await claude().beta.messages.create({
     model: MODEL,
     max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",   // if a safety check declines, Anthropic retries on its recommended model
+    // if a safety check declines, Anthropic retries on its recommended model
+    ...(FALLBACK ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
     output_config: { effort: effort === "low" ? "low" : "medium" },
     system: SYSTEM,
     messages: [{
@@ -90,6 +94,10 @@ async function handleAsk(req, res) {
   } catch (e) {
     if (e instanceof Anthropic.AuthenticationError) return send(res, 401, { code: "no_key" });
     if (e instanceof Anthropic.RateLimitError) return send(res, 429, { code: "rate_limited" });
+    if (e instanceof Anthropic.BadRequestError && /credit balance/i.test(e.message)) {
+      console.error("Claude API: the organisation of this key has no credit left.");
+      return send(res, 402, { code: "no_credit" });
+    }
     if (e instanceof Anthropic.BadRequestError) {
       console.error("Claude rejected the request:", e.message);
       return send(res, 400, { code: images.length ? "image_rejected" : "bad_request" });
@@ -124,14 +132,15 @@ async function serveFile(req, res) {
 http.createServer((req, res) => {
   if (req.method === "GET" && req.url === "/api/status") return send(res, 200, { ok: true });
   if (req.method === "GET" && req.url === "/phone-url.json") {
-    const ip = wifiAddress();
+    // Only offer the Wi-Fi address when the server actually listens beyond this computer
+    const ip = /^(127\.|::1$|localhost$)/.test(HOST) ? null : wifiAddress();
     return send(res, 200, { url: ip ? `http://${ip}:${PORT}/` : null });
   }
   if (req.method === "POST" && req.url === "/api/ask") return handleAsk(req, res);
   if (req.method === "GET") return serveFile(req, res);
   send(res, 405, "Method not allowed", "text/plain");
-}).listen(PORT, () => {
-  console.log(`ChillCheck is running: open http://localhost:${PORT}`);
+}).listen(PORT, HOST, () => {
+  console.log(`ChillCheck is running: open http://localhost:${PORT} (model ${MODEL}, listening on ${HOST})`);
   if (!process.env.ANTHROPIC_API_KEY) {
     console.log("Note: ANTHROPIC_API_KEY is not set. AI features need it (or an `ant auth login` profile).");
   }
