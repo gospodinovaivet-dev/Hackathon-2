@@ -53,6 +53,7 @@ window.ChillAPI = (() => {
       return {profile,fridges};
     },
     createFridge: name => result(client().from('fridges').insert({name:name.trim()}).select().single()),
+    purchases: (fridgeId,since)=>result(client().from('scans').select('id,taken_at,scan_items(proposed_name,proposed_data,review_status)').eq('fridge_id',fridgeId).eq('source','receipt').eq('status','confirmed').gte('taken_at',since).order('taken_at',{ascending:false}).limit(100)),
     async inventory(fridgeId) {
       const [items,events]=await Promise.all([
         result(client().from('food_items').select('*').eq('fridge_id',fridgeId).order('expires_on',{ascending:true,nullsFirst:false})),

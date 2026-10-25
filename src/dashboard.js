@@ -5,13 +5,17 @@ window.ChillWidgets = (() => {
  function Photo({item}){const p=ChillData.photo(item.name,item.photoKey);return h('img',{src:p.src,alt:item.name,onError:e=>ChillData.fallbackImage(e,p.key),width:120,height:120});}
  const sensorMemory={open:false,logs:null};
  const jokes=['Your soup called. It would like a second date.','The ice cream tub has a plot twist: stuffed peppers.','Open. Close. Open. Close. Are we rehearsing a fridge musical?','No judgement. I also need a snack before deciding on a snack.'];
- function Mascot(){
-  const [index,setIndex]=useState(0),[paused,setPaused]=useState(false);
-  useEffect(()=>{if(paused)return;const timer=setInterval(()=>setIndex(i=>(i+1)%jokes.length),11000);return()=>clearInterval(timer);},[paused]);
-  return h('div',{className:'chef-promenade'+(paused?' paused':''),'aria-label':'Chef Byte'},
-   h('div',{className:'chef-traveller'},button(jokes[index],()=>setIndex(i=>(i+1)%jokes.length),{className:'chef-cloud',title:'Another joke'}),
-    h('div',{className:'chef-robot','aria-hidden':true},h('div',{className:'chef-hat'},'☁'),h('div',{className:'chef-head'},h('i'),h('i'),h('span',null,'⌣')),h('div',{className:'chef-body'},'✳'),h('div',{className:'chef-feet'},h('i'),h('i')))),
-   button(paused?'Let Chef Byte roam':'Pause Chef Byte',()=>setPaused(!paused),{className:'link chef-pause','aria-pressed':paused}));
+ function Robot({mini=false}){return h('div',{className:'chef-robot'+(mini?' mini':' smol'),'aria-hidden':true},h('div',{className:'chef-hat'},h('i'),h('i'),h('i')),h('div',{className:'chef-head'},h('i'),h('i'),h('span',null,'⌣')),!mini&&h('div',{className:'chef-body'},'✳'),!mini&&h('div',{className:'chef-feet'},h('i'),h('i')));}
+ function Mascot({screen='home'}){
+  const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:600px)').matches),[tip,setTip]=useState(false);
+  useEffect(()=>{if(paused||collapsed||tip)return;const timer=setInterval(()=>setIndex(i=>(i+1)%jokes.length),11000);return()=>clearInterval(timer);},[paused,collapsed,tip]);
+  useEffect(()=>setTip(false),[screen]);
+  const tips={home:'Start with Eat Me First. Your next meal might already be waiting.',eat:'A familiar tub can hold a surprise. Identify the contents before choosing its shelf.',recipes:'Pick an ingredient photo to find a recipe that puts it first.',shopping:'Log what you use. I can help spot when the last spoonful is getting close.',history:'A receipt records a purchase; consumption logs tell the rest of the story.',nutrition:'Try a little variety. Your fridge has more than one main character.'};
+  return h('aside',{className:'chef-assistant'+(collapsed?' collapsed':''),'aria-label':'Chef Byte'},
+   !collapsed&&h('div',{className:'chef-bubble'},h('div',{className:'chef-bubble-heading'},h('strong',null,'Chef Byte'),button('×',()=>setCollapsed(true),{className:'chef-dismiss','aria-label':'Minimize Chef Byte'})),
+    button(tip?(tips[screen]||tips.home):jokes[index],()=>{setTip(false);setIndex(i=>(i+1)%jokes.length);},{className:'chef-cloud',title:'Another joke'}),
+    h('div',{className:'chef-options'},button('Tip',()=>setTip(true),{className:'link'}),button('Joke',()=>{setTip(false);setIndex(i=>(i+1)%jokes.length);},{className:'link'}),button(paused?'Resume jokes':'Pause jokes',()=>setPaused(!paused),{className:'link','aria-pressed':paused}))),
+   button(h(Robot),()=>setCollapsed(!collapsed),{className:'chef-toggle','aria-label':collapsed?'Open Chef Byte':'Minimize Chef Byte','aria-expanded':!collapsed}));
  }
  function Sensors({fridgeId}){
   const [open,setOpen]=useState(sensorMemory.open),[show,setShow]=useState(false);
@@ -88,5 +92,5 @@ window.ChillWidgets = (() => {
     h(ScanControls,{items,onResult,onExample:onScan,busy,phone,fridgeId})),
     h('div',{className:'col'},h(Sensors,{key:fridgeId,fridgeId}))));
  }
- return {Dashboard,ScanControls,Mascot};
+ return {Dashboard,ScanControls,Mascot,Robot};
 })();

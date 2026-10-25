@@ -8,12 +8,12 @@ for(const [width,height] of [[1920,1080],[1512,982],[1440,900],[1280,800],[1024,
  await page.getByRole('button',{name:/^Unrecognized /}).click();
  await page.getByRole('heading',{name:'Unknown container',exact:true}).waitFor();
  if(await page.locator('.eat-list article').count()!==1)throw Error('Unknown filter included recognized items');
- await page.getByRole('button',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'ChillCheck home',exact:true}).click();
  await page.getByRole('button',{name:/^Balkan packaging /}).click();
  await page.getByRole('heading',{name:'Rice-stuffed peppers',exact:true}).waitFor();
  if(await page.locator('.eat-list article').count()!==1)throw Error('Balkan filter included unrelated items');
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Inventory overflow at '+width);
- await page.getByRole('button',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'ChillCheck home',exact:true}).click();
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Home overflow at '+width);
  const clipped=await page.locator('.count,.reading,.expiry-product').evaluateAll(nodes=>nodes.some(n=>n.scrollWidth>n.clientWidth+2));if(clipped)throw Error('Clipped control at '+width);
  if([1512,390].includes(width))await page.screenshot({path:'/tmp/chill-responsive-'+width+'.png',fullPage:true});

@@ -8,6 +8,7 @@ const configured = process.argv.includes('--configured');
 const read = file => fs.readFileSync(path.join(root,file),'utf8');
 try {
   let html = read(configured ? 'index.local.html' : 'index.html');
+  html=html.replace('</head>','<script>window.CHILLCHECK_LOGO='+JSON.stringify('data:image/png;base64,'+fs.readFileSync(path.join(root,'assets/brand/chillcheck-header.png')).toString('base64'))+'</script></head>');
   const assets={};
   for (const file of fs.readdirSync(path.join(root,'assets/products'))) {
     if (file.endsWith('.jpg')) assets[file.slice(0,-4)]='data:image/jpeg;base64,'+fs.readFileSync(path.join(root,'assets/products',file)).toString('base64');

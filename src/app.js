@@ -93,7 +93,7 @@
     return h('div',{className:'shelf-zone',onMouseEnter:()=>setOpen(true),onMouseLeave:()=>setOpen(false),onBlur:e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);},onKeyDown:e=>{if(e.key==='Escape'){setOpen(false);e.stopPropagation();}}},
       h('button',{type:'button',className:'zone '+tone,'aria-pressed':selected,'aria-describedby':open?id:undefined,onFocus:()=>setOpen(true),onClick:onSelect},h('span',{className:'zone-name'},shelf),h('span',{className:'zone-count'},plural(list.length,'item'))),
       btn('i',()=>setOpen(v=>!v),{className:'shelf-help','aria-label':'Storage tips for '+shelf,'aria-expanded':open,'aria-controls':id}),
-      open&&h('div',{id,role:'tooltip',className:'shelf-tooltip'},h('strong',null,ChillStorage.headings[shelf]),h('p',null,ChillStorage.tips[shelf])));
+      open&&h('div',{id,role:'tooltip',className:'shelf-tooltip'},h('div',{className:'shelf-tip-heading'},h(ChillWidgets.Robot,{mini:true}),h('strong',null,ChillStorage.headings[shelf])),h('p',null,ChillStorage.tips[shelf])));
   }
   function Placement({item,onEdit,busy}) {
     const suggestion=ChillStorage.suggest(item);
@@ -204,12 +204,30 @@
         h('div',{className:'uses'},f.nutrients.map(n=>h('span',{key:n,className:'ing'},n))),
         h('dl',{className:'facts'},h('dt',null,'How often'),h('dd',null,f.howOften),h('dt',null,'When it may be too much'),h('dd',null,f.tooMuch))))));
   }
-  function History({events}) {
-    return h('section',{className:'screen'},h('h1',null,'Your food story'),h('p',{className:'lead'},'A little record of what you used and what you let go.'),
-      !events.length?h('div',{className:'empty'},'Mark food as eaten or discarded to start your history.'):
-      h('div',{className:'list'},events.map(event=>h('article',{className:'card history-row',key:event.id},h(Picture,{name:event.item_name,photoKey:event.photo_key}),
-        h('div',null,h('h2',null,event.item_name),event.demo&&h('span',{className:'note'},'Demo session · not saved'),h('p',{className:'note'},new Date(event.occurred_at).toLocaleString())),
-        h('span',{className:'pill '+(event.action==='eaten'?'safe':'expired')},event.action==='eaten'?'Enjoyed':'Discarded')))));
+  function History({events,fridgeId,demo,shopping}) {
+    const [receipts,setReceipts]=useState([]),[error,setError]=useState('');
+    const since=Dates.addDays(Dates.today(),-6);
+    useEffect(()=>{let live=true;setReceipts([]);setError('');if(demo)return;
+      api.purchases(fridgeId,since+'T00:00:00').then(rows=>{if(live)setReceipts(rows);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};
+    },[fridgeId,demo,since]);
+    const recent=events.filter(e=>(!demo||e.demo)&&e.occurred_at.slice(0,10)>=since).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at));
+    const eaten=recent.filter(e=>e.action==='eaten');
+    const consumed=shopping.logs.filter(l=>l.consumed_on>=since).sort((a,b)=>b.consumed_on.localeCompare(a.consumed_on));
+    const bought=receipts.flatMap(r=>(r.scan_items||[]).filter(i=>i.review_status==='accepted').map(i=>({name:i.proposed_name,qty:i.proposed_data.quantity,date:r.taken_at})));
+    const groups=[{title:'Recently eaten',count:eaten.length,unit:'logged uses',rows:eaten.slice(0,4).map(e=>({name:e.item_name,detail:new Date(e.occurred_at).toLocaleString()})),empty:'Mark an item eaten to start your food story.'},
+      {title:'Recently consumed',count:consumed.length,unit:'quantity logs',rows:consumed.slice(0,4).map(l=>({name:l.item_name,detail:l.amount+' '+l.unit+' · '+l.consumed_on})),empty:'Log an amount from your shopping list.'},
+      {title:'Recently bought',count:bought.length,unit:'receipt items',rows:bought.slice(0,4).map(i=>({name:i.name,detail:(i.qty||'')+' · logged '+new Date(i.date).toLocaleDateString()})),empty:'Confirm a receipt scan to record your purchases.'}];
+    const totals=new Map();consumed.forEach(l=>{const key=l.item_name+'|'+l.unit;const row=totals.get(key)||{name:l.item_name,unit:l.unit,total:0,logs:0};row.total+=Number(l.amount);row.logs++;totals.set(key,row);});
+    const favourite=[...totals.values()].sort((a,b)=>b.logs-a.logs)[0];
+    return h('section',{className:'screen history-screen'},h('h1',null,'Your food story'),h('p',{className:'lead'},'The last 7 days, one bite at a time.'),
+      demo&&h('p',{className:'note'},'Demo fridge: sample yogurt consumption and this session’s actions. Choose your saved fridge for your own history.'),
+      h('div',{className:'history-stats'},groups.map(g=>h('section',{className:'card',key:g.title},h('h2',null,g.title),h('p',{className:'history-total'},g.count,h('small',null,' '+g.unit)),g.rows.length?h('ul',null,g.rows.map((r,i)=>h('li',{key:i},h('strong',null,r.name),h('span',null,r.detail)))):h('p',{className:'note'},g.empty)))),
+      h('p',{className:'note'},'Eaten entries and quantity logs can describe the same meal. Showing up to 100 saved activity events and receipt scans. Receipt dates show when the scan was saved, not necessarily when you shopped.'),
+      (error||shopping.error)&&h('p',{role:'alert'},error||shopping.error),
+      h('div',{className:'card history-byte'},h(ChillWidgets.Robot,{mini:true}),h('div',null,h('h2',null,favourite?'Your repeat favourite: '+favourite.name:'Chef Byte’s kitchen diary'),h('p',null,favourite?favourite.total+' '+favourite.unit+' logged across '+favourite.logs+' uses. Your fridge has a main character.':'No judgement. I also need a snack before deciding on a snack.'))),
+      h('h2',null,'Recent activity'),!recent.length?h('p',{className:'empty'},'No activity logged in this period yet.'):
+      h('div',{className:'list'},recent.map(event=>h('article',{className:'card history-row',key:event.id},h(Picture,{name:event.item_name,photoKey:event.photo_key}),
+        h('div',null,h('h2',null,event.item_name),h('p',{className:'note'},new Date(event.occurred_at).toLocaleString())),h('span',{className:'pill '+(event.action==='eaten'?'safe':'expired')},event.action==='eaten'?'Enjoyed':'Discarded')))));
   }
   function App() {
     const [session,setSession]=useState(null),[authLoading,setAuthLoading]=useState(true);
@@ -318,9 +336,9 @@
       h('option',{value:'demo'},'Demo fridge'),fridges.map(f=>h('option',{key:f.id,value:f.id},f.name)));
 
     const top=h('header',{className:'app-header'},h('div',{className:'header-shell'},
-      btn('✳ ChillCheck',()=>navigate('home'),{className:'brand',disabled:busy||!!draft}),
+      btn(h('img',{src:window.CHILLCHECK_LOGO||'assets/brand/chillcheck-header.png',alt:'ChillCheck',className:'brand-logo'}),()=>navigate('home'),{className:'brand','aria-label':'ChillCheck home',disabled:busy||!!draft}),
       fridges.length>0&&h('div',{className:'workspace-toolbar'},
-        h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft})))),
+        h('nav',{'aria-label':'Main navigation'},[['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft})))),
       session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))));
     return h(React.Fragment,null,top,h('main',{className:'app'},
       error&&h('div',{className:'alert-item',role:'alert'},h('span',null,error),btn('Dismiss',()=>setError(''),{className:'btn small'})),
@@ -335,9 +353,9 @@
           draft?h(Review,{draft,setDraft,busy,onClose:()=>setDraft(null),onSave:saveReview}):
           screen==='home'?h(ChillWidgets.Dashboard,{fridgePicker,onAdd:addFood,shopping,name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
           screen==='eat'?h(Inventory,{items,busy,initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
-          screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events}),
+          screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events,fridgeId,demo,shopping}),
           editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
-      session&&fridges.length>0&&h(ChillWidgets.Mascot),
+      session&&fridges.length>0&&editor===undefined&&!draft&&h(ChillWidgets.Mascot,{screen}),
       h('footer',{className:'app-footer'},'Made for the food you almost forgot.')));
   }
   class ErrorBoundary extends React.Component {

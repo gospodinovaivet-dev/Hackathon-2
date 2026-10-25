@@ -215,3 +215,11 @@ Open **Shopping list** to choose a 3, 6, 7 or 14-day planning horizon and log th
 Forecasts use the previous seven complete days, including zero-log days, and require logs on at least three distinct days. Complete logs give better estimates. Expired stock is excluded; stock expiring soon only counts up to the amount expected to be used before its date. The demo includes five yogurt cups daily: six cups remaining means 1.2 days of stock and a recommendation to buy 24 cups for six days. Demo consumption resets on refresh; saved-fridge consumption persists in Supabase.
 
 Enable browser notifications explicitly from the shopping list. HTTPS (or localhost) and browser permission are required. Reminders run while ChillCheck is open, at most once per six hours per account/fridge; the manual reminder button bypasses that cooldown. No closed-app push scheduler is configured. Serve `notification-worker.js` at the site root for mobile notification display. In-app shopping alerts work without notification permission.
+
+### History and Chef Byte
+
+History summarizes recent eaten events, quantity logs, and accepted items from confirmed receipt scans for the last seven calendar days. Eaten and consumption records may overlap; their counts are not added together. Purchases use the receipt scan save time because the original purchase date is not stored in the receipt history. Receipt scans and activity are limited to the latest 100 records; unknown purchases are not inferred from manually added food. No additional migration is needed beyond 005.
+
+Chef Byte is a viewport-anchored helper with curated contextual tips and rotating jokes (not a live AI chat). Tap the robot or close button to collapse the bubble; phones start collapsed. Shelf guidance includes a smaller chef head. The helper stays out of food-edit and scan-review dialogs.
+
+The header logo is `assets/brand/chillcheck-header.png`, generated with the built-in imagegen tool from the approved logo. Prompt: preserve the snowflake/checkmark geometry and bold rounded ChillCheck lettering; replace green symbol strokes with warm cream #FFF1E8, retain strawberry #EFA7BC accents and cocoa #382E30 lettering; transparent background, no shadows, texture, gradients, or extra text. The standalone bundle embeds this image.
