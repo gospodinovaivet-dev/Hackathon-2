@@ -30,7 +30,7 @@ const ProductPhotos = (() => {
     const key = rules.find(([pattern]) => pattern.test(String(name)))?.[1] || "container";
     const img = el("img", { src: sources[key], alt: key === "container" ? "Closed food container; product photo unavailable" : `Illustrative photo of ${name}`, loading: "lazy", decoding: "async", width: 480, height: 480 });
     img.addEventListener("error", () => { img.hidden = true; });
-    figure.replaceChildren(img, el("figcaption", {}, key === "container" ? "Photo unavailable" : "Serving illustration"));
+    figure.replaceChildren(img, ...(key === "container" ? [el("figcaption", {}, "Photo unavailable")] : []));
   }
   function figure(name) {
     const node = el("figure", { class: "product-photo" });

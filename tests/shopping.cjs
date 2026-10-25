@@ -1,0 +1,15 @@
+const vm=require('vm'),fs=require('fs'),assert=require('assert/strict');
+const ctx={window:{},React:{createElement(){}}};vm.createContext(ctx);
+vm.runInContext(fs.readFileSync('js/dates.js','utf8')+'\n'+fs.readFileSync('src/shopping.js','utf8'),ctx);
+const {plan,quantity}=ctx.window.ChillShopping;
+const today='2026-10-25',logs=Array.from({length:7},(_,i)=>({item_name:'Yogurt',amount:5,unit:'cups',consumed_on:'2026-10-'+(24-i)}));
+const stock=[{name:'Yogurt',qty:'6 cups',expires:'2026-11-10'}];
+let row=plan(stock,logs,6,today)[0];assert.equal(row.rate,5);assert.equal(row.daysLeft,1.2);assert.equal(row.buy,24);
+assert.equal(plan(stock,logs.slice(0,2),6,today)[0].rate,null);
+assert.equal(plan([],logs,6,today)[0].buy,30);
+assert.equal(plan([{...stock[0],expires:'2026-10-24'}],logs,6,today)[0].buy,30);
+assert.equal(plan([{...stock[0],qty:'40 cups',expires:today}],logs,6,today)[0].buy,25);
+assert.ok(plan([{...stock[0],qty:'500 g'}],logs,6,today).every(r=>r.buy===null));
+assert.equal(quantity('1.5 kg').amount,1500);assert.equal(quantity('2 portions + 1 box'),null);
+assert.equal(plan(stock,[...logs,{...logs[0],amount:100,consumed_on:today}],6,today)[0].rate,5);
+console.log('PASS shopping forecasts, sparse logs, expiry, units, depleted stock, complete-day window');

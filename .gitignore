@@ -1,0 +1,12 @@
+# Downloaded browser libraries and generated local entry point
+vendor/
+index.local.html
+supabase.config.local.json
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+
+# Optional configured shareable build (contains public project settings)
+dist/chillcheck.local.html

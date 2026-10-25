@@ -1,0 +1,241 @@
+/* React application layout over the shared Strawberry Matcha design tokens. */
+:root { color-scheme: light; }
+.react-header { position:relative; z-index:1; max-width: 1120px; margin: auto; padding: 0 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.brand { background:none; border:0; color:inherit; font:800 28px var(--font-display); cursor:pointer; }
+.header-actions { display:flex; gap:14px; align-items:center; }
+.header-actions .btn { background:var(--sky); }
+.account-name { font-weight:800; }
+.eyebrow { display:block; font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:12px; }
+.pink-text { color:#a84665; }
+.auth-layout { display:grid; grid-template-columns:1.15fr 1fr; gap:60px; align-items:center; padding:50px 0; }
+.auth-intro h1 { font-size:clamp(42px,6vw,66px); max-width:9ch; }
+.auth-intro .lead { font-size:18px; margin-top:20px; }
+.auth-photos { display:flex; gap:12px; margin-top:30px; }
+.auth-photos .product-photo { width:calc((100% - 24px) / 3); }
+.auth-card { padding:30px; gap:18px; }
+.notice { padding:14px 18px; background:var(--mint); color:var(--ink); border-radius:18px; }
+.workspace-toolbar { display:flex; flex-wrap:wrap; gap:18px; align-items:end; margin-bottom:30px; }
+.workspace-toolbar nav { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+.workspace-toolbar label { min-width:150px; }
+.workspace-toolbar [aria-current="page"] { background:var(--green); color:var(--green-ink); border-color:var(--green); }
+.section-heading { margin-bottom:24px; }
+.product-copy p, .product-copy h3 { margin:0 0 4px; }
+.product-photo.large { width:100%; max-width:260px; justify-self:center; }
+.fridge-map.card { width:100%; justify-items:stretch; gap:10px; }
+.fridge-map h2 { margin-bottom:6px; }
+.fridge-map .zone[aria-pressed="true"] { outline:3px solid var(--green); outline-offset:2px; }
+.food-editor { width:min(680px,100%); max-height:90vh; overflow:auto; }
+.review-list { grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr)); }
+.review-food .product-info h2 { margin-bottom:8px; }
+.narrow-card { max-width:540px; margin:40px auto; }
+.history-row { grid-template-columns:auto minmax(0,1fr) auto; align-items:center; }
+.app-footer { text-align:center; margin:50px 0 0; font-size:13px; color:var(--muted); }
+.alert-item { margin-bottom:20px; justify-content:space-between; flex-wrap:wrap; }
+button:disabled { cursor:wait; opacity:.6; }
+button:focus-visible, summary:focus-visible { outline:3px solid var(--green); outline-offset:3px; }
+@media(min-width:1100px) { .eat-layout { grid-template-columns:320px minmax(0,1fr); } }
+@media(max-width:700px) {
+ .auth-layout { grid-template-columns:1fr; gap:25px; padding-top:10px; }
+ .auth-intro h1 { max-width:12ch; font-size:42px; }
+ .auth-photos { max-width:320px; }
+ .react-header { position:relative; z-index:1; padding:0 16px; }
+ .brand { font-size:23px; padding:0; }
+ .account-name { display:none; }
+ .workspace-toolbar nav { order:3; flex-basis:100%; }
+ .workspace-toolbar > .btn { margin-left:auto; }
+ .history-row { grid-template-columns:auto minmax(0,1fr); }
+ .history-row > .pill { grid-column:2; justify-self:start; }
+ .auth-card { padding:22px; }
+}
+
+.fridge-panel { min-width:0; width:100%; }
+.type-filters { min-width:0; grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+/* Fridge-haul dashboard */
+.dashboard-grid{grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);align-items:start;gap:24px}
+.demo-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;background:#f6e8da;border-radius:20px;margin:16px 0 24px;font-size:14px}
+.eat-widget{background:#efa7be;padding:28px;border-radius:32px;overflow:hidden;position:relative}
+.eat-heading{border:0;background:transparent;font:800 clamp(32px,4vw,52px)/1.08 'Bricolage Grotesque',sans-serif;color:#392d30;text-align:left;padding:0;cursor:pointer}
+.eat-widget>p{font-size:18px;margin:12px 0 20px}.expiry-previews{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.expiry-product{position:relative;border:0;background:none;text-align:left;padding:0;color:inherit;cursor:pointer;min-width:0}.expiry-product img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:20px;box-shadow:0 5px 12px #633d4220;transition:transform .2s}.expiry-product:hover img{transform:translateY(-4px)}
+.expiry-name{display:block;margin-top:9px;font-size:13px;font-weight:800;line-height:1.3}.days-badge{position:absolute;right:5px;top:5px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff1e8;border:2px solid #fff;font-size:12px;font-weight:900;box-shadow:0 2px 8px #392d3020}.text-link{padding:0;border:0;background:none;font-weight:800;text-decoration:underline;margin-bottom:16px;color:inherit;cursor:pointer}
+.scan-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.scan-actions .primary{grid-column:1/-1}.scan-card h2{font-size:32px}.scan-card>p{line-height:1.65}.sensor-card{overflow:hidden}.sensor-card h2{font-size:30px}.sensor-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}.sensor-metrics>div{background:#edf0e4;padding:20px 12px;border-radius:24px;display:flex;flex-direction:column;text-align:center;gap:8px}.sensor-metrics strong{font:800 38px 'Bricolage Grotesque',sans-serif;color:#546d3d}.sensor-metrics span{font-size:12px;color:#655c56}.sensor-disclaimer{font-size:12px;margin-top:20px}.door-log{list-style:none;max-height:220px;overflow:auto;padding:0}.door-log li{display:flex;gap:12px;flex-wrap:wrap;border-bottom:1px solid #eee0d7;padding:10px 0;font-size:13px}.door-log small{color:#7c7470}
+.chef-stage{height:170px;border-radius:24px;background:linear-gradient(#fff8f0,#edf0e4);margin:24px 0 10px;position:relative;overflow:hidden;border-bottom:5px solid #bcc8a2}.chef-walker{position:absolute;bottom:0;left:10%;width:80px;animation:chef-walk 9s ease-in-out infinite}.chef-hat{font-size:58px;line-height:38px;color:white;text-shadow:0 2px #a8b88d;text-align:center}.chef-head{width:70px;height:48px;background:#a8bb83;border:3px solid #546d3d;border-radius:18px;position:relative;display:flex;justify-content:space-around;align-items:center;padding:0 14px}.chef-head i{width:7px;height:10px;background:#392d30;border-radius:50%}.chef-head span{position:absolute;bottom:0;font-size:23px}.chef-body{margin:3px auto;width:54px;height:42px;background:#fff1e8;border:3px solid #546d3d;border-radius:15px;text-align:center;color:#b85877;font-size:25px}.chef-feet{display:flex;justify-content:space-evenly}.chef-feet i{width:15px;height:14px;background:#546d3d;border-radius:8px;animation:chef-step .5s infinite alternate}.chef-feet i+ i{animation-delay:.25s}.chef-speech{background:#f9e2e9;border-radius:20px 20px 20px 4px;padding:18px;font-weight:700;font-size:15px;line-height:1.6}
+@keyframes chef-walk{0%,100%{left:10%}50%{left:65%}}@keyframes chef-step{to{transform:translateY(-5px)}}
+.qr-panel{padding:20px;margin-top:18px;border:1px solid #decfc6}.qr-code{background:white;width:max-content;max-width:100%;padding:12px;margin:16px auto}.qr-code img,.qr-code canvas{max-width:100%;height:auto}.camera-preview video{display:block;width:100%;max-height:350px;border-radius:20px;margin:16px 0}.recipe-controls{display:grid;gap:16px}.recipe-controls .btn-row{flex-wrap:wrap}
+@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr}.demo-banner{align-items:flex-start;flex-direction:column}.expiry-previews{gap:8px}.eat-widget{padding:22px}.expiry-name{font-size:12px}.scan-actions{grid-template-columns:1fr}.scan-card h2{font-size:28px}.sensor-card h2{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.chef-walker,.chef-feet i{animation:none}.expiry-product img{transition:none}}
+.scan-photo-review{position:relative;max-width:650px;margin:20px 0}.scan-photo-review>img{display:block;width:100%;height:auto;border-radius:20px}.scan-box{position:absolute;border:3px solid #efa7be;background:#efa7be15;cursor:pointer;border-radius:8px;padding:0}.scan-box span{position:absolute;top:0;left:0;background:#fff1e8;color:#392d30;border-radius:50%;width:24px;height:24px;font-weight:800}
+
+/* Preserve main's HTML design; new interactions inherit its components. */
+.dashboard-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.eat-widget{padding:28px 26px;cursor:default;background:var(--blush)}
+.eat-widget:hover{transform:none}
+.eat-widget::before,.eat-widget::after{pointer-events:none}
+.eat-widget>*{position:relative;z-index:1}
+.eat-widget .eat-heading{font-family:var(--font-display);font-size:40px;line-height:1;letter-spacing:-.02em;color:inherit}
+.eat-widget .eat-sub{font:700 16px var(--font-body);margin:8px 0 16px}
+.eat-widget .counts{margin-top:10px}
+.expiry-product{font:inherit}
+.expiry-product:focus-visible,.eat-heading:focus-visible,.text-link:focus-visible{outline:3px solid var(--green);outline-offset:4px}
+.demo-banner{background:var(--well);color:var(--muted);border-radius:22px;margin:0 0 18px;padding:12px 16px;font-size:13px}
+.scan-card h2,.sensor-card h2{font:700 24px var(--font-display);letter-spacing:-.01em}
+.scan-actions{display:flex;flex-wrap:wrap;gap:10px}.scan-actions>.btn{flex:1 1 180px}
+.sensor-card .readings{margin:8px 0}.sensor-card .reading{--c:var(--safe)}
+.sensor-card .reading-value{font-weight:600;font-size:30px}
+.dashboard-grid .nav-icon{font-size:28px}.dashboard-grid .nav-arrow{font-size:24px}
+.chef-speech{background:var(--sky-deep);color:var(--ink)}
+@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr}.eat-widget{padding:24px 20px}.eat-widget .eat-heading{font-size:34px}}
+
+/* Compact home copy and one-row inventory summary. */
+.fridge-view-switch{display:flex;justify-content:flex-end;margin:-8px 0 6px}
+.eat-widget .eat-heading{padding-right:48px}
+.eat-widget .eat-corner-arrow{position:absolute;right:20px;top:24px;width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:50%;background:var(--green);color:var(--green-ink);font:600 26px/1 var(--font-body);cursor:pointer;z-index:2}
+.eat-corner-arrow:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.eat-widget .counts{display:flex;flex-wrap:nowrap;gap:6px;justify-content:space-between;width:100%}
+.eat-widget .count{min-width:0;padding:6px 8px;gap:5px;font-size:12px;line-height:1.3}
+.eat-widget .count .dot{width:7px;height:7px;flex:none}
+@media(max-width:420px){.eat-widget .counts{gap:3px}.eat-widget .count{font-size:9px;padding:6px 5px;gap:3px}.eat-widget .count .dot{width:5px;height:5px}.eat-widget .eat-heading{font-size:30px}.eat-widget .eat-corner-arrow{right:16px;top:22px;width:34px;height:34px}}
+
+/* Header navigation and a compact dashboard greeting. */
+.app-header .workspace-toolbar{position:relative;z-index:1;max-width:1120px;margin:16px auto 0;padding:0 24px;gap:14px;align-items:center}
+.app-header .workspace-toolbar label{min-width:140px;font-size:12px;gap:4px}
+.app-header .workspace-toolbar .field{padding:9px 14px;background:var(--sky)}
+.app-header .workspace-toolbar nav{align-self:flex-end;margin-bottom:2px}
+.app-header .workspace-toolbar>.btn{align-self:flex-end}
+.app-header .workspace-toolbar .chip{background:var(--sky);border-color:transparent}
+.app-header .workspace-toolbar [aria-current=page]{background:var(--green);color:var(--green-ink)}
+.home-screen{gap:18px}.home-screen .hello{align-items:center;gap:12px;margin-bottom:0}
+.home-screen .fridge-view-switch{margin:0}.home-screen .fridge-line{margin-bottom:0}
+.sensor-card .readings{gap:10px}.sensor-card .reading{min-width:0}
+.sensor-card .cleaning-value{font-size:22px}.cleaning-tile{font:inherit;color:var(--ink);text-align:left;border:0;cursor:pointer;--c:var(--soon)}
+.cleaning-link{font-size:12px;font-weight:800;margin-top:6px;color:var(--green)}
+.cleaning-tile:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.cleaning-form{display:grid;gap:12px;padding:16px;background:var(--well);border-radius:20px}
+.cleaning-note{font-size:12px;margin:0}.sensor-card .sensor-disclaimer{margin-top:0}
+/* Chef Byte walks on the page itself, with no card or stage behind him. */
+.chef-promenade{height:300px;position:relative;margin:26px 0 0;overflow:hidden}
+.chef-traveller{position:absolute;bottom:32px;left:0;width:270px;animation:chef-roam 24s ease-in-out infinite alternate}
+.chef-cloud{display:block;width:100%;min-height:90px;padding:18px 22px;margin:0 0 18px;border:0;border-radius:40px;background:var(--panel);color:var(--ink);font:700 14px/1.45 var(--font-body);text-align:center;box-shadow:0 5px 15px #382e3010;cursor:pointer;position:relative}
+.chef-cloud::after{content:'';position:absolute;bottom:-10px;left:calc(50% - 10px);width:20px;height:20px;background:var(--panel);border-radius:0 0 8px 0;transform:rotate(45deg)}
+.chef-robot{width:80px;margin:auto}.chef-robot .chef-head{margin:auto}.chef-robot .chef-head span{bottom:-3px;left:27px}.chef-robot .chef-feet{height:16px}
+.chef-pause{position:absolute;bottom:0;right:0;font-size:12px;color:var(--muted)}
+.chef-promenade.paused .chef-traveller,.chef-promenade.paused .chef-feet i{animation-play-state:paused}
+.chef-promenade:focus-within .chef-traveller,.chef-promenade:hover .chef-traveller{animation-play-state:paused}
+@keyframes chef-roam{from{left:0}to{left:calc(100% - 270px)}}
+.chef-promenade+.app-footer{margin-top:14px}
+@media(max-width:600px){.app-header .workspace-toolbar{padding:0 18px;gap:12px;margin-top:12px}.app-header .workspace-toolbar nav{order:3;flex-basis:100%;gap:6px}.app-header .workspace-toolbar>.btn{margin-left:auto}.app-header .workspace-toolbar .chip{font-size:12px;padding:7px 10px}.home-screen .hello{align-items:flex-start}.home-screen .fridge-view-switch{margin-left:auto}.sensor-card .reading-value{font-size:25px}.sensor-card .cleaning-value{font-size:19px}.chef-promenade{height:290px}}
+@media(prefers-reduced-motion:reduce){.chef-traveller,.chef-promenade .chef-feet i{animation:none}}
+
+/* Layout scales by available CSS pixels, including laptop display scaling. */
+.app{max-width:1280px;padding-inline:clamp(16px,2.2vw,32px)}
+.react-header,.app-header .workspace-toolbar{max-width:1280px;padding-inline:clamp(16px,2.2vw,32px)}
+.dashboard-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,2vw,24px)}
+.dashboard-grid>.col,.eat-widget,.sensor-card,.scan-card{min-width:0}
+.eat-widget .eat-heading{font-size:clamp(28px,3vw,40px)}
+.expiry-name{overflow-wrap:anywhere}.expiry-product img{aspect-ratio:1;object-fit:cover}
+.eat-widget .counts{flex-wrap:wrap;justify-content:flex-start;gap:6px}
+.eat-widget button.count{font-family:var(--font-body);font-weight:800;cursor:pointer;border:0;min-height:32px;padding:6px 9px;font-size:12px}
+.eat-widget button.count:hover{box-shadow:0 0 0 2px var(--green)}
+.eat-widget button.count:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.count.balkan{--c:#9a6145}.count.balkan .dot{background:var(--c)}
+.sensor-card .readings{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sensor-card .reading-text{overflow-wrap:anywhere}
+@media(min-width:801px) and (max-height:900px){.app-header{padding-block:12px 18px}.app-header .workspace-toolbar{margin-top:10px}.app{padding-top:20px}.home-screen{gap:16px}.sensor-card,.scan-card{padding:22px}.sensor-card .reading{padding:13px}.eat-widget{padding:24px}.eat-widget .expiry-previews{margin-bottom:12px}}
+@media(min-width:801px) and (max-width:1100px){.eat-widget,.sensor-card,.scan-card{padding:20px}.expiry-previews{gap:8px}.expiry-name{font-size:12px}.sensor-card h2{font-size:22px}.sensor-card .reading-value{font-size:25px}.sensor-card .cleaning-value{font-size:19px}.eat-widget .count{font-size:11px!important}.eat-layout{grid-template-columns:260px minmax(0,1fr)}}
+@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr}.app-header .workspace-toolbar{gap:10px}.app-header .workspace-toolbar nav{flex-basis:100%;order:3}.app-header .workspace-toolbar>.btn{margin-left:auto}.eat-layout{grid-template-columns:1fr}.fridge-panel{width:100%}.home-screen .hello{gap:12px}}
+@media(max-width:480px){.expiry-previews{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}.expiry-name{font-size:13px}.eat-widget button.count{font-size:12px;min-height:36px;padding:7px 10px;gap:5px}.eat-widget .count .dot{width:7px;height:7px}.eat-widget .counts{gap:7px}.eat-widget .eat-heading{font-size:30px}.sensor-card .reading{padding:12px}.sensor-card .reading-label{font-size:12px}.sensor-card .reading-value{font-size:24px}.sensor-card .cleaning-value{font-size:18px}.sensor-card .reading-text{font-size:12px}.app-header .workspace-toolbar .chip{min-height:40px}.chef-traveller{max-width:100%}}
+.shopping-settings{display:flex;align-items:end;gap:14px;flex-wrap:wrap}.shopping-settings p{flex-basis:100%;margin:0}.shopping-list{display:grid;gap:14px}.shopping-row{display:grid;grid-template-columns:80px minmax(0,1fr);gap:18px;align-items:start}.shopping-row>img{width:80px;height:80px;object-fit:cover;border-radius:20px}.shopping-row h2{margin:10px 0 6px}.shopping-row p{margin:8px 0}.shopping-row strong{color:var(--green)}.consumption-form{display:grid;grid-template-columns:1fr 1fr;gap:16px}.consumption-form h2,.consumption-form>p{grid-column:1/-1}.shopping-teaser{background:var(--mint)}
+@media(max-width:600px){.shopping-row{grid-template-columns:60px minmax(0,1fr);padding:18px;gap:12px}.shopping-row>img{width:60px;height:60px}.shopping-row h2{font-size:22px}.consumption-form{grid-template-columns:1fr}.shopping-settings>.btn{width:100%}}
+
+/* Shelf help remains inside the sidebar width on phones and laptops. */
+.shelf-zone{position:relative;margin-bottom:12px}.shelf-zone .zone{width:100%;margin:0;padding-right:50px}.shelf-help{position:absolute;right:14px;top:18px;width:28px;height:28px;border:1px solid var(--green);border-radius:50%;background:var(--cream,#fff1e6);color:var(--green);font:inherit;font-weight:800;cursor:pointer}.shelf-tooltip{position:absolute;left:0;right:0;bottom:calc(100% + 6px);z-index:20;padding:18px;border:2px solid var(--green);border-radius:20px;background:#fffaf5;box-shadow:0 8px 28px #382e2e25;font-size:14px;line-height:1.5}.shelf-tooltip p{margin:5px 0 0}.placement-tip{margin-top:12px;padding:12px 14px;border-radius:16px;background:#eff2e9;font-size:14px;line-height:1.5}.placement-tip p{margin:5px 0}.placement-tip small{display:block;margin-top:5px;color:var(--muted)}.storage-guide{font-size:13px;line-height:1.5}.shelf-help:focus-visible{outline:3px solid #a94768;outline-offset:3px}
+
+/* One-row desktop navigation and an overview that surfaces every main action. */
+.app-header{padding:14px 0;border-radius:0 0 28px 28px}
+.header-shell{position:relative;z-index:1;max-width:1440px;margin:auto;padding:0 24px;display:flex;align-items:center;gap:16px}
+.header-shell .brand{font-size:24px;white-space:nowrap;padding:0}
+.app-header .header-shell .workspace-toolbar{flex:1;flex-wrap:nowrap;min-width:0;margin:0;padding:0;gap:12px}
+.app-header .header-shell .workspace-toolbar>.field{width:120px;min-width:0;font-size:13px;padding:8px 10px}
+.app-header .header-shell nav{flex-wrap:nowrap;align-self:center;margin:0;gap:4px}
+.app-header .header-shell .chip{font-size:12px;padding:9px 10px;white-space:nowrap}
+.header-shell .header-actions{gap:10px;font-size:13px;white-space:nowrap}
+.header-shell .header-actions .btn{padding:8px 12px;font-size:12px}
+.page-tools{display:flex;justify-content:flex-end;margin-bottom:14px}
+.home-screen .hello h1{font-size:32px;margin:0}.home-screen .fridge-view-switch{gap:10px;align-items:center}
+.home-shortcuts{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:14px;align-items:stretch}
+.home-shortcuts .shopping-teaser{padding:14px 18px;gap:6px;border-radius:24px;display:grid;grid-template-columns:1fr auto;align-items:center}
+.home-shortcuts .shopping-teaser .eyebrow{display:none}.home-shortcuts .shopping-teaser h2{font-size:20px;margin:0}.home-shortcuts .shopping-teaser p{font-size:12px;line-height:1.4;margin:0;grid-column:1}.home-shortcuts .shopping-teaser .btn{font-size:12px;padding:8px 12px;grid-column:2;grid-row:1/3}
+.home-shortcuts .nav-card{padding:16px;gap:10px;border-radius:24px}.home-shortcuts .nav-title{font-size:18px}.home-shortcuts .nav-icon{width:36px;height:36px;font-size:24px}.home-shortcuts .nav-arrow{width:28px;height:28px;font-size:22px}
+@media(min-width:1001px){
+ .app{padding-top:16px}.home-screen{gap:14px}.dashboard-grid{gap:16px}.dashboard-grid>.col{gap:14px}
+ .home-screen .eat-widget,.home-screen .scan-card,.home-screen .sensor-card{padding:18px 20px;border-radius:26px;gap:12px}
+ .home-screen .eat-widget .eat-heading{font-size:32px}.home-screen .eat-widget .eat-sub{margin:6px 0 12px;font-size:14px}
+ .home-screen .expiry-previews{margin-bottom:8px;gap:12px}.home-screen .expiry-product img{max-height:110px;aspect-ratio:auto;object-fit:cover}.home-screen .expiry-name{font-size:12px;margin-top:6px}
+ .home-screen .eat-widget .counts{margin-top:6px}.home-screen .eat-widget button.count{font-size:11px;padding:5px 7px;min-height:28px}
+ .home-screen .scan-card h2,.home-screen .sensor-card h2{font-size:23px;margin:0}.home-screen .scan-card>.eyebrow{display:none}.home-screen .scan-card>p{font-size:13px;line-height:1.4;margin:0}
+ .home-screen .scan-actions{gap:8px}.home-screen .scan-actions>.btn{flex-basis:40%;padding:9px 12px;font-size:13px}
+ .home-screen .sensor-card .eyebrow{font-size:10px;margin:0}.home-screen .sensor-card .readings{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+ .home-screen .sensor-card .reading{padding:12px;border-radius:18px;gap:5px}.home-screen .sensor-card .reading-label{font-size:11px}.home-screen .sensor-card .reading-value{font-size:25px}.home-screen .sensor-card .cleaning-value{font-size:18px}.home-screen .sensor-card .reading-text{font-size:11px}.home-screen .sensor-card .cleaning-link{font-size:10px}
+ .home-screen .sensor-card>.note{font-size:12px}.home-screen .sensor-card .btn-row .btn{padding:8px 12px;font-size:12px}
+}
+@media(min-width:1001px) and (max-width:1250px){.header-shell{padding-inline:16px;gap:10px}.header-shell .brand{font-size:20px}.header-shell .account-name{display:none}.app-header .header-shell .chip{padding:8px;font-size:11px}.app-header .header-shell .workspace-toolbar{gap:8px}.app-header .header-shell .workspace-toolbar>.field{width:100px}.home-shortcuts .shopping-teaser{grid-template-columns:1fr}.home-shortcuts .shopping-teaser .btn{grid-column:1;grid-row:auto;justify-self:start}}
+@media(max-width:1000px){.header-shell{flex-wrap:wrap;gap:12px;padding-inline:18px}.header-shell .header-actions{margin-left:auto}.app-header .header-shell .workspace-toolbar{order:3;flex-basis:100%;overflow-x:auto;padding-bottom:4px}.app-header .header-shell nav{flex-basis:auto;order:initial}.app-header .header-shell .workspace-toolbar>.field{flex:none}.home-shortcuts{grid-template-columns:1fr 1fr}.home-shortcuts .shopping-teaser{grid-column:1/-1}.home-screen .hello h1{font-size:28px}}
+@media(max-width:600px){.home-screen .hello{align-items:center}.home-screen .fridge-view-switch{flex-wrap:wrap;justify-content:flex-end;gap:6px}.home-screen .fridge-view-switch .btn{font-size:12px;padding:8px 10px}.home-shortcuts{gap:8px}.home-shortcuts .shopping-teaser{grid-template-columns:1fr}.home-shortcuts .shopping-teaser .btn{grid-column:1;grid-row:auto;justify-self:start}.home-shortcuts .nav-title{font-size:14px}.home-shortcuts .nav-card{padding:12px;gap:6px}.home-shortcuts .nav-icon{display:none}.home-shortcuts .nav-arrow{width:24px;height:24px}}
+@media(min-width:1001px){
+ .home-screen .dashboard-grid>.col{display:contents}
+ .home-screen .eat-widget{grid-column:1;grid-row:1;align-self:stretch;display:flex;flex-direction:column}
+ .home-screen .sensor-card{grid-column:2;grid-row:1}
+ .home-screen .scan-card{grid-column:1/-1;grid-row:2;gap:8px}
+ .home-screen .scan-card .scan-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+ .home-screen .scan-card .scan-actions>.btn{grid-column:auto;font-size:12px;padding:9px 8px}
+ .home-screen .scan-card>.note{font-size:11px}
+ .home-screen .expiry-previews{margin-top:auto}.home-screen .eat-widget .counts{margin-top:auto}
+ .home-screen .sensor-card{gap:8px}.home-screen .sensor-card .reading{padding:10px}.home-screen .sensor-card .reading-value{font-size:23px}.home-screen .sensor-card .cleaning-value{font-size:17px}
+}
+@media(min-width:1001px) and (max-height:850px){
+ .home-screen{gap:10px}.home-screen .dashboard-grid{gap:12px}.home-screen .sensor-card{gap:6px;padding:14px 18px}
+ .home-screen .sensor-card .reading{padding:8px;gap:3px}.home-screen .sensor-card .reading-text{font-size:10px}.home-screen .sensor-card .reading-label{font-size:10px}.home-screen .sensor-card .reading-value{font-size:22px}.home-screen .sensor-card .cleaning-value{font-size:16px}
+ .home-screen .sensor-card .btn-row .btn{min-height:32px;padding:6px 10px}.home-screen .scan-card{padding:14px 18px;gap:6px}.home-screen .scan-card .scan-actions>.btn{min-height:36px;padding:6px 8px}
+ .home-shortcuts .shopping-teaser{padding:10px 14px;gap:4px}.home-shortcuts .shopping-teaser h2{font-size:18px}.home-shortcuts .shopping-teaser p{font-size:11px}.home-shortcuts .shopping-teaser .btn{min-height:32px;padding:6px 10px}
+}
+
+.fridge-picker{width:auto;max-width:220px;min-height:40px;padding:8px 32px 8px 14px;font-size:14px;background:var(--sky);border-radius:24px}.page-tools{gap:10px;align-items:center}.app-header .header-shell .workspace-toolbar{justify-content:center}.app-header .header-shell nav{flex:0 1 auto}@media(max-width:600px){.fridge-picker{max-width:160px;font-size:12px;min-height:36px}.page-tools{flex-wrap:wrap}}
+.brand-logo{display:block;width:200px;height:48px;object-fit:cover}.header-shell .brand{flex:none}
+/* Chef Byte stays with the viewport; users can collapse the speech bubble. */
+.chef-assistant{position:fixed;right:18px;bottom:max(10px,env(safe-area-inset-bottom));width:240px;z-index:30;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.chef-assistant>*{pointer-events:auto}.chef-assistant.collapsed{width:72px}.chef-bubble{background:var(--panel);border:1px solid #e8ddd2;border-radius:24px 24px 4px 24px;padding:12px 14px;box-shadow:0 8px 28px #382e3020;width:100%}
+.chef-bubble-heading{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--green)}.chef-dismiss{border:0;background:none;font-size:22px;cursor:pointer;padding:0 4px;color:var(--muted)}
+.chef-assistant .chef-cloud{border-radius:0;background:none;box-shadow:none;padding:8px 0;margin:0;font-size:13px;min-height:0;text-align:left}.chef-assistant .chef-cloud::after{display:none}.chef-options{display:flex;gap:12px}.chef-options .link{font-size:11px}.chef-toggle{border:0;background:none;padding:0;cursor:pointer;min-width:68px;min-height:90px}.chef-toggle:focus-visible{outline:3px solid var(--green);border-radius:16px}
+.chef-robot.smol{transform:scale(.72);transform-origin:bottom right;margin:0;width:80px;height:115px;margin-top:-30px}
+.chef-robot .chef-hat{position:relative;height:28px;width:52px;background:white;border:2px solid #d3d9c6;border-top:0;border-radius:10px 10px 5px 5px;margin:0 auto 3px;filter:drop-shadow(0 2px 1px #526a3d20)}
+.chef-hat>i{position:absolute;display:block;width:28px;height:26px;background:white;border-radius:50%;top:-10px;left:-7px}.chef-hat>i:nth-child(2){width:30px;height:32px;left:10px;top:-17px}.chef-hat>i:nth-child(3){left:29px}
+.chef-robot .chef-head{border-width:2px;background:#b9ce95;border-radius:22px}.chef-head::before,.chef-head::after{content:'';position:absolute;width:10px;height:5px;border-radius:50%;background:#efa7bc;bottom:10px}.chef-head::before{left:7px}.chef-head::after{right:7px}.chef-robot .chef-body{border-width:2px}.chef-robot .chef-feet i{animation:none}
+.chef-robot.mini{width:46px;height:46px;flex:none;position:relative;margin:8px 0 0}.chef-robot.mini .chef-head{width:44px;height:30px;padding:0 8px;border-radius:14px}.chef-robot.mini .chef-head i{width:4px;height:6px}.chef-robot.mini .chef-head span{font-size:15px;left:16px;bottom:-2px}.chef-robot.mini .chef-hat{width:32px;height:14px;margin-bottom:2px}.chef-robot.mini .chef-hat>i{width:18px;height:16px;top:-7px;left:-5px}.chef-robot.mini .chef-hat>i:nth-child(2){left:6px;top:-11px;height:21px}.chef-robot.mini .chef-hat>i:nth-child(3){left:18px}.chef-robot.mini .chef-head::before,.chef-robot.mini .chef-head::after{width:6px;height:3px;bottom:6px}
+.shelf-tip-heading{display:flex;align-items:center;gap:12px}.history-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.history-stats h2{font-size:21px}.history-total{font:700 38px var(--font-display)}.history-total small{font:600 13px var(--font-body);color:var(--muted)}.history-stats ul{list-style:none;margin:0;padding:0}.history-stats li{padding:10px 0;border-top:1px solid #eee4de;display:grid;gap:4px}.history-stats li span{font-size:12px;color:var(--muted)}.history-byte{display:flex;align-items:center;gap:18px;background:var(--mint)}.history-byte h2{font-size:22px}.app-footer{padding-bottom:120px}
+@media(max-width:1100px){.brand-logo{width:165px;height:42px}}@media(max-width:700px){.history-stats{grid-template-columns:1fr}.chef-assistant{right:10px;width:220px}.brand-logo{width:155px;height:40px}.history-byte h2{font-size:19px}}
+.chef-robot .chef-head span{font-size:0;width:12px;height:7px;border-bottom:2px solid #382e30;border-radius:0 0 12px 12px;left:27px;bottom:7px}.chef-robot.mini .chef-head span{font-size:0;width:8px;height:5px;left:16px;bottom:4px}
+/* Inventory twin: the appliance is the primary navigation, filters live above results. */
+.eat-layout{grid-template-columns:minmax(350px,.9fr) minmax(0,1.3fr);gap:24px}.eat-layout .fridge-panel{position:static;display:flex;flex-direction:column;gap:16px;align-items:stretch}.eat-list{min-width:0}
+.inventory-filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;justify-content:flex-start}.inventory-filters .type-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--panel);border:1px solid #e8dcd2;border-radius:30px;min-width:0;min-height:38px;width:auto}.inventory-filters .type-icon{width:auto;height:auto;background:none;box-shadow:none;font-size:17px;display:flex;gap:5px;align-items:center;border:0}.inventory-filters .type-n{position:static;min-width:17px;height:17px;font-size:10px;line-height:17px}.inventory-filters .type-label{font-size:11px;max-width:none;text-align:left}.inventory-filters .type-btn[aria-pressed=true]{background:var(--blush);border-color:var(--green)}
+.digital-fridge{padding:18px!important;background:linear-gradient(135deg,#fffefa,#edf0e6);border:3px solid #bac5ab;border-radius:34px!important;box-shadow:inset 0 0 0 5px #fff8ee,0 12px 32px #526a3d18;gap:12px!important;position:relative}.digital-fridge::after{content:'';position:absolute;left:28px;right:28px;bottom:-8px;height:8px;background:linear-gradient(to right,#526a3d 10%,transparent 10%,transparent 90%,#526a3d 90%);border-radius:0 0 4px 4px}
+.twin-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}.twin-heading h2{font-size:26px;margin:0}.twin-heading .eyebrow{font-size:10px;margin:0 0 3px}.twin-heading .btn{padding:7px 10px;font-size:12px;min-height:34px}.twin-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;font-weight:800}.twin-legend span:nth-child(1){color:var(--bad)}.twin-legend span:nth-child(2){color:var(--soon)}.twin-legend span:nth-child(3){color:#497b89}.twin-legend span:nth-child(4){color:var(--unknown)}
+.fridge-interior{display:grid;grid-template-columns:minmax(0,1fr) 102px;gap:10px;padding:12px 10px;background:#e6eadd;box-shadow:inset 0 5px 12px #526a3d20;border-radius:20px;align-items:stretch}
+.fridge-interior .shelf-zone{margin:0;min-width:0;border-bottom:6px solid #c4cfbd;border-radius:12px 12px 6px 6px;background:#fffff9;box-shadow:0 3px 4px #526a3d20;position:relative;padding:8px}.fridge-interior .door-rack{grid-column:2;grid-row:1/5;border:3px solid #cdd5c1;background:#f7f3e9;border-radius:12px;box-shadow:inset 0 0 6px #526a3d15}.fridge-interior .crisper{background:#edf1e5;border:2px solid #c4cfbd;border-radius:8px 8px 16px 16px}
+.fridge-interior .zone{border:0!important;border-radius:6px;background:transparent!important;box-shadow:none!important;padding:0 24px 4px 0!important;min-height:30px;text-align:left;display:flex;flex-wrap:wrap;gap:4px;align-items:center}.fridge-interior .zone-name{font-size:12px;line-height:1.2}.fridge-interior .zone-count{font-size:10px;line-height:1.2;color:var(--muted)}.fridge-interior .shelf-help{width:21px;height:21px;right:6px;top:6px;font-size:12px}.fridge-interior .shelf-tooltip{bottom:calc(100% + 4px);width:260px;max-width:calc(100vw - 64px);left:0;right:auto;font-size:12px;padding:12px}.fridge-interior .door-rack .shelf-tooltip{left:auto;right:0}
+.twin-products{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;min-height:53px}.twin-product{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;width:55px;padding:0;border:0;background:none;color:var(--ink);border-radius:10px;cursor:pointer;font:inherit}.twin-product img{width:44px;height:44px;object-fit:cover;border-radius:10px;border:2px solid #b5c69b}.twin-product.expired img{border-color:var(--bad)}.twin-product.soon img{border-color:var(--soon)}.twin-product.unknown img{border-color:var(--unknown)}.twin-product.needs-move img{border-color:#497b89}.twin-product[aria-pressed=true]{outline:2px solid var(--green);outline-offset:3px}.twin-name{font-size:9px;line-height:1.15;overflow-wrap:anywhere;text-align:center}.twin-badge{position:absolute;top:-5px;left:0;max-width:68px;padding:2px 4px;border-radius:8px;background:var(--ink);color:white;font-size:8px;font-weight:800;white-space:nowrap}.expired .twin-badge{background:var(--bad)}.soon .twin-badge{background:var(--soon)}.unknown .twin-badge{background:var(--unknown)}.needs-move .twin-badge{background:#497b89}.twin-empty{font-size:10px;color:var(--muted);padding-top:12px}.door-rack .twin-products{justify-content:center}.door-rack .twin-product{margin:10px 0;border-bottom:4px solid #c4cfbd;width:100%;padding-bottom:10px}.twin-unplaced{display:flex;flex-wrap:wrap;gap:6px;font-size:12px}.twin-unplaced strong{width:100%}.twin-unplaced .chip{font-size:11px}
+.move-plan{padding:18px;gap:10px}.move-plan h3{margin:0}.move-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;padding-top:10px;border-top:1px solid #e2e7d9}.move-row p{font-size:11px;color:var(--muted);margin-top:4px}.move-row .btn{font-size:11px;min-height:32px;padding:6px 9px;white-space:nowrap}.twin-selected{outline:2px solid var(--green);outline-offset:3px}.eat-list>.scan-card{margin-bottom:18px}
+@media(max-width:1000px){.eat-layout{grid-template-columns:minmax(300px,.9fr) minmax(0,1fr);gap:16px}.digital-fridge{padding:12px!important}.fridge-interior{grid-template-columns:minmax(0,1fr) 80px;padding:8px;gap:6px}.twin-product{width:48px}.twin-product img{width:40px;height:40px}.twin-name{font-size:8px}.inventory-filters .type-label{font-size:10px}}
+@media(max-width:800px){.eat-layout{grid-template-columns:1fr}.digital-fridge{width:100%;max-width:550px;align-self:center}.fridge-interior{grid-template-columns:minmax(0,1fr) 94px}.twin-product{width:58px}.twin-product img{width:48px;height:48px}.twin-name{font-size:10px}.inventory-filters .type-label{font-size:11px}.fridge-panel{order:0}.eat-list{order:1}}
+
+/* One connected chef drawing: hat, face, apron, mittens and little walking shoes. */
+.chef-art{display:block;overflow:visible;flex:none}.chef-art.mini{width:46px;height:48px}.chef-toggle{display:flex;align-items:flex-end;justify-content:flex-end;min-height:112px;padding:0 6px}.chef-assistant{animation:byte-stroll 32s ease-in-out infinite;gap:0;right:14px}.chef-assistant.collapsed{width:96px}.chef-bubble{margin-bottom:0}.chef-options{flex-wrap:wrap;gap:5px 12px}.chef-art .byte-leg{transform-box:fill-box;transform-origin:top center;animation:byte-foot .65s ease-in-out infinite alternate}.chef-art .byte-leg.right{animation-delay:-.65s}.chef-art .byte-arm{transform-box:fill-box;transform-origin:top center;animation:byte-arm .9s ease-in-out infinite alternate}.chef-art .byte-arm.right{animation-delay:-.9s}.chef-art .byte-torso{animation:byte-bob 1.3s ease-in-out infinite}.chef-assistant:hover,.chef-assistant:focus-within,.chef-assistant.still{animation-play-state:paused}.chef-assistant:hover .chef-art *,.chef-assistant:focus-within .chef-art *,.chef-assistant.still .chef-art *{animation-play-state:paused}
+@keyframes byte-stroll{0%,100%{right:14px}50%{right:max(14px,calc(100vw - 254px))}}
+@keyframes byte-foot{from{transform:translateY(0) rotate(-7deg)}to{transform:translateY(-3px) rotate(9deg)}}
+@keyframes byte-arm{from{transform:rotate(-5deg)}to{transform:rotate(7deg)}}
+@keyframes byte-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@media(max-width:600px){.chef-toggle{min-height:96px}.chef-toggle .chef-art{width:72px;height:96px}.chef-assistant{animation-duration:22s}.chef-assistant.collapsed{width:84px}}
+@media(prefers-reduced-motion:reduce){.chef-assistant,.chef-art *{animation:none!important}}
+
+/* The recipe assistant stays beside the conversation instead of walking. */
+.recipe-chat{gap:0;padding:0;overflow:hidden}.recipe-chat-header{display:flex;align-items:center;gap:18px;padding:20px 24px;background:var(--mint)}.recipe-chat-header h2{margin:0 0 5px}.recipe-chat-header .eyebrow{margin-bottom:4px}.recipe-chat .chef-art *{animation:none!important}.recipe-chat-header>.chef-art{width:72px;height:96px}.recipe-conversation{max-height:340px;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px;scrollbar-gutter:stable}.chat-message{display:flex;align-items:flex-end;gap:10px;max-width:88%;flex-shrink:0}.chat-message>div{background:var(--well);padding:12px 16px;border-radius:18px 18px 18px 4px;min-width:0}.chat-message strong{font-size:12px;color:var(--green)}.chat-message p{margin:4px 0 0;line-height:1.5;font-size:14px;overflow-wrap:anywhere}.chat-message.user{align-self:flex-end}.chat-message.user>div{background:var(--sky-deep);border-radius:18px 18px 4px 18px}.chat-message>.chef-art{width:36px;height:40px}.recipe-composer{padding:18px 24px;border-top:1px solid var(--line);display:grid;gap:12px}.recipe-prompt-chips{display:flex;gap:8px;flex-wrap:wrap}.recipe-prompt-chips .chip{font-size:12px}.recipe-send-row{display:flex;gap:12px;align-items:flex-end}.recipe-send-row .field-group{flex:1;min-width:0}.recipe-send-row .btn{flex:none}.recipe-composer details .btn-row{margin:12px 0;flex-wrap:wrap}.recipe-composer summary{font-size:13px;cursor:pointer}.recipe-composer .field-group>span{font-size:12px}.recipe-composer .field{width:100%}@media(max-width:600px){.recipe-chat-header{padding:16px;gap:12px}.recipe-chat-header h2{font-size:24px}.recipe-chat-header>.chef-art{width:60px;height:80px}.recipe-conversation{padding:14px;max-height:320px}.chat-message{max-width:100%;gap:6px}.chat-message>div{padding:10px 12px}.recipe-composer{padding:14px}.recipe-send-row{flex-direction:column;align-items:stretch}.recipe-send-row .field-group{width:100%}}
