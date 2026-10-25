@@ -74,7 +74,7 @@ window.ChillWidgets = (() => {
    h('p',{className:'note'},'Photos and receipts use AI when configured. Always review dates and hidden contents. Read a package date from any item’s Edit screen.'),
    qr&&h(QR,{fridgeId,onClose:()=>setQr(false),onReceive:row=>{setQr(false);onResult({...row.payload,source:'phone',transferId:row.id});}}));
  }
- function Dashboard({name,items,onNavigate,onFilter,onIngredient,onScan,onResult,busy,fridgeId,phone,demo,onMode}){
+ function Dashboard({shopping,name,items,onNavigate,onFilter,onIngredient,onScan,onResult,busy,fridgeId,phone,demo,onMode}){
   const counts=Food.counts(items);const soon=Food.byUrgency(items.filter(i=>Food.status(i)==='soon')).slice(0,4);
   return h('section',{className:'screen home-screen'},h('div',{className:'hello'},h('div',null,h('h1',null,`Hi ${name.split(' ')[0]}`),h('p',{className:'fridge-line'},'Less waste. More taste. Peek inside.')),
    h('div',{className:'fridge-view-switch'},button(demo?'View saved fridge':'Back to demo',onMode,{className:'btn small',disabled:busy}))),
@@ -85,7 +85,7 @@ window.ChillWidgets = (() => {
      button('→',()=>onNavigate('eat'),{className:'eat-corner-arrow','aria-label':'See all food',title:'See all food'}),
      h('div',{className:'counts'},STATUS_ORDER.map(status=>button(h(React.Fragment,null,h('span',{className:'dot'}),status==='unknown'?'Unrecognized':STATUS[status].label,' ',status==='unknown'?items.filter(ChillData.isUnrecognized).length:counts[status]),()=>onFilter(status==='unknown'?'unrecognized':'status:'+status),{key:status,className:'count '+status})),button(h(React.Fragment,null,h('span',{className:'dot'}),'Balkan packaging ',items.filter(ChillData.isBalkan).length),()=>onFilter('balkan'),{className:'count balkan'}))),
     h(ScanControls,{items,onResult,onExample:onScan,busy,phone,fridgeId})),
-    h('div',{className:'col'},h(Sensors,{key:fridgeId,fridgeId}),h('div',{className:'nav-pair'},[['recipes','Recipes','♨'],['nutrition','Food & your body','♡']].map(([screen,title,icon])=>button(h(React.Fragment,null,h('span',{className:'nav-icon','aria-hidden':true},icon),h('span',{className:'nav-title'},title),h('span',{className:'nav-arrow','aria-hidden':true},'→')),()=>onNavigate(screen),{key:screen,className:'nav-card'+(screen==='nutrition'?' sky':''),'aria-label':'Open '+title}))))));
+    h('div',{className:'col'},h(Sensors,{key:fridgeId,fridgeId}),h(ChillShopping.Teaser,{model:shopping,onOpen:()=>onNavigate('shopping')}),h('div',{className:'nav-pair'},[['recipes','Recipes','♨'],['nutrition','Food & your body','♡']].map(([screen,title,icon])=>button(h(React.Fragment,null,h('span',{className:'nav-icon','aria-hidden':true},icon),h('span',{className:'nav-title'},title),h('span',{className:'nav-arrow','aria-hidden':true},'→')),()=>onNavigate(screen),{key:screen,className:'nav-card'+(screen==='nutrition'?' sky':''),'aria-label':'Open '+title}))))));
  }
  return {Dashboard,ScanControls,Mascot};
 })();

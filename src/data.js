@@ -64,7 +64,7 @@ window.ChillData = (() => {
     fallbackImage(e,key) { const img=e.currentTarget;if(img.dataset.fallback)return;img.dataset.fallback='true';img.src=localAsset(key); },
     example(n=0) { return scans[n%scans.length].map(i=>{const date=i.printedIn==null?'':Dates.addDays(Dates.today(),i.printedIn);return {...i,...(date?{printedDate:date,dateText:date.split('-').reverse().join('.')}:{})};}); },
     demoItems() {
-      const examples=this.example();
+      const examples=this.example().map(i=>/greek yog[hu]?urt/i.test(i.name)?{...i,qty:'6 cups',printedIn:10,printedDate:Dates.addDays(Dates.today(),10),dateText:Dates.addDays(Dates.today(),10).split('-').reverse().join('.')}:i);
       if(!examples.some(isUnrecognized)) examples.push({...scans.flat().find(isUnrecognized)||{name:'Unknown container',qty:'1 box',container:'Blue opaque box, white lid',confidence:'low',note:'What is inside? Open the box and identify the contents before using it.'},kind:'other',category:'unknown',daysLeft:null,photoKey:'container'});
       return Food.merge([],examples).rows.map(i=>({...i,...(isUnrecognized(i)?{expires:null,dateSource:'unknown',category:'unknown'}:{}),demo:true}));
     },

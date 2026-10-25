@@ -206,6 +206,7 @@
     const demos=useRef({}),demoRef=useRef(true);demoRef.current=demo;
     const phone=new URLSearchParams(location.search).get('phone')==='1';
     const [items,setItems]=useState([]),[events,setEvents]=useState([]),[screen,setScreen]=useState('home');
+    const shopping=ChillShopping.usePlan(items,fridgeId,demo,session?.user.id);
     const [loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
     const [editor,setEditor]=useState(undefined),[draft,setDraft]=useState(null),[retry,setRetry]=useState(0);
     const sessionRef=useRef(null),fridgeRef=useRef(''),generation=useRef(0),scanCount=useRef(0);
@@ -276,19 +277,34 @@
     }
     async function finishItem(item,kind) {
       if(demoRef.current){demos.current[fridgeId]=items.filter(i=>i.id!==item.id);setItems(demos.current[fridgeId]);setEvents(old=>[{id:Food.newId(),item_name:item.name,photo_key:item.photoKey,action:kind,occurred_at:new Date().toISOString(),demo:true},...old]);setNotice('Demo action recorded for this session.');return;}
-      await action(()=>api.finish(item.id,kind),kind==='eaten'?'Marked as eaten.':'Marked as discarded.');
+      await action(()=>api.finish(item.id,kind),kind==='eaten'?'Marked as eaten.':'Marked as discarded.');shopping.reload();
     }
     function navigate(next){setInventoryFilter('');setScreen(next);setDraft(null);setNotice('');window.scrollTo(0,0);}
     async function create(name){
       await action(async()=>{const fridge=await api.createFridge(name);setFridges(old=>[...old,fridge]);setFridgeId(fridge.id);},'Fridge created.');
     }
+    async function consume(item,amount,q){
+      if(demoRef.current){
+        const remaining=q.amount-amount;
+        demos.current[fridgeId]=items.flatMap(i=>i.id===item.id?(remaining>0?[{...i,qty:remaining+' '+q.unit}]:[]):[i]);
+        setItems(demos.current[fridgeId]);shopping.addDemoLog({item_name:item.name,amount,unit:q.unit,consumed_on:Dates.today()});return;
+      }
+      const ok=await action(()=>api.consume(item,amount),'Consumption logged.');if(!ok)throw Error('Could not log consumption. Check the error above.');shopping.reload();
+    }
+    useEffect(()=>{
+      const open=()=>{setScreen('shopping');setDraft(null);};
+      const message=e=>{if(e.data?.type==='chill-open-shopping')open();};
+      window.addEventListener('chill-open-shopping',open);navigator.serviceWorker?.addEventListener('message',message);
+      return()=>{window.removeEventListener('chill-open-shopping',open);navigator.serviceWorker?.removeEventListener('message',message);};
+    },[]);
+    useEffect(()=>{if(profile&&new URLSearchParams(location.search).get('shopping')==='1')setScreen('shopping');},[profile]);
     async function signOut(){
       await action(async()=>{const {error}=await api.client().auth.signOut();if(error)throw error;},'');
     }
     const top=h('header',{className:'app-header'},h('div',{className:'react-header'},
       btn('✳ ChillCheck',()=>navigate('home'),{className:'brand',disabled:busy||!!draft}),
       session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))),fridges.length>0&&h('div',{className:'workspace-toolbar'},select('Your fridge',fridgeId,v=>{if(!busy){setFridgeId(v);navigate('home');}},fridges.map(f=>[f.id,f.name])),
-          h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft}))),
+          h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft}))),
           btn('+ Add food',()=>setEditor(null),{className:'btn primary',disabled:busy||loading||!!draft})) );
     return h(React.Fragment,null,top,h('main',{className:'app'},
       error&&h('div',{className:'alert-item',role:'alert'},h('span',null,error),btn('Dismiss',()=>setError(''),{className:'btn small'})),
@@ -300,9 +316,9 @@
         !fridges.length?h(CreateFridge,{onCreate:create,busy}):
         h(React.Fragment,null,
           draft?h(Review,{draft,setDraft,busy,onClose:()=>setDraft(null),onSave:saveReview}):
-          screen==='home'?h(ChillWidgets.Dashboard,{name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onMode:()=>setDemo(v=>!v),onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
+          screen==='home'?h(ChillWidgets.Dashboard,{shopping,name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onMode:()=>setDemo(v=>!v),onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
           screen==='eat'?h(Inventory,{items,busy,initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
-          screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events}),
+          screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events}),
           editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
       session&&fridges.length>0&&h(ChillWidgets.Mascot),
       h('footer',{className:'app-footer'},'Made for the food you almost forgot.')));

@@ -205,3 +205,13 @@ Run migration `202610250004_scan_integration.sql` after 001–003. It enables pr
 **Sensors and Chef Byte:** temperature, door events and logs are a clearly labeled simulation. Use “Simulate opening/closing” to demonstrate the log and mascot reactions. No physical sensor is connected, and door openings do not establish eating behavior.
 
 Validation: `tests/dashboard.cjs` covers demo reset, image fallback, ingredient recipes, QR/inbox, file scan/review, AI error handling and responsive layout with a stubbed backend. `supabase/tests/scan_integration.sql` tests real PostgreSQL ownership rules and quotas. `tests/edge.cjs` tests the function with mocked external services. Live Anthropic deployment and a physical phone test are separate setup steps.
+
+### Shopping reminders and consumption
+
+Apply `supabase/migrations/202610250005_shopping_consumption.sql` in the Supabase SQL Editor after migrations 001–004. It adds owner-protected consumption history and an atomic quantity logging function. No historical amounts are guessed.
+
+Open **Shopping list** to choose a 3, 6, 7 or 14-day planning horizon and log the amount eaten. Stock is reduced automatically; marking a whole item eaten also records its known quantity. Discarding food never counts as consumption. Use clear quantities such as `6 cups`, `500 g`, or `1 l`. Different units are not guessed or converted between cups and grams.
+
+Forecasts use the previous seven complete days, including zero-log days, and require logs on at least three distinct days. Complete logs give better estimates. Expired stock is excluded; stock expiring soon only counts up to the amount expected to be used before its date. The demo includes five yogurt cups daily: six cups remaining means 1.2 days of stock and a recommendation to buy 24 cups for six days. Demo consumption resets on refresh; saved-fridge consumption persists in Supabase.
+
+Enable browser notifications explicitly from the shopping list. HTTPS (or localhost) and browser permission are required. Reminders run while ChillCheck is open, at most once per six hours per account/fridge; the manual reminder button bypasses that cooldown. No closed-app push scheduler is configured. Serve `notification-worker.js` at the site root for mobile notification display. In-app shopping alerts work without notification permission.

@@ -3,7 +3,7 @@
  const user={id:'10000000-0000-0000-0000-000000000001',email:'tester@example.invalid',user_metadata:{display_name:'Ivet'}};
  let session=null, listener=()=>{};
  let n=100;
- const db={profiles:[],fridges:[],food_items:[],food_events:[],phone_scans:[],mock_photos:window.testCatalog.photos,mock_scans:window.testCatalog.scans.map((items,id)=>({id,items})),mock_recipes:window.testCatalog.recipes.map(data=>({name:data.name,data}))};
+ const db={profiles:[],fridges:[],food_items:[],food_events:[],food_consumption:[],phone_scans:[],mock_photos:window.testCatalog.photos,mock_scans:window.testCatalog.scans.map((items,id)=>({id,items})),mock_recipes:window.testCatalog.recipes.map(data=>({name:data.name,data}))};
  window.testDB=db;
  window.testFail=false;
  const uuid=()=>`00000000-0000-0000-0000-${String(++n).padStart(12,'0')}`;

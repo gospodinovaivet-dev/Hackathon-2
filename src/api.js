@@ -28,6 +28,15 @@ window.ChillAPI = (() => {
   });
   return {
     client, fromRow, toRow,
+    async consumption(fridgeId,since) {
+      const {data,error}=await client().from('food_consumption').select('*').eq('fridge_id',fridgeId).gte('consumed_on',since).order('consumed_on');
+      if(error)throw Error(error.code==='PGRST205'?'Run migration 202610250005_shopping_consumption.sql to enable consumption history.':error.message);
+      return data;
+    },
+    async consume(item,amount) {
+      const {error}=await client().rpc('consume_food_item',{p_item_id:item.id,p_amount:amount,p_expected_quantity:item.qty});
+      if(error)throw Error(error.code==='PGRST202'?'Run migration 202610250005_shopping_consumption.sql to enable consumption logging.':error.message);
+    },
     async sendPhone(fridgeId,payload) {
       const {photo,...safe}=payload;
       return result(client().from('phone_scans').insert({fridge_id:fridgeId,payload:safe}).select().single());
