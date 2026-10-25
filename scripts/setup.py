@@ -1,5 +1,7 @@
 """Download pinned browser dependencies without npm or pip."""
 import argparse
+import hashlib
+import re
 import json
 import os
 from pathlib import Path
@@ -96,6 +98,15 @@ def setup(refresh=False):
                'supabase.createClient(backendConfig.url, backendConfig.publishableKey) : null;\n'
                '</script>\n')
     html = html.replace('</head>', scripts + '</head>')
+    # Changed assets get a new URL even if an older browser tab cached the stylesheet.
+    def version_asset(match):
+        prefix, filename = match.groups()
+        asset = ROOT / filename
+        if not asset.is_file():
+            return match.group(0)
+        digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
+        return f'{prefix}{filename}?v={digest}"'
+    html = re.sub(r'((?:src|href)=")((?:css|src|js|vendor)/[^"?]+)(?:\?[^" ]*)?"', version_asset, html)
     (ROOT / 'index.local.html').write_text(html)
     print('Supabase client configured.' if url else 'Demo mode: add your project URL and publishable key to .env when ready.')
     print('Setup complete. React app uses Supabase Auth and database storage.')

@@ -15,7 +15,7 @@ The app is being migrated from a vanilla JavaScript hackathon prototype to **Rea
 - Example recipes with photos and example food information.
 - Responsive React UI, error messages and loading states.
 
-The React app does not use the Claude artifact link. Live AI photo recognition, generated recipes, photo storage and real hardware integration are still future steps. Recipes and scan detections are clearly labelled examples. Generated food photos are illustrative, not camera evidence. The original prototype remains available at `legacy.html` for reference.
+The React app does not use the Claude artifact link. Food/receipt recognition, label reading and generated recipes use the included authenticated Supabase Edge Function once deployed with provider secrets. The starter demo works without AI. Generated food photos are illustrative, not camera evidence; private original scan-photo storage and real hardware integration are not implemented. The original prototype remains at `legacy.html` for reference.
 
 ## Technology choices
 
@@ -180,7 +180,7 @@ Database tests run against a disposable PostgreSQL/Supabase environment; see `su
 - **Email confirmation:** open the confirmation email before signing in. Check Supabase's email delivery configuration if no email arrives.
 - **Missing function error when saving a scan or finishing food:** apply migration `202610240002_inventory_operations.sql`.
 - **Permission errors:** verify the signed-in account and table policies; do not disable Row Level Security to work around them.
-- **Expected automatic camera recognition:** not implemented in the React version yet. The next phase adds private uploads and a server-side AI function.
+- **Live camera recognition unavailable:** deploy `chill-ai`, configure its provider secrets, and apply migration 004. See `docs/AI_SETUP_PROMPT.md`. Local image preview works without the AI backend; live recognition does not.
 
 
 ### Database-backed mock items and photos
@@ -191,3 +191,17 @@ Database tests run against a disposable PostgreSQL/Supabase environment; see `su
 4. Refresh and check that your items and photo references remain. Recipes and example scan templates now load from database tables; image bytes are served from Supabase Storage. The local pictures remain available for the signed-out welcome screen.
 
 Catalog tables are read-only for signed-in users; only an administrator can seed/change them. The public bucket contains shared illustrations only, never private fridge photos. Inventory retains the existing owner-only policies. Migration 003 must be applied before using this version of the app. The Python uploader requires no npm or pip dependencies.
+
+### Restored dashboard and live scan integration
+
+The home screen starts with a fresh demo inventory on every page refresh. Click a food photo under **Eat Me First** for recipes using that ingredient; click its heading for the full inventory. **View saved fridge** switches to persisted Supabase inventory. Confirmed scans are saved even in demo mode. Edits/eaten actions on demo items affect the demo session; saved-fridge actions persist. No saved data is deleted by a refresh.
+
+Broken public mock-photo URLs fall back to the images included in this repository. The current project was returning `Bucket not found`; upload the optional catalog bucket as described above to serve shared images from Storage.
+
+Run migration `202610250004_scan_integration.sql` after 001–003. It enables private phone scan handoff, scan-source recording and authenticated AI quotas. Deploy `supabase/functions/chill-ai/index.ts` and set its `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` secrets to enable live food/receipt scanning, package dates/barcodes, outline refinement, recipe generation and general food information. The frontend makes authenticated Supabase function calls and contains no provider key. See [the AI deployment prompt](docs/AI_SETUP_PROMPT.md) for a complete handoff you can give another AI.
+
+**Phone QR:** open “Scan with my phone · QR”, enter the accessible app URL, and sign in to the same account on the phone. The phone sends detections to a private inbox and the desktop receives them for review. For trusted Wi-Fi testing use `python3 scripts/start.py --host 0.0.0.0 --port 8081` and your computer's LAN IP in the URL. `localhost` does not connect a phone to a computer. Prefer HTTPS hosting; browser live-camera preview requires a secure context, while the file/photo picker can be used on LAN HTTP. No credentials are put in QR codes.
+
+**Sensors and Chef Byte:** temperature, door events and logs are a clearly labeled simulation. Use “Simulate opening/closing” to demonstrate the log and mascot reactions. No physical sensor is connected, and door openings do not establish eating behavior.
+
+Validation: `tests/dashboard.cjs` covers demo reset, image fallback, ingredient recipes, QR/inbox, file scan/review, AI error handling and responsive layout with a stubbed backend. `supabase/tests/scan_integration.sql` tests real PostgreSQL ownership rules and quotas. `tests/edge.cjs` tests the function with mocked external services. Live Anthropic deployment and a physical phone test are separate setup steps.

@@ -3,13 +3,13 @@
  const user={id:'10000000-0000-0000-0000-000000000001',email:'tester@example.invalid',user_metadata:{display_name:'Ivet'}};
  let session=null, listener=()=>{};
  let n=100;
- const db={profiles:[],fridges:[],food_items:[],food_events:[],mock_photos:window.testCatalog.photos,mock_scans:window.testCatalog.scans.map((items,id)=>({id,items})),mock_recipes:window.testCatalog.recipes.map(data=>({name:data.name,data}))};
+ const db={profiles:[],fridges:[],food_items:[],food_events:[],phone_scans:[],mock_photos:window.testCatalog.photos,mock_scans:window.testCatalog.scans.map((items,id)=>({id,items})),mock_recipes:window.testCatalog.recipes.map(data=>({name:data.name,data}))};
  window.testDB=db;
  window.testFail=false;
  const uuid=()=>`00000000-0000-0000-0000-${String(++n).padStart(12,'0')}`;
  function query(table){
   let action='select',payload,filters=[],one=false,ignore=false;
-  const q={select(){return q;},eq(k,v){filters.push([k,v]);return q;},order(){return q;},limit(){return q;},
+  const q={select(){return q;},eq(k,v){filters.push([k,v]);return q;},gte(){return q;},order(){return q;},limit(){return q;},
    single(){one=true;return q;},maybeSingle(){one=true;return q;},insert(v){action='insert';payload=v;return q;},
    upsert(v,options){action='upsert';payload=v;ignore=options?.ignoreDuplicates;return q;},update(v){action='update';payload=v;return q;},
    then(resolve,reject){return Promise.resolve().then(()=>{
@@ -27,7 +27,7 @@
    }).then(resolve,reject);}
   };return q;
  }
- const client={from:query,storage:{from:()=>({getPublicUrl:path=>({data:{publicUrl:'/assets/products/'+path}})})},auth:{
+ const client={from:query,functions:{async invoke(name,{body}){window.testAIRequests=(window.testAIRequests||[]).concat(body);if(window.testAIError)return {error:{context:{json:async()=>({error:'Live AI setup is incomplete.'})}}};if(body.prompt.includes('Suggest 3 recipes'))return {data:{recipes:[{name:'Spinach test omelette',uses:['Baby spinach','Eggs'],extra:['Oil'],buy:[],steps:['Cook thoroughly.'],minutes:10,servings:1,kcal:300}]}};if(body.prompt.includes('close-up photo'))return {data:{found:true,date:'2026-11-01',dateText:'01.11.26',barcode:'1234567890123'}};return {data:{type:'food',items:[{name:'Tomatoes',kind:'fresh',qty:'3 pcs',category:'veg',shelf:'Crisper drawer',daysLeft:4,confidence:'high',box:[50,50,250,250]}]}};}},storage:{from:()=>({getPublicUrl:path=>({data:{publicUrl:'/assets/products/'+path}})})},auth:{
   onAuthStateChange(fn){listener=fn;return {data:{subscription:{unsubscribe(){}}}};},
   async getSession(){return {data:{session},error:null};},
   async signInWithPassword(){session={user};listener('SIGNED_IN',session);return {data:{session},error:null};},

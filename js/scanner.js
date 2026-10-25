@@ -290,7 +290,7 @@ function cleanScanItem(i, w, h) {
   return {
     name: String(i?.name || "").trim().slice(0, 40) || "Unknown item",
     container: String(i?.container || "").trim().slice(0, 60),
-    knownId: String(i?.knownId || "").slice(0, 20),
+    knownId: String(i?.knownId || "").slice(0, 36),
     kind: pick(i?.kind, ["packaged", "cooked", "fresh", "other"], "other"),
     category: pick(i?.category, CATEGORY_IDS, "unknown"),
     qty: String(i?.qty || "").trim().slice(0, 20),

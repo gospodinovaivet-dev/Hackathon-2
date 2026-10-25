@@ -13,8 +13,9 @@ try {
     if (file.endsWith('.jpg')) assets[file.slice(0,-4)]='data:image/jpeg;base64,'+fs.readFileSync(path.join(root,'assets/products',file)).toString('base64');
   }
   html=html.replace('</head>','<script>window.CHILLCHECK_IMAGES='+JSON.stringify(assets)+'</script>\n</head>');
-  html=html.replace(/<link rel="stylesheet" href="(css\/[^"]+)">/g,(_,file)=>'<style>\n'+read(file)+'\n</style>');
+  html=html.replace(/<link rel="stylesheet" href="(css\/[^"]+)">/g,(_,file)=>'<style>\n'+read(file.split('?')[0])+'\n</style>');
   html=html.replace(/<script src="((?:js|src|vendor)\/[^"]+)"><\/script>/g,(_,file)=> {
+    file=file.split('?')[0];
     // Supabase's UMD runtime needs a script URL to resolve its public path.
     if (file === 'vendor/supabase.js') return '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.js"></script>';
     return '<script>\n'+read(file).replace(/<\/script/gi,'<\\/script')+'\n</script>';

@@ -9,6 +9,10 @@ from setup import ROOT, setup
 
 
 class AppHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Cache-Control', 'no-store')
+        super().end_headers()
+
     def send_head(self):
         if self.path.split("?", 1)[0] in ("/", "/index.html"):
             self.path = "/index.local.html"
@@ -30,13 +34,14 @@ class AppHandler(SimpleHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--host', default='127.0.0.1', help='Use 0.0.0.0 for phone access on trusted Wi-Fi')
     parser.add_argument('--port', type=int, default=8080)
     parser.add_argument('--no-browser', action='store_true')
     args = parser.parse_args()
     try:
         setup()
         handler = partial(AppHandler, directory=str(ROOT))
-        with ThreadingHTTPServer(('127.0.0.1', args.port), handler) as server:
+        with ThreadingHTTPServer((args.host, args.port), handler) as server:
             url = f'http://127.0.0.1:{args.port}/index.local.html'
             print(f'ChillCheck: {url}\nPress Ctrl+C to stop.', flush=True)
             if not args.no_browser:

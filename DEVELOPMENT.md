@@ -17,3 +17,12 @@ Hosted verification still requires an actual user to sign up/confirm/sign in and
 ## Next phase
 
 Add private photo storage and server-side AI functions for recognition and recipe generation. Keep provider keys on the server. Add shared fridge membership in a separate migration if required. Preserve manual date overrides and review uncertain/reused containers before accepting detections.
+
+
+## Dashboard integration (October 25)
+
+`src/dashboard.js` owns the dashboard, camera/photo controls, authenticated phone inbox and simulated sensor/mascot components. `src/ai.js` adapts the old Scanner contract to `chill-ai`; do not call `Scanner.init()` in the React app, since that initializer belongs to the legacy embedded runtime. Keep UUID container matches intact.
+
+Run migrations through 004. Demo view state lives in memory and resets on reload; saved inventory is selected with View saved fridge. The phone inbox only exposes records to the owning account. Original image blobs are used in local review and sent to the AI function, but not stored as public photos. The catalog bucket is only for shared illustrations.
+
+Run `tests/dashboard.cjs` and `tests/browser.cjs` with Playwright/Chrome, `tests/edge.cjs` with Node 24, and `supabase/tests/scan_integration.sql` against a disposable database after migrations. The edge and browser tests mock network services; they do not prove live deployment or real phone connectivity. The AI deployment handoff is in `docs/AI_SETUP_PROMPT.md`.

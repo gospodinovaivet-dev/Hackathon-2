@@ -10,7 +10,7 @@
   function Picture({name,photoKey,large=false}) {
     const photo=ChillData.photo(name,photoKey);
     return h('figure',{className:'product-photo'+(large?' large':'')},
-      h('img',{src:photo.src,alt:photo.placeholder?'Closed food container':`Illustrative photo of ${name}`,loading:'lazy',width:480,height:480}),
+      h('img',{src:photo.src,alt:photo.placeholder?'Closed food container':`Illustrative photo of ${name}`,loading:'lazy',onError:e=>ChillData.fallbackImage(e,photo.key),width:480,height:480}),
       h('figcaption',null,photo.placeholder?'Photo unavailable':'Serving illustration'));
   }
   function Status({item}) {return h('span',{className:'pill '+Food.status(item)},Food.daysText(item));}
@@ -52,6 +52,7 @@
       h('button',{className:'btn primary',disabled:busy||!name.trim()},busy?'Creating…':'Create fridge'));
   }
   function FoodForm({item,onSave,onClose,busy,error}) {
+    const [labelBusy,setLabelBusy]=useState(false),[labelError,setLabelError]=useState('');
     const [form,setForm]=useState(item||{name:'',qty:'',kind:'other',category:'unknown',shelf:'',expires:'',dateSource:'unknown',container:'',note:''});
     const ref=useRef(null);
     const change=(key,value)=>setForm(old=>({...old,[key]:value}));
@@ -80,19 +81,22 @@
           select('Category',form.category,v=>change('category',v),CATEGORIES.map(c=>[c.id,c.label])),
           select('Shelf',form.shelf,v=>change('shelf',v),[['','Not sure'],...SHELVES.map(s=>[s,s])]),
           form.kind==='cooked'&&field('Cooked on (if known)',{type:'date',value:form.cookedOn||'',onChange:e=>change('cookedOn',e.target.value)})),
-        field('Container',{value:form.container||'',onChange:e=>change('container',e.target.value),placeholder:'e.g. reused ice cream tub'}),
+        h('label',{className:'field-group'},h('span',null,labelBusy?'Reading package date…':'Scan package date / barcode'),h('input',{type:'file',accept:'image/*',capture:'environment',disabled:busy||labelBusy,onChange:async e=>{const file=e.target.files[0];if(!file)return;setLabelBusy(true);setLabelError('');try{const result=await Scanner.readLabel(file,form.name);setForm(old=>({...old,barcode:result.barcode||old.barcode,...(result.found?{expires:result.date,dateText:result.dateText,dateSource:'label'}:{})}));if(!result.found)setLabelError('No fully readable date found. Enter it manually; no date was guessed.');}catch(err){setLabelError(err.message);}finally{setLabelBusy(false);}}})),labelError&&h('p',{role:'status'},labelError),
+        field('Container',{ value:form.container||'',onChange:e=>change('container',e.target.value),placeholder:'e.g. reused ice cream tub'}),
         field('Notes',{value:form.note||'',onChange:e=>change('note',e.target.value)}),
-        h('div',{className:'btn-row'},h('button',{className:'btn primary',disabled:busy||!form.name.trim()},busy?'Saving…':'Save food'),btn('Cancel',onClose,{disabled:busy}))));
+        h('div',{className:'btn-row'},h('button',{className:'btn primary',disabled:busy||labelBusy||!form.name.trim()},busy?'Saving…':'Save food'),btn('Cancel',onClose,{disabled:busy}))));
   }
-  function Inventory({items,onEdit,onFinish,busy}) {
-    const [filter,setFilter]=useState(''),[shelf,setShelf]=useState('');
-    const shown=Food.byUrgency(items.filter(i=>(!filter||Food.categoryOf(i)===filter)&&(!shelf||i.shelf===shelf)));
+  function Inventory({items,onEdit,onFinish,busy,initialFilter=''}) {
+    const [filter,setFilter]=useState(initialFilter),[shelf,setShelf]=useState('');
+    useEffect(()=>{setFilter(initialFilter);setShelf('');},[initialFilter]);
+    const matches=(i,f)=>f==='balkan'?ChillData.isBalkan(i):f==='unrecognized'||f==='unknown'?ChillData.isUnrecognized(i):f.startsWith('status:')?Food.status(i)===f.slice(7):Food.categoryOf(i)===f;
+    const shown=Food.byUrgency(items.filter(i=>(!filter||matches(i,filter))&&(!shelf||i.shelf===shelf)));
     return h('section',null,h('div',{className:'section-heading'},h('div',null,h('h1',null,'Eat Me First'),h('p',{className:'lead'},'A little attention goes a long way.'))),
       h('div',{className:'eat-layout'},
         h('aside',{className:'fridge-panel'},
-          h('div',{className:'type-filters'},CATEGORIES.map(c=>{
-            const n=items.filter(i=>Food.categoryOf(i)===c.id).length;
-            return h('button',{key:c.id,id:'type-'+c.id,type:'button',className:'type-btn'+(!n?' empty':''),'aria-pressed':filter===c.id,onClick:()=>{setFilter(filter===c.id?'':c.id);setShelf('');}},
+          h('div',{className:'type-filters'},[...CATEGORIES,{id:'balkan',label:'Balkan packaging',icon:'📦'}].map(c=>{
+            const n=items.filter(i=>matches(i,c.id)).length;
+            return h('button',{key:c.id,id:'type-'+c.id,type:'button',className:'type-btn'+(!n?' empty':''),'aria-pressed':filter===c.id||(c.id==='unknown'&&filter==='unrecognized'),onClick:()=>{setFilter(filter===c.id?'':c.id);setShelf('');}},
               h('span',{className:'type-icon'},c.icon,h('span',{className:'type-n'},n)),h('span',{className:'type-label'},c.label));
           })),
           h('div',{className:'fridge-map card'},h('h2',null,'Where is it?'),SHELVES.map(s=>{
@@ -100,7 +104,7 @@
             return h('button',{key:s,type:'button',className:'zone '+tone,'aria-pressed':shelf===s,onClick:()=>{setShelf(shelf===s?'':s);setFilter('');}},
               h('span',{className:'zone-name'},s),h('span',{className:'zone-count'},plural(list.length,'item')));
           }))),
-        h('div',{className:'eat-list'},(filter||shelf)&&btn('Clear filter',()=>{setFilter('');setShelf('');},{className:'link'}),
+        h('div',{className:'eat-list'},filter==='balkan'&&h('p',{className:'notice'},'Balkan packaging: familiar tubs, unexpected contents. Check what is inside, not the original label.'),filter==='unrecognized'&&h('p',{className:'notice'},'What’s in this box? Open it, identify the contents, then edit the item.'),(filter||shelf)&&btn('Clear filter',()=>{setFilter('');setShelf('');},{className:'link'}),
           !shown.length&&h('div',{className:'empty'},items.length?'Nothing in this category yet.':'Your fridge is ready for its first ingredients.'),
           STATUS_ORDER.map(status=>{
             const group=shown.filter(i=>Food.status(i)===status);if(!group.length)return null;
@@ -114,10 +118,16 @@
           }))));
   }
   function Review({draft,setDraft,onSave,onClose,busy}) {
+    const [photoUrl,setPhotoUrl]=useState(''),[refining,setRefining]=useState(false),[refineError,setRefineError]=useState('');
+    useEffect(()=>{if(!draft.photo)return;const url=URL.createObjectURL(draft.photo);setPhotoUrl(url);return()=>URL.revokeObjectURL(url);},[draft.photo]);
+    async function refine(){setRefining(true);setRefineError('');try{const rows=draft.rows.map(r=>({...r}));await Scanner.refineBoxes(draft.photo,rows,()=>setDraft(old=>({...old,rows:[...rows]})));}catch(e){setRefineError(e.message);}finally{setRefining(false);}}
+
     function patch(id,values){setDraft(old=>({...old,rows:old.rows.map(i=>i.id===id?{...i,...values}:i)}));}
-    return h('section',{className:'screen'},h('div',null,h('span',{className:'eyebrow'},'Example scan · review before saving'),h('h1',null,'Let’s check the details'),
-      h('p',{className:'lead'},'These are demo detections, not a live camera scan. Check names, dates, and what is really inside each container.')),
-      h('div',{className:'review-list'},draft.rows.map(item=>h('article',{key:item.id,className:'card review-food'},
+    return h('section',{className:'screen'},h('div',null,h('span',{className:'eyebrow'},draft.source==='example'?'Example scan · review before saving':'Photo scan · review before saving'),h('h1',null,'Let’s check the details'),
+      h('p',{className:'lead'},draft.source==='example'?'Demo detections. Check names, dates, and what is really inside each container.':'AI detections need your review. Check names and dates; confirm the contents of reused or closed containers.')),
+      draft.receipt&&h('p',{className:'notice'},`Receipt purchase date: ${draft.purchaseDate}. Unreadable purchase dates use today; review before saving.`),
+      photoUrl&&h('div',null,h('div',{className:'scan-photo-review'},h('img',{src:photoUrl,alt:'Your scan for review'}),draft.rows.filter(i=>i.box).map((i,n)=>h('button',{type:'button',key:i.id,className:'scan-box',style:{left:i.box[0]/10+'%',top:i.box[1]/10+'%',width:(i.box[2]-i.box[0])/10+'%',height:(i.box[3]-i.box[1])/10+'%'},'aria-label':'Review '+i.name,onClick:()=>document.getElementById('review-'+i.id)?.scrollIntoView({behavior:'smooth',block:'center'})},h('span',null,n+1)))),draft.rows.some(i=>i.box)&&btn(refining?'Refining outlines…':'Refine item outlines',refine,{disabled:busy||refining}),refineError&&h('p',{role:'alert'},refineError)),
+      h('div',{className:'review-list'},draft.rows.map(item=>h('article',{key:item.id,id:'review-'+item.id,className:'card review-food'},
         h('div',{className:'product-info'},h(Picture,{name:item.name,photoKey:item.photoKey}),h('div',null,h('h2',null,item.name),h(Status,{item}))),
         field('Food name',{value:item.name,onChange:e=>patch(item.id,{name:e.target.value}),required:true,maxLength:120}),
         h('div',{className:'add-grid'},field('Quantity',{value:item.qty||'',onChange:e=>patch(item.id,{qty:e.target.value})}),
@@ -127,23 +137,47 @@
         btn('Exclude from scan',()=>setDraft(old=>({...old,rows:old.rows.filter(i=>i.id!==item.id)})),{className:'link',disabled:busy})))),
       draft.missing.length>0&&h('section',{className:'card'},h('h2',null,'Not seen in this scan'),h('p',{className:'note'},'Keep items that may be hidden. Uncheck only if you want to remove them.'),
         draft.missing.map(m=>h('label',{key:m.item.id,className:'check'},h('span',null,m.item.name),h('input',{type:'checkbox',checked:m.keep,onChange:e=>setDraft(old=>({...old,missing:old.missing.map(x=>x.item.id===m.item.id?{...x,keep:e.target.checked}:x)}))})))),
-      h('div',{className:'save-bar'},h('div',{className:'btn-row'},btn(busy?'Saving…':'Confirm and save',onSave,{className:'btn primary',disabled:busy||draft.rows.some(i=>!i.name.trim())}),btn('Cancel',onClose,{disabled:busy}))));
+      h('div',{className:'save-bar'},h('div',{className:'btn-row'},btn(busy?'Saving…':'Confirm and save',onSave,{className:'btn primary',disabled:busy||refining||draft.rows.some(i=>!i.name.trim())}),btn('Cancel',onClose,{disabled:busy}))));
   }
-  function Recipes({items}) {
-    const [quick,setQuick]=useState(false);
-    return h('section',{className:'screen'},h('div',null,h('span',{className:'eyebrow'},'Something lovely from what’s left'),h('h1',null,'Recipes'),h('p',{className:'lead'},'A small collection of ideas. Check the ingredients against your fridge.')),
+  function Recipes({items,ingredient,onClear}) {
+    const [quick,setQuick]=useState(false),[shop,setShop]=useState(false),[prefs,setPrefs]=useState([]),[wishes,setWishes]=useState('');
+    const [generated,setGenerated]=useState(null),[working,setWorking]=useState(false),[error,setError]=useState('');
+    useEffect(()=>{setGenerated(null);setError('');},[ingredient]);
+    async function generate(){setWorking(true);setError('');try{
+      const usable=items.filter(i=>Food.status(i)!=='expired');
+      const result=await ChillAI.json(`Suggest 3 recipes. Return JSON {"recipes":[{"name":"","minutes":10,"servings":2,"kcal":400,"why":"","uses":["exact fridge item name"],"extra":["pantry item"],"buy":[],"steps":["step with amounts"]}]}. Prioritize expiring ingredients. Never use expired foods. ${shop?'Shopping is allowed; list missing items in buy.':'Use only available fridge foods and pantry staples; buy must be empty.'} ${ingredient?'Every recipe must include '+ingredient+'.':''} Preferences: ${prefs.join(', ')}. Request: ${wishes.slice(0,300)}. Available: ${JSON.stringify(usable.map(i=>({name:i.name,quantity:i.qty,days:i.expires?Dates.daysUntil(i.expires):null})))}. Expired, exclude: ${items.filter(i=>Food.status(i)==='expired').map(i=>i.name).join(', ')}. Pantry: oil,salt,pepper,garlic,onion,rice,pasta,oats,flour,spices.`);
+      if(!Array.isArray(result?.recipes)||!result.recipes.length)throw Error('No recipes returned. Try a different request.');
+      const strings=value=>Array.isArray(value)?value.filter(v=>typeof v==='string').slice(0,20):[];
+      const recipes=result.recipes.slice(0,6).map(r=>({name:String(r.name||'Recipe'),minutes:Number(r.minutes)||0,servings:Number(r.servings)||1,kcal:Number(r.kcal)||0,why:String(r.why||''),uses:strings(r.uses),pantry:strings(r.extra),buy:strings(r.buy),steps:strings(r.steps),photo:ChillData.photo(r.uses?.[0]||'').key}));
+      if(recipes.some(r=>r.uses.some(name=>items.some(i=>sameFood(i.name,name)&&Food.status(i)==='expired'))))throw Error('A suggestion included expired food and was rejected. Please try again.');
+      setGenerated(recipes);
+    }catch(e){setError(e.message);}finally{setWorking(false);}}
+    const recipes=(generated||ChillData.recipes).filter(r=>(!quick||r.minutes<15)&&(!ingredient||r.uses.some(name=>sameFood(name,ingredient))));
+    return h('section',{className:'screen'},h('span',{className:'eyebrow'},'Something lovely from what’s left'),h('h1',null,ingredient?`Cook with ${ingredient}`:'Recipes'),
+      ingredient&&btn('Show all ingredients',onClear,{className:'btn small'}),
+      h('section',{className:'card recipe-controls'},h('h2',null,'What are you craving?'),
+        h('div',{className:'btn-row'},['Vegetarian','High protein','No oven','Sweet','Salty','Under 15 min'].map(p=>btn(p,()=>setPrefs(old=>old.includes(p)?old.filter(v=>v!==p):[...old,p]),{key:p,className:'chip','aria-pressed':prefs.includes(p)}))),
+        field('Preferences or dish idea',{value:wishes,onChange:e=>setWishes(e.target.value),maxLength:300,placeholder:'No dairy, cooking for two…'}),
+        h('label',{className:'row'},h('input',{type:'checkbox',checked:shop,onChange:e=>setShop(e.target.checked)}),'Happy to shop for extra ingredients'),
+        btn(working?'Cooking up ideas…':'Generate AI recipes',generate,{className:'btn primary',disabled:working}),error&&h('p',{role:'alert'},error)),
       h('div',{className:'row'},btn('Under 15 minutes',()=>setQuick(!quick),{className:'chip','aria-pressed':quick})),
-      h('p',{className:'note'},'Example recipes. Live AI suggestions will be added through a server-side function.'),
-      h('div',{className:'recipes'},ChillData.recipes.filter(r=>!quick||r.minutes<15).map(r=>h('article',{key:r.name,className:'recipe'},
-        h('figure',{className:'recipe-photo'},h('img',{src:ChillData.asset(r.photo),alt:r.name,width:640,height:640,loading:'lazy'}),h('figcaption',null,'Serving suggestion')),
-        h('div',{className:'rbody'},h('h2',null,r.name),h('p',{className:'note'},`${r.minutes} min · ${r.servings} serving${r.servings===1?'':'s'} · about ${r.kcal} kcal`),
-          h('div',{className:'uses'},r.uses.map(name=>{
-            const item=items.find(i=>sameFood(i.name,name));const expired=item&&Food.status(item)==='expired';
-            return h('span',{key:name,className:'ing'+(expired?' expired':item?'':' buy')},expired?`Replace expired: ${name}`:item?name:`Get: ${name}`);
-          })),h('p',{className:'note'},'Also: '+r.pantry.join(', ')),
+      h('p',{className:'note'},generated?'AI suggestions. Check ingredients, quantities and cooking instructions. Photos are ingredient illustrations.':'Starter recipe ideas. Generate tailored recipes when the AI backend is configured.'),
+      !recipes.length&&h('p',{className:'empty'},'No matching starter recipe. Generate a recipe for this ingredient or clear the filters.'),
+      h('div',{className:'recipes'},recipes.map(r=>h('article',{key:r.name,className:'recipe'},
+        h('figure',{className:'recipe-photo'},h('img',{src:ChillData.asset(r.photo),onError:e=>ChillData.fallbackImage(e,r.photo),alt:r.name,width:640,height:640,loading:'lazy'}),h('figcaption',null,generated?'Ingredient illustration':'Serving suggestion')),
+        h('div',{className:'rbody'},h('h2',null,r.name),h('p',{className:'note'},`${r.minutes} min · ${r.servings} servings · about ${r.kcal} kcal`),r.why&&h('p',null,r.why),
+          h('div',{className:'uses'},r.uses.map(name=>{const item=items.find(i=>sameFood(i.name,name));const expired=item&&Food.status(item)==='expired';return h('span',{key:name,className:'ing'+(expired?' expired':item?'':' buy')},expired?`Replace expired: ${name}`:item?name:`Get: ${name}`);})),
+          h('p',{className:'note'},'Pantry: '+r.pantry.join(', ')),r.buy?.length>0&&h('p',null,'Shopping list: '+r.buy.join(', ')),
           h('details',null,h('summary',null,'How to make it'),h('ol',null,r.steps.map((step,i)=>h('li',{key:i},step)))))))));
   }
   function Nutrition({items,events}) {
+    const [advice,setAdvice]=useState(null),[working,setWorking]=useState(false),[error,setError]=useState('');
+    async function ask(){setWorking(true);setError('');try{
+      const result=await ChillAI.json(`Give general nutrition information for up to six of these foods: ${items.map(i=>i.name).join(', ')}. Return JSON {"summary":"","foods":[{"name":"","helps":"","nutrients":[""],"howOften":"","tooMuch":""}]}. Keep guidance general and brief; no diagnoses, health judgments or personalized intake recommendations. Door activity and logged eating counts do not establish serving size or a complete diet.`);
+      if(!Array.isArray(result?.foods))throw Error('No food information returned.');
+      setAdvice({summary:String(result.summary||''),foods:result.foods.slice(0,6).map(f=>({name:String(f.name||'Food'),helps:String(f.helps||''),nutrients:Array.isArray(f.nutrients)?f.nutrients.filter(n=>typeof n==='string').slice(0,5):[],howOften:String(f.howOften||''),tooMuch:String(f.tooMuch||'')}))});
+    }catch(e){setError(e.message);}finally{setWorking(false);}}
+
     const recent=events.filter(e=>e.action==='eaten'&&new Date(e.occurred_at)>=new Date(Date.now()-30*86400000));
     const counts=new Map();
     recent.forEach(e=>counts.set(e.item_name,(counts.get(e.item_name)||0)+1));
@@ -152,8 +186,8 @@
       h('section',{className:'card'},h('h2',null,'Your last 30 days'),
         counts.size?h('div',{className:'uses'},[...counts].sort((a,b)=>b[1]-a[1]).map(([name,n])=>h('span',{key:name,className:'ing'},`${name} · ${n} times`))):
         h('p',{className:'note'},'Mark food as eaten to see your recent history here.')),
-      h('p',{className:'note'},'Example food information from the prototype. General information, not personalized medical advice.'),
-      h('div',{className:'food-cards'},ChillNutrition.foods.map(f=>h('article',{key:f.name,className:'food-card'},
+      btn(working?'Thinking…':'Ask about my foods',ask,{disabled:working}),error&&h('p',{role:'alert'},error),advice&&h('p',null,advice.summary),h('p',{className:'note'},advice?'AI-generated general information; not personalized medical advice.':'Example food information. General information, not personalized medical advice.'),
+      h('div',{className:'food-cards'},(advice?.foods||ChillNutrition.foods).map(f=>h('article',{key:f.name,className:'food-card'},
         h(Picture,{name:f.name,large:true}),h('h2',null,f.name),h('p',null,f.helps),
         h('div',{className:'uses'},f.nutrients.map(n=>h('span',{key:n,className:'ing'},n))),
         h('dl',{className:'facts'},h('dt',null,'How often'),h('dd',null,f.howOften),h('dt',null,'When it may be too much'),h('dd',null,f.tooMuch))))));
@@ -162,26 +196,15 @@
     return h('section',{className:'screen'},h('h1',null,'Your food story'),h('p',{className:'lead'},'A little record of what you used and what you let go.'),
       !events.length?h('div',{className:'empty'},'Mark food as eaten or discarded to start your history.'):
       h('div',{className:'list'},events.map(event=>h('article',{className:'card history-row',key:event.id},h(Picture,{name:event.item_name,photoKey:event.photo_key}),
-        h('div',null,h('h2',null,event.item_name),h('p',{className:'note'},new Date(event.occurred_at).toLocaleString())),
+        h('div',null,h('h2',null,event.item_name),event.demo&&h('span',{className:'note'},'Demo session · not saved'),h('p',{className:'note'},new Date(event.occurred_at).toLocaleString())),
         h('span',{className:'pill '+(event.action==='eaten'?'safe':'expired')},event.action==='eaten'?'Enjoyed':'Discarded')))));
-  }
-  function Dashboard({name,items,onNavigate,onScan,busy}) {
-    const counts=Food.counts(items);
-    return h('section',{className:'screen'},h('div',null,h('span',{className:'eyebrow'},'Your kitchen, a little more in sync'),h('h1',null,`Hi ${name.split(' ')[0]}`)),
-      h('div',{className:'home-grid'},h('div',{className:'col'},
-        h('button',{type:'button',className:'eat-btn',onClick:()=>onNavigate('eat')},h('span',{className:'eat-title'},'Eat Me First'),
-          h('span',{className:'eat-sub'},counts.expired?`${plural(counts.expired,'item')} expired. Check the list.`:counts.soon?`${plural(counts.soon,'item')} could use a little attention.`:'Let’s make the most of your fridge.'),
-          h('span',{className:'counts'},STATUS_ORDER.map(status=>h('span',{key:status,className:'count '+status},h('span',{className:'dot'}),STATUS[status].label,h('span',{className:'n'},counts[status]))))),
-        h('section',{className:'card'},h('h2',null,'In your fridge'),!items.length?h('p',{className:'note'},'Add your first item or try an example scan.'):
-          h('div',{className:'fridge-preview'},Food.byUrgency(items).map(item=>h('div',{key:item.id,className:'fridge-preview-item'},h(Picture,{name:item.name,photoKey:item.photoKey}),h('span',null,item.name)))))),
-        h('div',{className:'col'},h('section',{className:'card'},h('span',{className:'eyebrow'},'A familiar little surprise'),h('h2',null,'Ice cream tub. Stuffed peppers.'),
-          h(Picture,{name:'Rice-stuffed peppers',large:true}),h('p',null,'Good leftovers deserve a second look. Review what’s inside, not just what the package says.'),
-          btn('Try example scan',onScan,{className:'btn primary',disabled:busy})),
-          h('section',{className:'card'},h('h2',null,'Fridge sensors'),h('p',{className:'note'},'Hardware is not connected. Temperature and door readings are not available.')))));
   }
   function App() {
     const [session,setSession]=useState(null),[authLoading,setAuthLoading]=useState(true);
     const [profile,setProfile]=useState(null),[fridges,setFridges]=useState([]),[fridgeId,setFridgeId]=useState('');
+    const [demo,setDemo]=useState(true),[ingredient,setIngredient]=useState(''),[inventoryFilter,setInventoryFilter]=useState('');
+    const demos=useRef({}),demoRef=useRef(true);demoRef.current=demo;
+    const phone=new URLSearchParams(location.search).get('phone')==='1';
     const [items,setItems]=useState([]),[events,setEvents]=useState([]),[screen,setScreen]=useState('home');
     const [loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
     const [editor,setEditor]=useState(undefined),[draft,setDraft]=useState(null),[retry,setRetry]=useState(0);
@@ -197,16 +220,17 @@
     },[]);
     useEffect(()=>{
       let alive=true;generation.current++;setItems([]);setEvents([]);setFridges([]);setFridgeId('');setProfile(null);setDraft(null);setEditor(undefined);setScreen('home');setNotice('');
+      demos.current={};setDemo(true);
       if(!session){setLoading(false);return;}
       setLoading(true);setError('');
-      api.bootstrap(session.user).then(data=>{if(alive){setProfile(data.profile);setFridges(data.fridges);setFridgeId(data.fridges[0]?.id||'');}})
+      api.bootstrap(session.user).then(data=>{if(alive){setProfile(data.profile);setFridges(data.fridges);setFridgeId(data.fridges.find(f=>f.id===new URLSearchParams(location.search).get('fridge'))?.id||data.fridges[0]?.id||'');}})
         .catch(e=>{if(alive)setError(e.message);}).finally(()=>{if(alive)setLoading(false);});
       return ()=>{alive=false;};
     },[session?.user.id,retry]);
     async function refresh(id=fridgeId) {
       const token=++generation.current;
       const data=await api.inventory(id);
-      if(token===generation.current&&fridgeRef.current===id){setItems(data.items);setEvents(data.events);}
+      if(token===generation.current&&fridgeRef.current===id){if(demoRef.current){demos.current[id] ||= ChillData.demoItems();setItems(demos.current[id]);}else setItems(data.items);setEvents(data.events);}
     }
     useEffect(()=>{
       setDraft(null);setEditor(undefined);setItems([]);setEvents([]);
@@ -214,7 +238,7 @@
       let alive=true;setLoading(true);
       refresh(fridgeId).catch(e=>{if(alive)setError(e.message);}).finally(()=>{if(alive)setLoading(false);});
       return ()=>{alive=false;generation.current++;};
-    },[fridgeId]);
+    },[fridgeId,demo]);
     async function action(fn,message) {
       if(busy)return false;
       const userId=sessionRef.current?.user.id;const selected=fridgeRef.current;
@@ -230,7 +254,31 @@
       }catch(e){if(userId===sessionRef.current?.user.id)setError(e.message);return false;}
       finally{setBusy(false);}
     }
-    function navigate(next){setScreen(next);setDraft(null);setNotice('');window.scrollTo(0,0);}
+    function scanned(result) {
+      const next=Food.merge(items,result.items,{trackMissing:result.type==='fridge'});
+      setDraft({...next,source:result.source||'example',transferId:result.transferId,receipt:result.type==='bill',purchaseDate:result.purchaseDate,photo:result.photo});setNotice('');
+    }
+    async function saveReview() {
+      const current=draft;
+      const ok=await action(async()=>{
+        // Demo UUIDs are not database rows. Resolve real matches before saving to avoid duplicates.
+        const saved=await api.inventory(fridgeId);
+        const rows=current.rows.map(i=>{const match=saved.items.find(e=>sameFood(e.name,i.name));return {...i,id:match?.id||i.id,isNew:!match};});
+        const missing=current.missing.filter(m=>!m.keep).map(m=>({keep:false,item:saved.items.find(e=>e.id===m.item.id||sameFood(e.name,m.item.name))})).filter(m=>m.item);
+        await api.review(fridgeId,rows,missing,current.source);
+        if(demoRef.current)demos.current[fridgeId]=[...current.rows.map(i=>({...i,demo:true})),...current.missing.filter(m=>m.keep).map(m=>m.item),...(current.untouched||[])];
+      },'Scan saved to Supabase. The demo view resets on refresh.');
+      if(ok){setDraft(null);setScreen('eat');if(current.transferId){try{await api.completePhone(current.transferId);}catch{setError('Scan saved. The phone inbox could not be marked reviewed.');}}}
+    }
+    async function saveItem(item) {
+      if(demoRef.current&&item.demo){demos.current[fridgeId]=items.map(i=>i.id===item.id?item:i);setItems(demos.current[fridgeId]);setNotice('Demo item updated for this session.');return true;}
+      return action(async()=>{const row=await(item.id?api.update(fridgeId,item):api.add(fridgeId,item));if(demoRef.current)demos.current[fridgeId]=[...items,api.fromRow(row)];},'Food saved.');
+    }
+    async function finishItem(item,kind) {
+      if(demoRef.current){demos.current[fridgeId]=items.filter(i=>i.id!==item.id);setItems(demos.current[fridgeId]);setEvents(old=>[{id:Food.newId(),item_name:item.name,photo_key:item.photoKey,action:kind,occurred_at:new Date().toISOString(),demo:true},...old]);setNotice('Demo action recorded for this session.');return;}
+      await action(()=>api.finish(item.id,kind),kind==='eaten'?'Marked as eaten.':'Marked as discarded.');
+    }
+    function navigate(next){setInventoryFilter('');setScreen(next);setDraft(null);setNotice('');window.scrollTo(0,0);}
     async function create(name){
       await action(async()=>{const fridge=await api.createFridge(name);setFridges(old=>[...old,fridge]);setFridgeId(fridge.id);},'Fridge created.');
     }
@@ -239,24 +287,24 @@
     }
     const top=h('header',{className:'app-header'},h('div',{className:'react-header'},
       btn('✳ ChillCheck',()=>navigate('home'),{className:'brand',disabled:busy||!!draft}),
-      session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))));
+      session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))),fridges.length>0&&h('div',{className:'workspace-toolbar'},select('Your fridge',fridgeId,v=>{if(!busy){setFridgeId(v);navigate('home');}},fridges.map(f=>[f.id,f.name])),
+          h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft}))),
+          btn('+ Add food',()=>setEditor(null),{className:'btn primary',disabled:busy||loading||!!draft})) );
     return h(React.Fragment,null,top,h('main',{className:'app'},
       error&&h('div',{className:'alert-item',role:'alert'},h('span',null,error),btn('Dismiss',()=>setError(''),{className:'btn small'})),
       notice&&h('p',{className:'notice',role:'status'},notice),
       authLoading?h('p',{role:'status'},'Checking your session…'):!session?h(Auth,{onError:setError}):
       h(React.Fragment,null,
-        fridges.length>0&&h('div',{className:'workspace-toolbar'},select('Your fridge',fridgeId,v=>{if(!busy){setFridgeId(v);navigate('home');}},fridges.map(f=>[f.id,f.name])),
-          h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft}))),
-          btn('+ Add food',()=>setEditor(null),{className:'btn primary',disabled:busy||loading||!!draft})),
         loading?h('p',{role:'status'},'Loading your fridge…'):!profile?
           h('div',{className:'empty'},h('p',null,'Could not load your account.'),btn('Retry',()=>setRetry(n=>n+1))):
         !fridges.length?h(CreateFridge,{onCreate:create,busy}):
         h(React.Fragment,null,
-          draft?h(Review,{draft,setDraft,busy,onClose:()=>setDraft(null),onSave:async()=>{if(await action(()=>api.review(fridgeId,draft.rows,draft.missing),'Scan saved.')){setDraft(null);setScreen('eat');}}}):
-          screen==='home'?h(Dashboard,{name:profile.display_name,items,onNavigate:navigate,busy,onScan:()=>{if(!ChillData.scans.length){setError('The database has no example scans. Run migration 003.');return;}setDraft(Food.merge(items,ChillData.scans[scanCount.current++%ChillData.scans.length]));setNotice('');}}):
-          screen==='eat'?h(Inventory,{items,busy,onEdit:setEditor,onFinish:(item,kind)=>action(()=>api.finish(item.id,kind),kind==='eaten'?'Marked as eaten.':'Marked as discarded.')}):
-          screen==='recipes'?h(Recipes,{items}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events}),
-          editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:item=>action(()=>item.id?api.update(fridgeId,item):api.add(fridgeId,item),'Food saved.')}))),
+          draft?h(Review,{draft,setDraft,busy,onClose:()=>setDraft(null),onSave:saveReview}):
+          screen==='home'?h(ChillWidgets.Dashboard,{name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onMode:()=>setDemo(v=>!v),onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
+          screen==='eat'?h(Inventory,{items,busy,initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
+          screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events}),
+          editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
+      session&&fridges.length>0&&h(ChillWidgets.Mascot),
       h('footer',{className:'app-footer'},'Made for the food you almost forgot.')));
   }
   class ErrorBoundary extends React.Component {

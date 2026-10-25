@@ -7,8 +7,8 @@ window.ChillAPI = (() => {
   async function result(query) {
     const {data,error} = await query;
     if (error) {
-      if (error.code === 'PGRST205' || error.code === '42703') throw new Error('Run migration 202610240003_mock_catalog.sql in Supabase SQL Editor, then upload the mock photos.');
-      if (error.code === 'PGRST202') throw new Error('Run database migration 202610240002_inventory_operations.sql in Supabase SQL Editor to enable scan saving and eaten/discarded actions.');
+      if (error.code === 'PGRST205' || error.code === '42703') throw new Error('Run the database migrations through 202610250004_scan_integration.sql in Supabase SQL Editor.');
+      if (error.code === 'PGRST202') throw new Error('Run all database migrations through 202610250004_scan_integration.sql in Supabase SQL Editor to enable these actions.');
       throw new Error(error.message || 'The database request failed.');
     }
     return data;
@@ -20,7 +20,7 @@ window.ChillAPI = (() => {
     note:r.notes,barcode:r.barcode
   });
   const toRow = i => ({
-    photo_key:i.photoKey || ChillData.photo(i.name).key, name:i.name.trim(), quantity:i.qty || '',kind:i.kind || 'other',category:Food.categoryOf(i),
+    photo_key:ChillData.photo(i.name,i.photoKey).key, name:i.name.trim(), quantity:i.qty || '',kind:i.kind || 'other',category:Food.categoryOf(i),
     shelf:i.shelf || null,expires_on:i.expires || null,date_source:i.dateSource || 'unknown',
     date_text:i.dateText || '',first_seen_on:i.firstSeen || Dates.today(),cooked_on:i.cookedOn || null,
     container_description:i.container || '',condition:i.condition || '',confidence:i.confidence || 'high',
@@ -28,6 +28,12 @@ window.ChillAPI = (() => {
   });
   return {
     client, fromRow, toRow,
+    async sendPhone(fridgeId,payload) {
+      const {photo,...safe}=payload;
+      return result(client().from('phone_scans').insert({fridge_id:fridgeId,payload:safe}).select().single());
+    },
+    phoneInbox: (fridgeId,since)=>result(client().from('phone_scans').select('*').eq('fridge_id',fridgeId).eq('status','pending').gte('created_at',since).order('created_at')),
+    completePhone: id=>result(client().from('phone_scans').update({status:'reviewed'}).eq('id',id)),
     async bootstrap(user) {
       const [photos,scans,recipes]=await Promise.all(['mock_photos','mock_scans','mock_recipes'].map(table=>result(client().from(table).select('*').order(table==='mock_recipes'?'name':'id'))));
       ChillData.loadCatalog({photos,scans,recipes},path=>client().storage.from('mock-photos').getPublicUrl(path).data.publicUrl);
@@ -48,8 +54,8 @@ window.ChillAPI = (() => {
     add: (fridgeId,item)=>result(client().from('food_items').insert({...toRow(item),fridge_id:fridgeId}).select().single()),
     update: (fridgeId,item)=>result(client().from('food_items').update(toRow(item)).eq('id',item.id).eq('fridge_id',fridgeId).select().single()),
     finish: (id,action)=>result(client().rpc('finish_food_item',{p_item_id:id,p_action:action})),
-    review: (fridgeId,rows,missing)=>result(client().rpc('save_food_review',{
-      p_fridge_id:fridgeId,
+    review: (fridgeId,rows,missing,source="example")=>result(client().rpc('save_food_review',{
+      p_source:source, p_fridge_id:fridgeId,
       p_items:rows.map(i=>({...toRow(i),...(!i.isNew?{id:i.id}:{})})),
       p_missing_ids:missing.filter(m=>!m.keep).map(m=>m.item.id)
     }))

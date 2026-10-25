@@ -50,3 +50,98 @@ button:focus-visible, summary:focus-visible { outline:3px solid var(--green); ou
 
 .fridge-panel { min-width:0; width:100%; }
 .type-filters { min-width:0; grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+/* Fridge-haul dashboard */
+.dashboard-grid{grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);align-items:start;gap:24px}
+.demo-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;background:#f6e8da;border-radius:20px;margin:16px 0 24px;font-size:14px}
+.eat-widget{background:#efa7be;padding:28px;border-radius:32px;overflow:hidden;position:relative}
+.eat-heading{border:0;background:transparent;font:800 clamp(32px,4vw,52px)/1.08 'Bricolage Grotesque',sans-serif;color:#392d30;text-align:left;padding:0;cursor:pointer}
+.eat-widget>p{font-size:18px;margin:12px 0 20px}.expiry-previews{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.expiry-product{position:relative;border:0;background:none;text-align:left;padding:0;color:inherit;cursor:pointer;min-width:0}.expiry-product img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:20px;box-shadow:0 5px 12px #633d4220;transition:transform .2s}.expiry-product:hover img{transform:translateY(-4px)}
+.expiry-name{display:block;margin-top:9px;font-size:13px;font-weight:800;line-height:1.3}.days-badge{position:absolute;right:5px;top:5px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff1e8;border:2px solid #fff;font-size:12px;font-weight:900;box-shadow:0 2px 8px #392d3020}.text-link{padding:0;border:0;background:none;font-weight:800;text-decoration:underline;margin-bottom:16px;color:inherit;cursor:pointer}
+.scan-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.scan-actions .primary{grid-column:1/-1}.scan-card h2{font-size:32px}.scan-card>p{line-height:1.65}.sensor-card{overflow:hidden}.sensor-card h2{font-size:30px}.sensor-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}.sensor-metrics>div{background:#edf0e4;padding:20px 12px;border-radius:24px;display:flex;flex-direction:column;text-align:center;gap:8px}.sensor-metrics strong{font:800 38px 'Bricolage Grotesque',sans-serif;color:#546d3d}.sensor-metrics span{font-size:12px;color:#655c56}.sensor-disclaimer{font-size:12px;margin-top:20px}.door-log{list-style:none;max-height:220px;overflow:auto;padding:0}.door-log li{display:flex;gap:12px;flex-wrap:wrap;border-bottom:1px solid #eee0d7;padding:10px 0;font-size:13px}.door-log small{color:#7c7470}
+.chef-stage{height:170px;border-radius:24px;background:linear-gradient(#fff8f0,#edf0e4);margin:24px 0 10px;position:relative;overflow:hidden;border-bottom:5px solid #bcc8a2}.chef-walker{position:absolute;bottom:0;left:10%;width:80px;animation:chef-walk 9s ease-in-out infinite}.chef-hat{font-size:58px;line-height:38px;color:white;text-shadow:0 2px #a8b88d;text-align:center}.chef-head{width:70px;height:48px;background:#a8bb83;border:3px solid #546d3d;border-radius:18px;position:relative;display:flex;justify-content:space-around;align-items:center;padding:0 14px}.chef-head i{width:7px;height:10px;background:#392d30;border-radius:50%}.chef-head span{position:absolute;bottom:0;font-size:23px}.chef-body{margin:3px auto;width:54px;height:42px;background:#fff1e8;border:3px solid #546d3d;border-radius:15px;text-align:center;color:#b85877;font-size:25px}.chef-feet{display:flex;justify-content:space-evenly}.chef-feet i{width:15px;height:14px;background:#546d3d;border-radius:8px;animation:chef-step .5s infinite alternate}.chef-feet i+ i{animation-delay:.25s}.chef-speech{background:#f9e2e9;border-radius:20px 20px 20px 4px;padding:18px;font-weight:700;font-size:15px;line-height:1.6}
+@keyframes chef-walk{0%,100%{left:10%}50%{left:65%}}@keyframes chef-step{to{transform:translateY(-5px)}}
+.qr-panel{padding:20px;margin-top:18px;border:1px solid #decfc6}.qr-code{background:white;width:max-content;max-width:100%;padding:12px;margin:16px auto}.qr-code img,.qr-code canvas{max-width:100%;height:auto}.camera-preview video{display:block;width:100%;max-height:350px;border-radius:20px;margin:16px 0}.recipe-controls{display:grid;gap:16px}.recipe-controls .btn-row{flex-wrap:wrap}
+@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr}.demo-banner{align-items:flex-start;flex-direction:column}.expiry-previews{gap:8px}.eat-widget{padding:22px}.expiry-name{font-size:12px}.scan-actions{grid-template-columns:1fr}.scan-card h2{font-size:28px}.sensor-card h2{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.chef-walker,.chef-feet i{animation:none}.expiry-product img{transition:none}}
+.scan-photo-review{position:relative;max-width:650px;margin:20px 0}.scan-photo-review>img{display:block;width:100%;height:auto;border-radius:20px}.scan-box{position:absolute;border:3px solid #efa7be;background:#efa7be15;cursor:pointer;border-radius:8px;padding:0}.scan-box span{position:absolute;top:0;left:0;background:#fff1e8;color:#392d30;border-radius:50%;width:24px;height:24px;font-weight:800}
+
+/* Preserve main's HTML design; new interactions inherit its components. */
+.dashboard-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.eat-widget{padding:28px 26px;cursor:default;background:var(--blush)}
+.eat-widget:hover{transform:none}
+.eat-widget::before,.eat-widget::after{pointer-events:none}
+.eat-widget>*{position:relative;z-index:1}
+.eat-widget .eat-heading{font-family:var(--font-display);font-size:40px;line-height:1;letter-spacing:-.02em;color:inherit}
+.eat-widget .eat-sub{font:700 16px var(--font-body);margin:8px 0 16px}
+.eat-widget .counts{margin-top:10px}
+.expiry-product{font:inherit}
+.expiry-product:focus-visible,.eat-heading:focus-visible,.text-link:focus-visible{outline:3px solid var(--green);outline-offset:4px}
+.demo-banner{background:var(--well);color:var(--muted);border-radius:22px;margin:0 0 18px;padding:12px 16px;font-size:13px}
+.scan-card h2,.sensor-card h2{font:700 24px var(--font-display);letter-spacing:-.01em}
+.scan-actions{display:flex;flex-wrap:wrap;gap:10px}.scan-actions>.btn{flex:1 1 180px}
+.sensor-card .readings{margin:8px 0}.sensor-card .reading{--c:var(--safe)}
+.sensor-card .reading-value{font-weight:600;font-size:30px}
+.dashboard-grid .nav-icon{font-size:28px}.dashboard-grid .nav-arrow{font-size:24px}
+.chef-speech{background:var(--sky-deep);color:var(--ink)}
+@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr}.eat-widget{padding:24px 20px}.eat-widget .eat-heading{font-size:34px}}
+
+/* Compact home copy and one-row inventory summary. */
+.fridge-view-switch{display:flex;justify-content:flex-end;margin:-8px 0 6px}
+.eat-widget .eat-heading{padding-right:48px}
+.eat-widget .eat-corner-arrow{position:absolute;right:20px;top:24px;width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:50%;background:var(--green);color:var(--green-ink);font:600 26px/1 var(--font-body);cursor:pointer;z-index:2}
+.eat-corner-arrow:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.eat-widget .counts{display:flex;flex-wrap:nowrap;gap:6px;justify-content:space-between;width:100%}
+.eat-widget .count{min-width:0;padding:6px 8px;gap:5px;font-size:12px;line-height:1.3}
+.eat-widget .count .dot{width:7px;height:7px;flex:none}
+@media(max-width:420px){.eat-widget .counts{gap:3px}.eat-widget .count{font-size:9px;padding:6px 5px;gap:3px}.eat-widget .count .dot{width:5px;height:5px}.eat-widget .eat-heading{font-size:30px}.eat-widget .eat-corner-arrow{right:16px;top:22px;width:34px;height:34px}}
+
+/* Header navigation and a compact dashboard greeting. */
+.app-header .workspace-toolbar{position:relative;z-index:1;max-width:1120px;margin:16px auto 0;padding:0 24px;gap:14px;align-items:center}
+.app-header .workspace-toolbar label{min-width:140px;font-size:12px;gap:4px}
+.app-header .workspace-toolbar .field{padding:9px 14px;background:var(--sky)}
+.app-header .workspace-toolbar nav{align-self:flex-end;margin-bottom:2px}
+.app-header .workspace-toolbar>.btn{align-self:flex-end}
+.app-header .workspace-toolbar .chip{background:var(--sky);border-color:transparent}
+.app-header .workspace-toolbar [aria-current=page]{background:var(--green);color:var(--green-ink)}
+.home-screen{gap:18px}.home-screen .hello{align-items:center;gap:12px;margin-bottom:0}
+.home-screen .fridge-view-switch{margin:0}.home-screen .fridge-line{margin-bottom:0}
+.sensor-card .readings{gap:10px}.sensor-card .reading{min-width:0}
+.sensor-card .cleaning-value{font-size:22px}.cleaning-tile{font:inherit;color:var(--ink);text-align:left;border:0;cursor:pointer;--c:var(--soon)}
+.cleaning-link{font-size:12px;font-weight:800;margin-top:6px;color:var(--green)}
+.cleaning-tile:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.cleaning-form{display:grid;gap:12px;padding:16px;background:var(--well);border-radius:20px}
+.cleaning-note{font-size:12px;margin:0}.sensor-card .sensor-disclaimer{margin-top:0}
+/* Chef Byte walks on the page itself, with no card or stage behind him. */
+.chef-promenade{height:300px;position:relative;margin:26px 0 0;overflow:hidden}
+.chef-traveller{position:absolute;bottom:32px;left:0;width:270px;animation:chef-roam 24s ease-in-out infinite alternate}
+.chef-cloud{display:block;width:100%;min-height:90px;padding:18px 22px;margin:0 0 18px;border:0;border-radius:40px;background:var(--panel);color:var(--ink);font:700 14px/1.45 var(--font-body);text-align:center;box-shadow:0 5px 15px #382e3010;cursor:pointer;position:relative}
+.chef-cloud::after{content:'';position:absolute;bottom:-10px;left:calc(50% - 10px);width:20px;height:20px;background:var(--panel);border-radius:0 0 8px 0;transform:rotate(45deg)}
+.chef-robot{width:80px;margin:auto}.chef-robot .chef-head{margin:auto}.chef-robot .chef-head span{bottom:-3px;left:27px}.chef-robot .chef-feet{height:16px}
+.chef-pause{position:absolute;bottom:0;right:0;font-size:12px;color:var(--muted)}
+.chef-promenade.paused .chef-traveller,.chef-promenade.paused .chef-feet i{animation-play-state:paused}
+.chef-promenade:focus-within .chef-traveller,.chef-promenade:hover .chef-traveller{animation-play-state:paused}
+@keyframes chef-roam{from{left:0}to{left:calc(100% - 270px)}}
+.chef-promenade+.app-footer{margin-top:14px}
+@media(max-width:600px){.app-header .workspace-toolbar{padding:0 18px;gap:12px;margin-top:12px}.app-header .workspace-toolbar nav{order:3;flex-basis:100%;gap:6px}.app-header .workspace-toolbar>.btn{margin-left:auto}.app-header .workspace-toolbar .chip{font-size:12px;padding:7px 10px}.home-screen .hello{align-items:flex-start}.home-screen .fridge-view-switch{margin-left:auto}.sensor-card .reading-value{font-size:25px}.sensor-card .cleaning-value{font-size:19px}.chef-promenade{height:290px}}
+@media(prefers-reduced-motion:reduce){.chef-traveller,.chef-promenade .chef-feet i{animation:none}}
+
+/* Layout scales by available CSS pixels, including laptop display scaling. */
+.app{max-width:1280px;padding-inline:clamp(16px,2.2vw,32px)}
+.react-header,.app-header .workspace-toolbar{max-width:1280px;padding-inline:clamp(16px,2.2vw,32px)}
+.dashboard-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,2vw,24px)}
+.dashboard-grid>.col,.eat-widget,.sensor-card,.scan-card{min-width:0}
+.eat-widget .eat-heading{font-size:clamp(28px,3vw,40px)}
+.expiry-name{overflow-wrap:anywhere}.expiry-product img{aspect-ratio:1;object-fit:cover}
+.eat-widget .counts{flex-wrap:wrap;justify-content:flex-start;gap:6px}
+.eat-widget button.count{font-family:var(--font-body);font-weight:800;cursor:pointer;border:0;min-height:32px;padding:6px 9px;font-size:12px}
+.eat-widget button.count:hover{box-shadow:0 0 0 2px var(--green)}
+.eat-widget button.count:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.count.balkan{--c:#9a6145}.count.balkan .dot{background:var(--c)}
+.sensor-card .readings{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sensor-card .reading-text{overflow-wrap:anywhere}
+@media(min-width:801px) and (max-height:900px){.app-header{padding-block:12px 18px}.app-header .workspace-toolbar{margin-top:10px}.app{padding-top:20px}.home-screen{gap:16px}.sensor-card,.scan-card{padding:22px}.sensor-card .reading{padding:13px}.eat-widget{padding:24px}.eat-widget .expiry-previews{margin-bottom:12px}}
+@media(min-width:801px) and (max-width:1100px){.eat-widget,.sensor-card,.scan-card{padding:20px}.expiry-previews{gap:8px}.expiry-name{font-size:12px}.sensor-card h2{font-size:22px}.sensor-card .reading-value{font-size:25px}.sensor-card .cleaning-value{font-size:19px}.eat-widget .count{font-size:11px!important}.eat-layout{grid-template-columns:260px minmax(0,1fr)}}
+@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr}.app-header .workspace-toolbar{gap:10px}.app-header .workspace-toolbar nav{flex-basis:100%;order:3}.app-header .workspace-toolbar>.btn{margin-left:auto}.eat-layout{grid-template-columns:1fr}.fridge-panel{width:100%}.home-screen .hello{gap:12px}}
+@media(max-width:480px){.expiry-previews{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}.expiry-name{font-size:13px}.eat-widget button.count{font-size:12px;min-height:36px;padding:7px 10px;gap:5px}.eat-widget .count .dot{width:7px;height:7px}.eat-widget .counts{gap:7px}.eat-widget .eat-heading{font-size:30px}.sensor-card .reading{padding:12px}.sensor-card .reading-label{font-size:12px}.sensor-card .reading-value{font-size:24px}.sensor-card .cleaning-value{font-size:18px}.sensor-card .reading-text{font-size:12px}.app-header .workspace-toolbar .chip{min-height:40px}.chef-traveller{max-width:100%}}

@@ -1,0 +1,3 @@
+[functions.chill-ai]
+# The handler validates the user token with Supabase Auth on every request.
+verify_jwt = false
