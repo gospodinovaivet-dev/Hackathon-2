@@ -5,16 +5,40 @@ window.ChillWidgets = (() => {
  function Photo({item}){const p=ChillData.photo(item.name,item.photoKey);return h('img',{src:p.src,alt:item.name,onError:e=>ChillData.fallbackImage(e,p.key),width:120,height:120});}
  const sensorMemory={open:false,logs:null};
  const jokes=['Your soup called. It would like a second date.','The ice cream tub has a plot twist: stuffed peppers.','Open. Close. Open. Close. Are we rehearsing a fridge musical?','No judgement. I also need a snack before deciding on a snack.'];
- function Robot({mini=false}){return h('div',{className:'chef-robot'+(mini?' mini':' smol'),'aria-hidden':true},h('div',{className:'chef-hat'},h('i'),h('i'),h('i')),h('div',{className:'chef-head'},h('i'),h('i'),h('span',null,'⌣')),!mini&&h('div',{className:'chef-body'},'✳'),!mini&&h('div',{className:'chef-feet'},h('i'),h('i')));}
+ function Robot({mini=false}){
+  const stroke='#526A3D';
+  return h('svg',{className:'chef-art'+(mini?' mini':''),viewBox:mini?'7 6 106 91':'0 0 120 160',width:mini?46:84,height:mini?48:112,'aria-hidden':true,focusable:false},
+   !mini&&h('ellipse',{cx:60,cy:151,rx:30,ry:5,fill:'#526a3d20'}),
+   !mini&&h('g',{className:'byte-leg left'},h('path',{d:'M43 125v13',stroke,strokeWidth:10,strokeLinecap:'round'}),h('rect',{x:30,y:136,width:23,height:12,rx:6,fill:stroke})),
+   !mini&&h('g',{className:'byte-leg right'},h('path',{d:'M76 125v13',stroke,strokeWidth:10,strokeLinecap:'round'}),h('rect',{x:67,y:136,width:23,height:12,rx:6,fill:stroke})),
+   h('g',{className:mini?'':'byte-torso'},
+    !mini&&h('g',{className:'byte-arm left'},h('path',{d:'M35 94L19 99 22 111',fill:'none',stroke,strokeWidth:10,strokeLinecap:'round'}),h('circle',{cx:19,cy:99,r:5,fill:'#FFF1E8',stroke,strokeWidth:2}),h('path',{d:'M17 112v6q5 5 10 0v-6',fill:'none',stroke:'#809B62',strokeWidth:5,strokeLinecap:'round'})),
+    !mini&&h('g',{className:'byte-arm right'},h('path',{d:'M85 94L101 99 98 111',fill:'none',stroke,strokeWidth:10,strokeLinecap:'round'}),h('circle',{cx:101,cy:99,r:5,fill:'#FFF1E8',stroke,strokeWidth:2}),h('path',{d:'M93 112v6q5 5 10 0v-6',fill:'none',stroke:'#809B62',strokeWidth:5,strokeLinecap:'round'})),
+    !mini&&h('rect',{x:32,y:81,width:56,height:54,rx:13,fill:'#B9CE95',stroke,strokeWidth:2.5}),
+    !mini&&h('path',{d:'M44 85v13l-6 29q22 10 44 0l-6-29V85',fill:'#fffaf3',stroke,strokeWidth:2,strokeLinejoin:'round'}),
+    !mini&&h('path',{d:'M48 111h24v8q-12 11-24 0Z',fill:'#EFA7BC',stroke:'#cf8399',strokeWidth:1.5}),!mini&&h('circle',{cx:60,cy:103,r:3,fill:'#809B62'}),
+    h('path',{d:'M23 57L14 48V35M97 57l9-9V35',fill:'none',stroke,strokeWidth:3,strokeLinecap:'round'}),
+    h('circle',{cx:14,cy:33,r:4,fill:'#EFA7BC',stroke,strokeWidth:1.5}),h('circle',{cx:106,cy:33,r:4,fill:'#EFA7BC',stroke,strokeWidth:1.5}),
+    h('rect',{x:15,y:58,width:12,height:20,rx:5,fill:'#EFA7BC',stroke,strokeWidth:2}),h('rect',{x:93,y:58,width:12,height:20,rx:5,fill:'#EFA7BC',stroke,strokeWidth:2}),
+    h('rect',{x:23,y:43,width:74,height:49,rx:14,fill:'#B9CE95',stroke,strokeWidth:2.5}),
+    h('rect',{x:29,y:52,width:62,height:32,rx:10,fill:'#344638'}),
+    h('path',{d:'M35 57h17',stroke:'#ffffff30',strokeWidth:2,strokeLinecap:'round'}),
+    h('rect',{x:40,y:61,width:7,height:10,rx:3,fill:'#D6F6A9'}),h('rect',{x:73,y:61,width:7,height:10,rx:3,fill:'#D6F6A9'}),
+    h('rect',{x:34,y:73,width:9,height:3,rx:1.5,fill:'#EFA7BC'}),h('rect',{x:77,y:73,width:9,height:3,rx:1.5,fill:'#EFA7BC'}),
+    h('path',{d:'M54 74q6 6 12 0',fill:'none',stroke:'#D6F6A9',strokeWidth:2,strokeLinecap:'round'}),
+    h('path',{d:'M34 47V34C15 31 19 10 36 12C42 0 58 4 62 10C77 0 88 10 87 16C107 18 103 36 87 37V47Z',fill:'#ffffff',stroke:'#a7b897',strokeWidth:2,strokeLinejoin:'round'}),
+    h('path',{d:'M35 40h51v8H35Z',fill:'#fffdf8',stroke:'#a7b897',strokeWidth:1.5}),
+    h('path',{d:'M49 27v11m22-12v12',fill:'none',stroke:'#e4ead9',strokeWidth:2,strokeLinecap:'round'})));
+ }
  function Mascot({screen='home'}){
-  const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:600px)').matches),[tip,setTip]=useState(false);
+  const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:600px)').matches),[tip,setTip]=useState(false),[still,setStill]=useState(false);
   useEffect(()=>{if(paused||collapsed||tip)return;const timer=setInterval(()=>setIndex(i=>(i+1)%jokes.length),11000);return()=>clearInterval(timer);},[paused,collapsed,tip]);
   useEffect(()=>setTip(false),[screen]);
   const tips={home:'Start with Eat Me First. Your next meal might already be waiting.',eat:'A familiar tub can hold a surprise. Identify the contents before choosing its shelf.',recipes:'Pick an ingredient photo to find a recipe that puts it first.',shopping:'Log what you use. I can help spot when the last spoonful is getting close.',history:'A receipt records a purchase; consumption logs tell the rest of the story.',nutrition:'Try a little variety. Your fridge has more than one main character.'};
-  return h('aside',{className:'chef-assistant'+(collapsed?' collapsed':''),'aria-label':'Chef Byte'},
+  return h('aside',{className:'chef-assistant'+(collapsed?' collapsed':'')+(still?' still':''),'aria-label':'Chef Byte'},
    !collapsed&&h('div',{className:'chef-bubble'},h('div',{className:'chef-bubble-heading'},h('strong',null,'Chef Byte'),button('×',()=>setCollapsed(true),{className:'chef-dismiss','aria-label':'Minimize Chef Byte'})),
     button(tip?(tips[screen]||tips.home):jokes[index],()=>{setTip(false);setIndex(i=>(i+1)%jokes.length);},{className:'chef-cloud',title:'Another joke'}),
-    h('div',{className:'chef-options'},button('Tip',()=>setTip(true),{className:'link'}),button('Joke',()=>{setTip(false);setIndex(i=>(i+1)%jokes.length);},{className:'link'}),button(paused?'Resume jokes':'Pause jokes',()=>setPaused(!paused),{className:'link','aria-pressed':paused}))),
+    h('div',{className:'chef-options'},button('Tip',()=>setTip(true),{className:'link'}),button('Joke',()=>{setTip(false);setIndex(i=>(i+1)%jokes.length);},{className:'link'}),button(still?'Let me walk':'Pause walking',()=>setStill(!still),{className:'link','aria-pressed':still}),button(paused?'Resume jokes':'Pause jokes',()=>setPaused(!paused),{className:'link','aria-pressed':paused}))),
    button(h(Robot),()=>setCollapsed(!collapsed),{className:'chef-toggle','aria-label':collapsed?'Open Chef Byte':'Minimize Chef Byte','aria-expanded':!collapsed}));
  }
  function Sensors({fridgeId}){

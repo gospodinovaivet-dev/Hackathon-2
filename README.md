@@ -223,3 +223,9 @@ History summarizes recent eaten events, quantity logs, and accepted items from c
 Chef Byte is a viewport-anchored helper with curated contextual tips and rotating jokes (not a live AI chat). Tap the robot or close button to collapse the bubble; phones start collapsed. Shelf guidance includes a smaller chef head. The helper stays out of food-edit and scan-review dialogs.
 
 The header logo is `assets/brand/chillcheck-header.png`, generated with the built-in imagegen tool from the approved logo. Prompt: preserve the snowflake/checkmark geometry and bold rounded ChillCheck lettering; replace green symbol strokes with warm cream #FFF1E8, retain strawberry #EFA7BC accents and cocoa #382E30 lettering; transparent background, no shadows, texture, gradients, or extra text. The standalone bundle embeds this image.
+
+### Fridge map
+
+My fridge shows a schematic digital twin using the shelf locations from confirmed scans and inventory edits. It is not a measured 3D reconstruction. An empty fridge opens the scan controls; review and save detected foods to populate the map. Unassigned locations are listed separately for confirmation. Category filters sit above the item details and do not hide foods on the map.
+
+Click a product to focus its details or a shelf to filter its contents. Red marks expired food, amber marks food to eat soon, purple marks uncertain dates/contents, and blue marks a suggested move. The move list excludes expired food and respects both top and middle shelf placement for cooked meals. Review a move after physically relocating the food, then save the new shelf.

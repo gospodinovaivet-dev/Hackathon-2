@@ -86,12 +86,14 @@
         field('Notes',{value:form.note||'',onChange:e=>change('note',e.target.value)}),
         h('div',{className:'btn-row'},h('button',{className:'btn primary',disabled:busy||labelBusy||!form.name.trim()},busy?'Saving…':'Save food'),btn('Cancel',onClose,{disabled:busy}))));
   }
-  function ShelfZone({shelf,list,selected,onSelect}) {
+  function ShelfZone({shelf,list,selected,onSelect,onItem,selectedItem}) {
     const [open,setOpen]=useState(false);
     const count=Food.counts(list),tone=count.expired?'expired':count.soon?'soon':count.unknown?'unknown':'safe';
     const id='shelf-tip-'+SHELVES.indexOf(shelf);
-    return h('div',{className:'shelf-zone',onMouseEnter:()=>setOpen(true),onMouseLeave:()=>setOpen(false),onBlur:e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);},onKeyDown:e=>{if(e.key==='Escape'){setOpen(false);e.stopPropagation();}}},
+    return h('div',{className:'shelf-zone'+(shelf==='Door rack'?' door-rack':'')+(shelf==='Crisper drawer'?' crisper':''),onMouseEnter:()=>setOpen(true),onMouseLeave:()=>setOpen(false),onBlur:e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);},onKeyDown:e=>{if(e.key==='Escape'){setOpen(false);e.stopPropagation();}}},
       h('button',{type:'button',className:'zone '+tone,'aria-pressed':selected,'aria-describedby':open?id:undefined,onFocus:()=>setOpen(true),onClick:onSelect},h('span',{className:'zone-name'},shelf),h('span',{className:'zone-count'},plural(list.length,'item'))),
+      onItem&&h('div',{className:'twin-products'},list.length?list.map(item=>{const photo=ChillData.photo(item.name,item.photoKey),state=Food.status(item),suggestion=ChillStorage.suggest(item),move=state!=='expired'&&suggestion.shelf&&!(suggestion.allowed||[suggestion.shelf]).includes(item.shelf);const label=state==='expired'?'Expired':ChillData.isUnrecognized(item)?'Identify':move?'Move':state==='soon'?Food.daysText(item):state==='unknown'?'Check date':'';
+        return btn(h(React.Fragment,null,h('img',{src:photo.src,alt:'',onError:e=>ChillData.fallbackImage(e,photo.key)}),label&&h('span',{className:'twin-badge'},label),h('span',{className:'twin-name'},item.name)),()=>{setOpen(false);onItem(item);},{key:item.id,className:'twin-product '+state+(move?' needs-move':''),'aria-label':'Locate '+item.name,'aria-pressed':selectedItem===item.id,title:item.name+(label?' · '+label:'')});}):h('span',{className:'twin-empty'},'Room for something good')),
       btn('i',()=>setOpen(v=>!v),{className:'shelf-help','aria-label':'Storage tips for '+shelf,'aria-expanded':open,'aria-controls':id}),
       open&&h('div',{id,role:'tooltip',className:'shelf-tooltip'},h('div',{className:'shelf-tip-heading'},h(ChillWidgets.Robot,{mini:true}),h('strong',null,ChillStorage.headings[shelf])),h('p',null,ChillStorage.tips[shelf])));
   }
@@ -102,26 +104,33 @@
       suggestion.shelf&&!fits&&btn('Update shelf →',()=>onEdit({...item,shelf:suggestion.shelf}),{className:'link',disabled:busy,'aria-label':'Update shelf for '+item.name}),
       suggestion.shelf&&!fits&&h('small',null,'Move the food, then save its new shelf.'));
   }
-  function Inventory({items,onEdit,onFinish,busy,initialFilter=''}) {
-    const [filter,setFilter]=useState(initialFilter),[shelf,setShelf]=useState('');
-    useEffect(()=>{setFilter(initialFilter);setShelf('');},[initialFilter]);
+  function Inventory({items,onEdit,onFinish,onResult,onExample,fridgeId,busy,initialFilter=''}) {
+    const [filter,setFilter]=useState(initialFilter),[shelf,setShelf]=useState(''),[selectedItem,setSelectedItem]=useState(''),[scanOpen,setScanOpen]=useState(()=>items.length===0);
+    useEffect(()=>{setFilter(initialFilter);setShelf('');setSelectedItem('');},[initialFilter]);
     const matches=(i,f)=>f==='balkan'?ChillData.isBalkan(i):f==='unrecognized'||f==='unknown'?ChillData.isUnrecognized(i):f.startsWith('status:')?Food.status(i)===f.slice(7):Food.categoryOf(i)===f;
-    const shown=Food.byUrgency(items.filter(i=>(!filter||matches(i,filter))&&(!shelf||i.shelf===shelf)));
+    const shown=Food.byUrgency(items.filter(i=>(!filter||matches(i,filter))&&(!shelf||i.shelf===shelf)&&(!selectedItem||i.id===selectedItem)));
+    const moves=items.filter(i=>{const rec=ChillStorage.suggest(i);return Food.status(i)!=='expired'&&rec.shelf&&!(rec.allowed||[rec.shelf]).includes(i.shelf);});
+    const unplaced=items.filter(i=>!SHELVES.includes(i.shelf));
     return h('section',null,h('div',{className:'section-heading'},h('div',null,h('h1',null,'Eat Me First'),h('p',{className:'lead'},'A little attention goes a long way.'))),
       h('div',{className:'eat-layout'},
         h('aside',{className:'fridge-panel'},
-          h('div',{className:'type-filters'},[...CATEGORIES,{id:'balkan',label:'Balkan packaging',icon:'📦'}].map(c=>{
+          h('div',{className:'fridge-map card digital-fridge'},h('div',{className:'twin-heading'},h('div',null,h('span',{className:'eyebrow'},'Your fridge, mapped'),h('h2',null,'Peek inside')),btn(scanOpen?'Close scan':'Scan fridge',()=>setScanOpen(v=>!v),{className:'btn small',disabled:busy,'aria-expanded':scanOpen})),
+            h('p',{className:'note'},'From reviewed scans and saved shelf locations.'),
+            h('div',{className:'twin-legend'},h('span',null,'● Expired'),h('span',null,'● Eat soon'),h('span',null,'↗ Move'),h('span',null,'? Check')),
+            h('div',{className:'fridge-interior'},SHELVES.map(s=>h(ShelfZone,{key:s,shelf:s,list:items.filter(i=>i.shelf===s),selected:shelf===s,selectedItem,onItem:item=>{setSelectedItem(item.id);setFilter('');setShelf('');},onSelect:()=>{setShelf(shelf===s?'':s);setFilter('');setSelectedItem('');}}))),
+            !!unplaced.length&&h('div',{className:'twin-unplaced'},h('strong',null,'Location to confirm'),unplaced.map(i=>btn(i.name,()=>{setSelectedItem(i.id);setShelf('');setFilter('');},{key:i.id,className:'chip'}))),
+            h('p',{className:'note'},'Tap a product to inspect it. Hover or tap ⓘ for shelf tips.')),
+          h('section',{className:'card move-plan'},h('h3',null,'A better spot'),moves.length?moves.map(i=>{const rec=ChillStorage.suggest(i);return h('div',{className:'move-row',key:i.id},h('div',null,h('strong',null,i.name),h('p',null,(i.shelf||'No shelf yet')+' → '+rec.shelf)),btn('Review move',()=>onEdit({...i,shelf:rec.shelf}),{className:'btn small',disabled:busy,'aria-label':'Review move for '+i.name}));}):h('p',{className:'note'},'No shelf moves suggested. Check any unknown contents and dates.'))),
+        h('div',{className:'eat-list'},h('div',{className:'type-filters inventory-filters'},[...CATEGORIES,{id:'balkan',label:'Balkan packaging',icon:'📦'}].map(c=>{
             const n=items.filter(i=>matches(i,c.id)).length;
-            return h('button',{key:c.id,id:'type-'+c.id,type:'button',className:'type-btn'+(!n?' empty':''),'aria-pressed':filter===c.id||(c.id==='unknown'&&filter==='unrecognized'),onClick:()=>{setFilter(filter===c.id?'':c.id);setShelf('');}},
+            return h('button',{key:c.id,id:'type-'+c.id,type:'button',className:'type-btn'+(!n?' empty':''),'aria-pressed':filter===c.id||(c.id==='unknown'&&filter==='unrecognized'),onClick:()=>{setFilter(filter===c.id?'':c.id);setShelf('');setSelectedItem('');}},
               h('span',{className:'type-icon'},c.icon,h('span',{className:'type-n'},n)),h('span',{className:'type-label'},c.label));
-          })),
-          h('div',{className:'fridge-map card'},h('h2',null,'Where is it?'),SHELVES.map(s=>h(ShelfZone,{key:s,shelf:s,list:items.filter(i=>i.shelf===s),selected:shelf===s,onSelect:()=>{setShelf(shelf===s?'':s);setFilter('');}})),h('p',{className:'note storage-guide'},'Hover or tap ⓘ for shelf tips. Follow your fridge manual and food labels. ',h('a',{href:'https://www.safefood.net/food-safety/storing-food-safely/storing-food-fridge',target:'_blank',rel:'noreferrer'},'Storage guide')))),
-        h('div',{className:'eat-list'},filter==='balkan'&&h('p',{className:'notice'},'Balkan packaging: familiar tubs, unexpected contents. Check what is inside, not the original label.'),filter==='unrecognized'&&h('p',{className:'notice'},'What’s in this box? Open it, identify the contents, then edit the item.'),(filter||shelf)&&btn('Clear filter',()=>{setFilter('');setShelf('');},{className:'link'}),
+          })),scanOpen&&h(ChillWidgets.ScanControls,{items,onResult,onExample,busy,fridgeId}),filter==='balkan'&&h('p',{className:'notice'},'Balkan packaging: familiar tubs, unexpected contents. Check what is inside, not the original label.'),filter==='unrecognized'&&h('p',{className:'notice'},'What’s in this box? Open it, identify the contents, then edit the item.'),(filter||shelf||selectedItem)&&btn('Clear filter',()=>{setFilter('');setShelf('');setSelectedItem('');},{className:'link'}),
           !shown.length&&h('div',{className:'empty'},items.length?'Nothing in this category yet.':'Your fridge is ready for its first ingredients.'),
           STATUS_ORDER.map(status=>{
             const group=shown.filter(i=>Food.status(i)===status);if(!group.length)return null;
             return h('section',{key:status,className:'group '+status},h('h2',{className:'group-head'},h('span',{className:'dot'}),STATUS[status].label,h('span',{className:'n'},group.length)),
-              group.map(item=>h('article',{key:item.id,className:'erow '+status},h('span',{className:'bar'}),
+              group.map(item=>h('article',{key:item.id,className:'erow '+status+(selectedItem===item.id?' twin-selected':'')},h('span',{className:'bar'}),
                 h('div',{className:'product-info'},h(Picture,{name:item.name,photoKey:item.photoKey}),h('div',{className:'product-copy'},
                   h('h3',{className:'name'},item.name),h('p',{className:'meta'},[item.qty,item.shelf].filter(Boolean).join(' · ')),
                   item.container&&h('p',{className:'meta'},item.container),h('p',{className:'source'},Food.sourceText(item)),item.note&&h('p',{className:'warn-note'},item.note),h(Placement,{item,onEdit,busy}))),
@@ -352,7 +361,7 @@
           (screen!=='home'||draft)&&h('div',{className:'page-tools'},btn('+ Add food',addFood,{className:'btn primary',disabled:busy||!!draft}),fridgePicker),
           draft?h(Review,{draft,setDraft,busy,onClose:()=>setDraft(null),onSave:saveReview}):
           screen==='home'?h(ChillWidgets.Dashboard,{fridgePicker,onAdd:addFood,shopping,name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
-          screen==='eat'?h(Inventory,{items,busy,initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
+          screen==='eat'?h(Inventory,{items,busy,fridgeId,onResult:scanned,onExample:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'}),initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
           screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events,fridgeId,demo,shopping}),
           editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
       session&&fridges.length>0&&editor===undefined&&!draft&&h(ChillWidgets.Mascot,{screen}),

@@ -15,6 +15,7 @@ await page.getByRole('heading',{name:'Recently bought',exact:true}).waitFor();
 await page.locator('.history-stats').getByText('Eggs',{exact:true}).waitFor();
 await page.locator('.history-stats').getByText('Yogurt',{exact:true}).waitFor();
 if(await page.getByText('Rejected milk',{exact:true}).count())throw Error('Rejected purchase counted');
+await page.evaluate(()=>{const e=document.querySelector('.chef-assistant'),a=e.getAnimations()[0];if(!a)throw Error('Walking animation missing');a.pause();a.currentTime=0;const start=e.getBoundingClientRect().left;a.currentTime=16000;const end=e.getBoundingClientRect().left;if(Math.abs(start-end)<100)throw Error('Chef does not travel');a.currentTime=0;});
 await page.getByRole('button',{name:'Tip',exact:true}).click();await page.getByText('A receipt records a purchase; consumption logs tell the rest of the story.',{exact:true}).waitFor();
 if(await page.locator('.chef-assistant').evaluate(e=>getComputedStyle(e).position)!=='fixed')throw Error('Assistant not viewport anchored');
 await page.getByRole('button',{name:'Minimize Chef Byte',exact:true}).first().click();await page.getByRole('button',{name:'Open Chef Byte',exact:true}).click();
