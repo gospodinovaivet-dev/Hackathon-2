@@ -109,7 +109,6 @@
           <p class="status" id="scan-status" role="status"></p>
         </section>
 
-        <button class="link" id="add-by-hand" type="button">Add an item by hand</button>
       </div>
 
       <div class="col">
@@ -237,20 +236,26 @@
 
   <!-- RECIPES -->
   <section class="screen" id="screen-recipes" hidden>
-    <div>
-      <h1>Recipes</h1>
-      <p class="lead" id="mode-hint"></p>
-    </div>
+    <h1>Recipes</h1>
     <section class="card" aria-label="What you feel like">
-      <div class="mode" role="group" aria-label="Ingredients">
-        <button class="seg" id="mode-fridge" type="button" aria-selected="true">From my fridge</button>
-        <button class="seg" id="mode-any" type="button" aria-selected="false">Anything, I'll shop</button>
-      </div>
       <div class="prefs" id="prefs" aria-label="Preferences"></div>
-      <div class="row">
-        <label class="sr" for="pref-text">What you want</label>
-        <input class="field grow" id="pref-text" type="text" maxlength="200">
-        <button class="btn primary" id="gen-recipes" type="button">Get recipes</button>
+      <div class="cook-row">
+      <label class="sr" for="pref-text">Tell the chef what you want</label>
+      <input class="field" id="pref-text" type="text" maxlength="200" placeholder="Tell the chef: e.g. something warm, no dairy, for 4">
+      <button class="chef-btn" id="gen-recipes" type="button" aria-label="Let the chef cook recipes" title="Let's cook!">
+        <svg class="chef" viewBox="0 0 64 88" aria-hidden="true">
+          <g class="chef-hat">
+            <path d="M15 32c-8 0-10-11-3-14-1-8 8-12 14-8 3-6 12-6 15 0 6-4 15 0 13 8 7 3 5 14-3 14z" fill="#FFF9F0" stroke="#3B4733" stroke-width="2.4" stroke-linejoin="round"/>
+            <rect x="15" y="29" width="34" height="8" rx="3.5" fill="#FFF9F0" stroke="#3B4733" stroke-width="2.4"/>
+          </g>
+          <g class="chef-face">
+            <g class="chef-eyes" fill="#3B4733"><circle cx="23" cy="55" r="3.2"/><circle cx="41" cy="55" r="3.2"/></g>
+            <circle cx="15" cy="64" r="3.2" fill="#F5C9D3"/><circle cx="49" cy="64" r="3.2" fill="#F5C9D3"/>
+            <path class="chef-smile" d="M25 64q7 5 14 0" fill="none" stroke="#3B4733" stroke-width="2.6" stroke-linecap="round"/>
+            <path class="chef-grin" d="M22 62q10 13 20 0z" fill="#3B4733"/>
+          </g>
+        </svg>
+      </button>
       </div>
       <p class="note" id="rec-status"></p>
     </section>
@@ -315,6 +320,7 @@
 <script src="js/food.js"></script>
 <script src="js/products.js"></script>
 <script src="js/photos.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/scanner.js"></script>
 <script src="js/dish.js"></script>
 <script src="js/recipes.js"></script>

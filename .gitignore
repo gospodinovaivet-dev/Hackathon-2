@@ -10,3 +10,9 @@ __pycache__/
 
 # Optional configured shareable build (contains public project settings)
 dist/chillcheck.local.html
+
+# Vercel build output
+public/
+
+# Local Node server for the legacy app with AI (npm start)
+node_modules/

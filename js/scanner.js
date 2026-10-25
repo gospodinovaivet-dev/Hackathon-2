@@ -1,28 +1,19 @@
 // Everything the AI reads from photos. One photo can show the inside of the fridge, food anywhere
 // else, a shop bill or a package close-up; the AI works out which. Plus "Scan date" for one item.
-// Uses Claude when the page runs inside Claude. Elsewhere only the example data works;
-// the real product would send photos to a backend that calls the Claude API.
+// The app that loads this file plugs in its AI connection (Scanner.sample, .canReadPhotos, .ready):
+// src/ai.js in the React app, js/ai.js in the old app (legacy.html).
 const RULER = 36;      // px of white margin holding the rulers
 const MAX_SIDE = 1024; // the photo is scaled to this before it is sent
 
 const Scanner = {
   sample: null,
   canReadPhotos: false,
-  ready: null,
-
-  init() {
-    this.ready = (async () => {
-      try { this.sample = await window.claude?.use?.("sample"); } catch { this.sample = null; }
-      const limits = this.sample ? await this.sample.limits().catch(() => null) : null;
-      this.canReadPhotos = !!limits?.images;
-    })();
-    return this.ready;
-  },
+  ready: Promise.resolve(),
 
   async ask(prompt, file) {
     await this.ready;
-    if (!this.canReadPhotos) throw { code: "no_ai" };
-    return this.sample.json(prompt, { images: [file], cache: false });
+    if (!this.sample || !this.canReadPhotos) throw { code: "no_ai" };
+    return this.sample.json(prompt, { images: [file] });
   },
 
   // Any photo, always treated as taken today.
@@ -106,10 +97,10 @@ Reply with only JSON:
   // it, and map that back onto the photo. Updates row.box in place; onUpdate runs after each batch.
   async refineBoxes(file, rows, onUpdate) {
     await this.ready;
-    const limits = this.sample ? await this.sample.limits().catch(() => null) : null;
-    if (!limits?.images) return false;
+    if (!this.sample || !this.canReadPhotos) return false;
+    const limits = await this.sample.limits?.().catch(() => null);
     const bmp = await loadBitmap(file);
-    const perCall = Math.max(1, Math.min(limits.images.maxCount || 1, 6));
+    const perCall = Math.max(1, Math.min(limits?.images?.maxCount || 1, 6));
     const targets = rows.filter(r => r.box);
 
     for (let k = 0; k < targets.length; k += perCall) {
@@ -120,7 +111,7 @@ Reply with only JSON:
 Each piece should contain one item:
 ${list}
 For each image, give the box around that one item as [x1, y1, x2, y2] read off that image's rulers: its left, top, right and bottom edges. Make it tight around the whole item, edge to edge, without the shelf, neighbouring items or the white margin. If the item isn't in that piece, use null.
-Reply with only JSON with exactly ${batch.length} entries: {"boxes": [[x1, y1, x2, y2]]}`, { images: crops.map(c => c.blob), cache: false });
+Reply with only JSON with exactly ${batch.length} entries: {"boxes": [[x1, y1, x2, y2]]}`, { images: crops.map(c => c.blob) });
 
       const boxes = Array.isArray(res?.boxes) ? res.boxes : [];
       batch.forEach((r, i) => {
@@ -173,7 +164,11 @@ dateType is one of "use by", "best before", "expiry", "other".`, file);
 
   errorText(code) {
     return {
-      no_ai: "The AI can only read photos when the app is open on the shared claude.ai link. Here, use Check inside → Example data.",
+      no_ai: "The AI isn't connected. Start the app with “npm start” and open http://localhost:3000, or use the shared claude.ai link.",
+      server_down: "The ChillCheck server stopped. Run “npm start” again and reload the page.",
+      no_key: "The server has no Claude API key. Set ANTHROPIC_API_KEY, then run “npm start” again.",
+      no_credit: "The Claude API account behind this key has no credit left. Add credit in the Claude Console (Settings → Billing) or use a key from a funded organisation.",
+      refused: "The AI declined this request. Try a different photo or wording.",
       not_granted: "The app wasn't allowed to send the photo to the AI. Allow it and try again.",
       sampling_disabled: "AI isn't available on this account.",
       images_unavailable: "This view can't send photos to the AI.",

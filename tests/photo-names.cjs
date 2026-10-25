@@ -16,5 +16,11 @@ for(const [name,filename] of Object.entries(examples)){
 assert.equal(data.localAsset('stuffed-peppers.jpg'),'assets/products/stuffed-peppers.jpg');
 assert.equal(data.localAsset('unrecognized.jpg'),'assets/products/container.jpg');
 data.loadCatalog({photos:[{id:'rice-stuffed-peppers.jpg',object_path:'rice-stuffed-peppers.jpg'}],scans:[],recipes:[]},p=>'https://storage.example/mock-photos/'+p);
-assert.equal(data.photo('Rice-stuffed peppers').src,'https://storage.example/mock-photos/stuffed-peppers.jpg');
+// Local copies ship with the app and show first; the Storage copy is the backup when a local file fails
+assert.equal(data.photo('Rice-stuffed peppers').src,'assets/products/stuffed-peppers.jpg');
+const img={src:'assets/products/stuffed-peppers.jpg',getAttribute(){return this.src;}};
+data.fallbackImage({currentTarget:img},'stuffed-peppers');
+assert.equal(img.src,'https://storage.example/mock-photos/stuffed-peppers.jpg');
+data.fallbackImage({currentTarget:img},'stuffed-peppers');
+assert.equal(img.src,'https://storage.example/mock-photos/stuffed-peppers.jpg');
 console.log('PASS: all 15 filenames, legacy aliases, JPG references and canonical Storage paths.');

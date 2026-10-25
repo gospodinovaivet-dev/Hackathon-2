@@ -89,7 +89,6 @@ render.home = () => {
 $("open-eat").addEventListener("click", () => go("eat"));
 $("open-recipes").addEventListener("click", () => go("recipes"));
 $("open-health").addEventListener("click", () => go("health"));
-$("add-by-hand").addEventListener("click", () => { go("eat"); $("add-name").focus(); });
 
 let unpairArmed = false;
 $("unpair").addEventListener("click", () => {
@@ -208,8 +207,8 @@ async function photoBlob(src) {
 // "Check inside": the photos/ folder stands in for the fridge camera until the hardware exists
 const runExample = () => runScan("fridge", async () => Scanner.example(exampleCount++));
 const runCameraPhoto = photo => runScan("fridge", async () => {
-  await Scanner.ready;
-  if (!Scanner.canReadPhotos) throw { code: "no_ai" };
+  await AI.ready;
+  if (!AI.canReadPhotos) throw { code: "no_ai" };
   return Scanner.readPhoto(await photoBlob(photo.src), state.items);
 }, photo.src);
 
@@ -637,7 +636,7 @@ Store.onRemoteChange(() => {
 Store.connect();
 
 /* ---------- Start ---------- */
-Scanner.init();
+AI.init();
 Recipes.init();
 Health.init();
 Sensors.init();
