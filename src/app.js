@@ -162,25 +162,38 @@
   }
   function Recipes({items,ingredient,onClear}) {
     const [quick,setQuick]=useState(false),[shop,setShop]=useState(false),[prefs,setPrefs]=useState([]),[wishes,setWishes]=useState('');
-    const [generated,setGenerated]=useState(null),[working,setWorking]=useState(false),[error,setError]=useState('');
-    useEffect(()=>{setGenerated(null);setError('');},[ingredient]);
-    async function generate(){setWorking(true);setError('');try{
+    const [generated,setGenerated]=useState(null),[working,setWorking]=useState(false),[error,setError]=useState(''),[messages,setMessages]=useState([]);
+    const chatRef=useRef(null),requestVersion=useRef(0);
+    useEffect(()=>{requestVersion.current++;setGenerated(null);setError('');setMessages([]);setWorking(false);return()=>{requestVersion.current++;};},[ingredient]);
+    useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[messages,working,error]);
+    async function generate(){if(working)return;const version=++requestVersion.current;
+      const request=wishes.trim()||(ingredient?'What can I cook with '+ingredient+'?':'What can I make with what’s in my fridge?');
+      const context=messages.slice(-6).map(m=>({role:m.role,text:m.text}));
+      setMessages(old=>[...old,{role:'user',text:request+(prefs.length?' · '+prefs.join(', '):'')+(shop?' · Extra shopping is okay.':' · Use my fridge and pantry.')}]);setWishes('');setWorking(true);setError('');try{
       const usable=items.filter(i=>Food.status(i)!=='expired');
-      const result=await ChillAI.json(`Suggest 3 recipes. Return JSON {"recipes":[{"name":"","minutes":10,"servings":2,"kcal":400,"why":"","uses":["exact fridge item name"],"extra":["pantry item"],"buy":[],"steps":["step with amounts"]}]}. Prioritize expiring ingredients. Never use expired foods. ${shop?'Shopping is allowed; list missing items in buy.':'Use only available fridge foods and pantry staples; buy must be empty.'} ${ingredient?'Every recipe must include '+ingredient+'.':''} Preferences: ${prefs.join(', ')}. Request: ${wishes.slice(0,300)}. Available: ${JSON.stringify(usable.map(i=>({name:i.name,quantity:i.qty,days:i.expires?Dates.daysUntil(i.expires):null})))}. Expired, exclude: ${items.filter(i=>Food.status(i)==='expired').map(i=>i.name).join(', ')}. Pantry: oil,salt,pepper,garlic,onion,rice,pasta,oats,flour,spices.`);
+      const result=await ChillAI.json(`You are Chef Byte, a friendly robot chef. Continue this recipe conversation, applying the latest request to previous ideas when relevant. Conversation: ${JSON.stringify(context)}. Previous recipe details: ${JSON.stringify((generated||[]).map(r=>({name:r.name,uses:r.uses,steps:r.steps})))}. Suggest 3 recipes. Return JSON {"recipes":[{"name":"","minutes":10,"servings":2,"kcal":400,"why":"","uses":["exact fridge item name"],"extra":["pantry item"],"buy":[],"steps":["step with amounts"]}]}. Prioritize expiring ingredients. Never use expired foods. ${shop?'Shopping is allowed; list missing items in buy.':'Use only available fridge foods and pantry staples; buy must be empty.'} ${ingredient?'Every recipe must include '+ingredient+'.':''} Preferences: ${prefs.join(', ')}. Request: ${request.slice(0,300)}. Available: ${JSON.stringify(usable.map(i=>({name:i.name,quantity:i.qty,days:i.expires?Dates.daysUntil(i.expires):null})))}. Expired, exclude: ${items.filter(i=>Food.status(i)==='expired').map(i=>i.name).join(', ')}. Pantry: oil,salt,pepper,garlic,onion,rice,pasta,oats,flour,spices.`);
+      if(version!==requestVersion.current)return;
       if(!Array.isArray(result?.recipes)||!result.recipes.length)throw Error('No recipes returned. Try a different request.');
       const strings=value=>Array.isArray(value)?value.filter(v=>typeof v==='string').slice(0,20):[];
       const recipes=result.recipes.slice(0,6).map(r=>({name:String(r.name||'Recipe'),minutes:Number(r.minutes)||0,servings:Number(r.servings)||1,kcal:Number(r.kcal)||0,why:String(r.why||''),uses:strings(r.uses),pantry:strings(r.extra),buy:strings(r.buy),steps:strings(r.steps),photo:ChillData.photo(r.uses?.[0]||'').key}));
       if(recipes.some(r=>r.uses.some(name=>items.some(i=>sameFood(i.name,name)&&Food.status(i)==='expired'))))throw Error('A suggestion included expired food and was rejected. Please try again.');
-      setGenerated(recipes);
-    }catch(e){setError(e.message);}finally{setWorking(false);}}
+      setGenerated(recipes);setQuick(false);setMessages(old=>[...old,{role:'assistant',text:'I’ve cooked up '+recipes.length+(recipes.length===1?' idea':' ideas')+' for you: '+recipes.map(r=>r.name).join(', ')+'. You’ll find the recipes below. Want them quicker, dairy-free, or for more people? Just ask.'}]);
+    }catch(e){if(version===requestVersion.current){setError(e.message);setMessages(old=>[...old,{role:'assistant',text:'I couldn’t finish that request. Your earlier ideas are still here—please try again.',failed:true}]);}}finally{if(version===requestVersion.current)setWorking(false);}}
     const recipes=(generated||ChillData.recipes).filter(r=>(!quick||r.minutes<15)&&(!ingredient||r.uses.some(name=>sameFood(name,ingredient))));
     return h('section',{className:'screen'},h('span',{className:'eyebrow'},'Something lovely from what’s left'),h('h1',null,ingredient?`Cook with ${ingredient}`:'Recipes'),
       ingredient&&btn('Show all ingredients',onClear,{className:'btn small'}),
-      h('section',{className:'card recipe-controls'},h('h2',null,'What are you craving?'),
-        h('div',{className:'btn-row'},['Vegetarian','High protein','No oven','Sweet','Salty','Under 15 min'].map(p=>btn(p,()=>setPrefs(old=>old.includes(p)?old.filter(v=>v!==p):[...old,p]),{key:p,className:'chip','aria-pressed':prefs.includes(p)}))),
-        field('Preferences or dish idea',{value:wishes,onChange:e=>setWishes(e.target.value),maxLength:300,placeholder:'No dairy, cooking for two…'}),
-        h('label',{className:'row'},h('input',{type:'checkbox',checked:shop,onChange:e=>setShop(e.target.checked)}),'Happy to shop for extra ingredients'),
-        btn(working?'Cooking up ideas…':'Generate AI recipes',generate,{className:'btn primary',disabled:working}),error&&h('p',{role:'alert'},error)),
+      h('section',{className:'card recipe-chat','aria-label':'Cook with Chef Byte'},
+        h('header',{className:'recipe-chat-header'},h(ChillWidgets.Robot),h('div',null,h('span',{className:'eyebrow'},'Your little kitchen sidekick'),h('h2',null,'Let’s cook, together'),h('p',{className:'note'},'Tell Chef Byte what you fancy, then fine-tune the ideas together.'))),
+        h('div',{className:'recipe-conversation',ref:chatRef,role:'log','aria-label':'Recipe conversation','aria-live':'polite','aria-relevant':'additions'},
+          h('div',{className:'chat-message assistant'},h(ChillWidgets.Robot,{mini:true}),h('div',null,h('strong',null,'Chef Byte'),h('p',null,ingredient?'Let’s give '+ingredient+' a starring role. What are you craving?':'Hi, I’m Chef Byte! Let’s turn what’s in your fridge into something lovely. What are you craving?'))),
+          messages.map((m,i)=>h('div',{key:i,className:'chat-message '+m.role},m.role==='assistant'&&h(ChillWidgets.Robot,{mini:true}),h('div',null,h('strong',null,m.role==='user'?'You':'Chef Byte'),h('p',null,m.text)))),
+          working&&h('div',{className:'chat-message assistant'},h(ChillWidgets.Robot,{mini:true}),h('p',{role:'status'},'Chef Byte is cooking up ideas…'))),
+        h('form',{className:'recipe-composer',onSubmit:e=>{e.preventDefault();generate();}},
+          h('div',{className:'recipe-prompt-chips'},['Something quick','Make it vegetarian','Dinner for two'].map(text=>btn(text,()=>setWishes(text),{key:text,className:'chip',disabled:working}))),
+          h('details',null,h('summary',null,'Tastes & ingredients'),h('div',{className:'btn-row'},['Vegetarian','High protein','No oven','Sweet','Salty','Under 15 min'].map(p=>btn(p,()=>setPrefs(old=>old.includes(p)?old.filter(v=>v!==p):[...old,p]),{key:p,className:'chip','aria-pressed':prefs.includes(p),disabled:working}))),
+            h('label',{className:'row'},h('input',{type:'checkbox',checked:shop,disabled:working,onChange:e=>setShop(e.target.checked)}),'Happy to shop for extra ingredients')),
+          h('div',{className:'recipe-send-row'},field('Message Chef Byte',{value:wishes,onChange:e=>setWishes(e.target.value),maxLength:300,disabled:working,placeholder:messages.length?'Can you make those dairy-free?':'Something cosy with spinach…'}),h('button',{type:'submit',className:'btn primary',disabled:working},working?'Thinking…':'Ask Chef Byte')),
+          error&&h('p',{role:'alert',className:'error'},error))),
       h('div',{className:'row'},btn('Under 15 minutes',()=>setQuick(!quick),{className:'chip','aria-pressed':quick})),
       h('p',{className:'note'},generated?'AI suggestions. Check ingredients, quantities and cooking instructions. Photos are ingredient illustrations.':'Starter recipe ideas. Generate tailored recipes when the AI backend is configured.'),
       !recipes.length&&h('p',{className:'empty'},'No matching starter recipe. Generate a recipe for this ingredient or clear the filters.'),
@@ -364,7 +377,7 @@
           screen==='eat'?h(Inventory,{items,busy,fridgeId,onResult:scanned,onExample:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'}),initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
           screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events,fridgeId,demo,shopping}),
           editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
-      session&&fridges.length>0&&editor===undefined&&!draft&&h(ChillWidgets.Mascot,{screen}),
+      session&&fridges.length>0&&screen!=='recipes'&&editor===undefined&&!draft&&h(ChillWidgets.Mascot,{screen}),
       h('footer',{className:'app-footer'},'Made for the food you almost forgot.')));
   }
   class ErrorBoundary extends React.Component {
