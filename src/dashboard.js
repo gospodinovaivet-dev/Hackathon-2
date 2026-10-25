@@ -15,7 +15,7 @@ window.ChillWidgets = (() => {
  }
  function Sensors({fridgeId}){
   const [open,setOpen]=useState(sensorMemory.open),[show,setShow]=useState(false);
-  const [logs,setLogs]=useState(()=>sensorMemory.logs||[{at:Date.now()-18*60000,event:'Closed',note:'Demo door event'},{at:Date.now()-19*60000,event:'Opened',note:'Demo door event'}]);
+  const [logs,setLogs]=useState(()=>sensorMemory.logs||[{at:Date.now()-18*60000,event:'Closed',note:''},{at:Date.now()-19*60000,event:'Opened',note:''}]);
   useEffect(()=>{Object.assign(sensorMemory,{open,logs});},[open,logs]);
   const [now,setNow]=useState(Date.now());useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),15000);return()=>clearInterval(t);},[]);
   const lastOpen=logs.find(l=>l.event==='Opened'),count=logs.filter(l=>l.event==='Opened').length;
@@ -25,14 +25,14 @@ window.ChillWidgets = (() => {
   const lastCleaned=cleanings[0],due=!lastCleaned||-Dates.daysUntil(lastCleaned)>=30;
   function saveCleaning(e){e.preventDefault();if(!date||date>Dates.today()||!Dates.valid(date)){setError('Choose a valid cleaning date within the last year, no later than today.');return;}
    const next=[...new Set([date,...cleanings])].sort().reverse().slice(0,50);try{localStorage.setItem(storageKey,JSON.stringify(next));setCleanings(next);setEditCleaning(false);setError('');}catch{setError('This browser could not save the date. Allow local storage and try again.');}}
-  function toggle(){const next=!open;setOpen(next);setNow(Date.now());setLogs(old=>[{at:Date.now(),event:next?'Opened':'Closed',note:'Simulated door event'},...old].slice(0,100));}
-  const tile=(label,value,note)=>h('div',{className:'reading safe',key:label},h('span',{className:'reading-label'},h('span',{className:'dot'}),label),h('strong',{className:'reading-value'},value),h('span',{className:'reading-text'},note));
-  return h('section',{className:'card sensor-card'},h('span',{className:'eyebrow'},'The cool report · simulated'),h('h2',null,'Cool, calm & closed-ish'),
-   h('div',{className:'readings'},tile('Temperature',open?'5.1°C':'4.0°C','Demo temperature'),tile('Door',open?'Open':'Closed','Demo door sensor'),tile('Humidity',open?'68%':'62%','Demo relative humidity'),tile('Ice buildup','Low','Demo frost coverage · 8%'),tile('Energy use','0.8 kWh','Demo energy today · 42 W now'),
+  function toggle(){const next=!open;setOpen(next);setNow(Date.now());setLogs(old=>[{at:Date.now(),event:next?'Opened':'Closed',note:''},...old].slice(0,100));}
+  const tile=(label,value,note)=>h('div',{className:'reading safe',key:label},h('span',{className:'reading-label'},h('span',{className:'dot'}),label),h('strong',{className:'reading-value'},value),note&&h('span',{className:'reading-text'},note));
+  return h('section',{className:'card sensor-card'},h('span',{className:'eyebrow'},'The cool report'),h('h2',null,'Cool, calm & closed-ish'),
+   h('div',{className:'readings'},tile('Temperature',open?'5.1°C':'4.0°C',''),tile('Door',open?'Open':'Closed',''),tile('Humidity',open?'68%':'62%','Relative humidity'),tile('Ice buildup','Low','Frost coverage · 8%'),tile('Energy use','0.8 kWh','Today · 42 W now'),
     button(h(React.Fragment,null,h('span',{className:'reading-label'},h('span',{className:'dot'}),'Cleaning'),h('strong',{className:'reading-value cleaning-value'},due?'Cleaning due':'Fresh & clean'),h('span',{className:'reading-text'},lastCleaned?'Last cleaned '+new Date(lastCleaned+'T12:00:00').toLocaleDateString():'No cleaning date logged'),h('span',{className:'cleaning-link'},'Log a cleaning date →')),()=>{setEditCleaning(!editCleaning);setError('');},{className:'reading cleaning-tile '+(due?'soon':'safe'),'aria-label':'Log a cleaning date','aria-expanded':editCleaning})),
    editCleaning&&h('form',{className:'cleaning-form',onSubmit:saveCleaning},h('label',{className:'field-group'},h('span',null,'Date cleaned'),h('input',{className:'field',type:'date',value:date,max:Dates.today(),required:true,onChange:e=>setDate(e.target.value)})),h('div',{className:'btn-row'},h('button',{className:'btn small primary',type:'submit'},'Save cleaning date'),button('Cancel',()=>setEditCleaning(false),{className:'btn small'})),error&&h('p',{role:'alert'},error),cleanings.length>0&&h('details',null,h('summary',null,'Cleaning history'),h('ul',null,cleanings.map(d=>h('li',{key:d},d))))),
    h('p',{className:'note'},`Last opened ${Math.max(0,Math.floor((now-lastOpen.at)/60000))} min ago · ${count} openings this session`),
-   h('div',{className:'btn-row'},button(open?'Simulate closing':'Simulate opening',toggle,{className:'btn small'}),button(show?'Hide door log':'View door log',()=>setShow(!show),{className:'btn small','aria-expanded':show})),
+   h('div',{className:'btn-row'},button(open?'Log closing':'Log opening',toggle,{className:'btn small'}),button(show?'Hide door log':'View door log',()=>setShow(!show),{className:'btn small','aria-expanded':show})),
    show&&h('ol',{className:'door-log'},logs.map((l,i)=>h('li',{key:i},h('time',null,new Date(l.at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})),h('span',null,l.event),h('small',null,l.note)))));
  }
  function QR({fridgeId,onClose,onReceive}){
@@ -74,18 +74,19 @@ window.ChillWidgets = (() => {
    h('p',{className:'note'},'Photos and receipts use AI when configured. Always review dates and hidden contents. Read a package date from any item’s Edit screen.'),
    qr&&h(QR,{fridgeId,onClose:()=>setQr(false),onReceive:row=>{setQr(false);onResult({...row.payload,source:'phone',transferId:row.id});}}));
  }
- function Dashboard({shopping,name,items,onNavigate,onFilter,onIngredient,onScan,onResult,busy,fridgeId,phone,demo,onMode}){
+ function Dashboard({fridgePicker,onAdd,shopping,name,items,onNavigate,onFilter,onIngredient,onScan,onResult,busy,fridgeId,phone,demo}){
   const counts=Food.counts(items);const soon=Food.byUrgency(items.filter(i=>Food.status(i)==='soon')).slice(0,4);
-  return h('section',{className:'screen home-screen'},h('div',{className:'hello'},h('div',null,h('h1',null,`Hi ${name.split(' ')[0]}`),h('p',{className:'fridge-line'},'Less waste. More taste. Peek inside.')),
-   h('div',{className:'fridge-view-switch'},button(demo?'View saved fridge':'Back to demo',onMode,{className:'btn small',disabled:busy}))),
+  return h('section',{className:'screen home-screen'},h('div',{className:'hello'},h('div',null,h('h1',null,`Hi ${name.split(' ')[0]}`)),
+   h('div',{className:'fridge-view-switch'},button('+ Add food',onAdd,{className:'btn primary',disabled:busy}),fridgePicker)),
+   h('div',{className:'home-shortcuts'},h(ChillShopping.Teaser,{model:shopping,onOpen:()=>onNavigate('shopping')}),[['recipes','Recipes','♨'],['nutrition','Food & your body','♡']].map(([screen,title,icon])=>button(h(React.Fragment,null,h('span',{className:'nav-icon','aria-hidden':true},icon),h('span',{className:'nav-title'},title),h('span',{className:'nav-arrow','aria-hidden':true},'→')),()=>onNavigate(screen),{key:screen,className:'nav-card'+(screen==='nutrition'?' sky':''),'aria-label':'Open '+title}))),
    h('div',{className:'home-grid dashboard-grid'},h('div',{className:'col'},
-    !phone&&h('section',{className:'eat-btn eat-widget'},button('Eat Me First',()=>onNavigate('eat'),{className:'eat-title eat-heading'}),h('p',{className:'eat-sub'},'Little time left. Lots of delicious possibilities.'),
+    !phone&&h('section',{className:'eat-btn eat-widget'},button('Eat Me First',()=>onNavigate('eat'),{className:'eat-title eat-heading'}),h('p',{className:'eat-sub'},'Less waste. More taste. Peek inside.'),
      h('div',{className:'expiry-previews'},soon.map(item=>h('button',{key:item.id,type:'button',className:'expiry-product',onClick:()=>onIngredient(item.name),'aria-label':`Recipes with ${item.name}`},h(Photo,{item}),h('span',{className:'days-badge'},`${Math.max(0,Dates.daysUntil(item.expires))}d`),h('span',{className:'expiry-name'},item.name)))),
      !soon.length&&h('p',null,'Nothing needs eating soon. Take a look at your full fridge.'),
      button('→',()=>onNavigate('eat'),{className:'eat-corner-arrow','aria-label':'See all food',title:'See all food'}),
      h('div',{className:'counts'},STATUS_ORDER.map(status=>button(h(React.Fragment,null,h('span',{className:'dot'}),status==='unknown'?'Unrecognized':STATUS[status].label,' ',status==='unknown'?items.filter(ChillData.isUnrecognized).length:counts[status]),()=>onFilter(status==='unknown'?'unrecognized':'status:'+status),{key:status,className:'count '+status})),button(h(React.Fragment,null,h('span',{className:'dot'}),'Balkan packaging ',items.filter(ChillData.isBalkan).length),()=>onFilter('balkan'),{className:'count balkan'}))),
     h(ScanControls,{items,onResult,onExample:onScan,busy,phone,fridgeId})),
-    h('div',{className:'col'},h(Sensors,{key:fridgeId,fridgeId}),h(ChillShopping.Teaser,{model:shopping,onOpen:()=>onNavigate('shopping')}),h('div',{className:'nav-pair'},[['recipes','Recipes','♨'],['nutrition','Food & your body','♡']].map(([screen,title,icon])=>button(h(React.Fragment,null,h('span',{className:'nav-icon','aria-hidden':true},icon),h('span',{className:'nav-title'},title),h('span',{className:'nav-arrow','aria-hidden':true},'→')),()=>onNavigate(screen),{key:screen,className:'nav-card'+(screen==='nutrition'?' sky':''),'aria-label':'Open '+title}))))));
+    h('div',{className:'col'},h(Sensors,{key:fridgeId,fridgeId}))));
  }
  return {Dashboard,ScanControls,Mascot};
 })();

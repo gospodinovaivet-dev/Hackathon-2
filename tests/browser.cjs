@@ -12,7 +12,7 @@ const path=require('path');
  await page.getByLabel('Password',{exact:true}).fill('test-only-password');
  await page.getByRole('button',{name:'Sign in',exact:true}).click();
  await page.getByRole('button',{name:'Create fridge',exact:true}).click();
- await page.getByRole('button',{name:'View saved fridge',exact:true}).click();
+ await page.getByLabel('Your fridge',{exact:true}).selectOption(await page.evaluate(()=>window.testDB.fridges[0].id));
  await page.getByRole('button',{name:'+ Add food',exact:true}).click();
  await page.getByLabel('Food name',{exact:true}).fill('Tomatoes');
  await page.getByLabel('Quantity',{exact:true}).fill('6 pcs');

@@ -21,5 +21,5 @@ window.ChillStorage=(()=>{
   if(/\b(ketchup|mustard|condiment|soda|sparkling water)\b/.test(name))return {shelf:'Door rack',reason:'Use the door for suitable condiments and drinks, following the label after opening.'};
   return {shelf:null,reason:'Check the storage label and identify the food type before choosing a shelf.'};
  }
- return {tips,suggest};
+ return {tips,suggest,headings:{'Top shelf':'Leftovers','Middle shelf':'Dairy','Bottom shelf':'Raw','Crisper drawer':'Produce','Door rack':'Condiments'}};
 })();

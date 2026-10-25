@@ -11,7 +11,7 @@
     const photo=ChillData.photo(name,photoKey);
     return h('figure',{className:'product-photo'+(large?' large':'')},
       h('img',{src:photo.src,alt:photo.placeholder?'Closed food container':`Illustrative photo of ${name}`,loading:'lazy',onError:e=>ChillData.fallbackImage(e,photo.key),width:480,height:480}),
-      h('figcaption',null,photo.placeholder?'Photo unavailable':'Serving illustration'));
+      photo.placeholder&&h('figcaption',null,'Photo unavailable'));
   }
   function Status({item}) {return h('span',{className:'pill '+Food.status(item)},Food.daysText(item));}
   function Auth({onError}) {
@@ -93,7 +93,7 @@
     return h('div',{className:'shelf-zone',onMouseEnter:()=>setOpen(true),onMouseLeave:()=>setOpen(false),onBlur:e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);},onKeyDown:e=>{if(e.key==='Escape'){setOpen(false);e.stopPropagation();}}},
       h('button',{type:'button',className:'zone '+tone,'aria-pressed':selected,'aria-describedby':open?id:undefined,onFocus:()=>setOpen(true),onClick:onSelect},h('span',{className:'zone-name'},shelf),h('span',{className:'zone-count'},plural(list.length,'item'))),
       btn('i',()=>setOpen(v=>!v),{className:'shelf-help','aria-label':'Storage tips for '+shelf,'aria-expanded':open,'aria-controls':id}),
-      open&&h('div',{id,role:'tooltip',className:'shelf-tooltip'},h('strong',null,'At home here'),h('p',null,ChillStorage.tips[shelf])));
+      open&&h('div',{id,role:'tooltip',className:'shelf-tooltip'},h('strong',null,ChillStorage.headings[shelf]),h('p',null,ChillStorage.tips[shelf])));
   }
   function Placement({item,onEdit,busy}) {
     const suggestion=ChillStorage.suggest(item);
@@ -313,11 +313,15 @@
     async function signOut(){
       await action(async()=>{const {error}=await api.client().auth.signOut();if(error)throw error;},'');
     }
-    const top=h('header',{className:'app-header'},h('div',{className:'react-header'},
+    const addFood=()=>setEditor(null);
+    const fridgePicker=h('select',{className:'field fridge-picker','aria-label':'Your fridge',value:demo?'demo':fridgeId,disabled:busy||loading||!!draft,onChange:e=>{const value=e.target.value;setDemo(value==='demo');if(value!=='demo')setFridgeId(value);navigate('home');}},
+      h('option',{value:'demo'},'Demo fridge'),fridges.map(f=>h('option',{key:f.id,value:f.id},f.name)));
+
+    const top=h('header',{className:'app-header'},h('div',{className:'header-shell'},
       btn('✳ ChillCheck',()=>navigate('home'),{className:'brand',disabled:busy||!!draft}),
-      session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))),fridges.length>0&&h('div',{className:'workspace-toolbar'},select('Your fridge',fridgeId,v=>{if(!busy){setFridgeId(v);navigate('home');}},fridges.map(f=>[f.id,f.name])),
-          h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft}))),
-          btn('+ Add food',()=>setEditor(null),{className:'btn primary',disabled:busy||loading||!!draft})) );
+      fridges.length>0&&h('div',{className:'workspace-toolbar'},
+        h('nav',{'aria-label':'Main navigation'},[['home','Home'],['eat','My fridge'],['recipes','Recipes'],['nutrition','Food & you'],['history','History'],['shopping','Shopping list']].map(([value,label])=>btn(label,()=>navigate(value),{key:value,className:'chip','aria-current':screen===value?'page':undefined,disabled:busy||!!draft})))),
+      session&&h('div',{className:'header-actions'},h('span',{className:'account-name'},profile?.display_name||'My account'),btn('Sign out',signOut,{className:'btn small',disabled:busy}))));
     return h(React.Fragment,null,top,h('main',{className:'app'},
       error&&h('div',{className:'alert-item',role:'alert'},h('span',null,error),btn('Dismiss',()=>setError(''),{className:'btn small'})),
       notice&&h('p',{className:'notice',role:'status'},notice),
@@ -327,8 +331,9 @@
           h('div',{className:'empty'},h('p',null,'Could not load your account.'),btn('Retry',()=>setRetry(n=>n+1))):
         !fridges.length?h(CreateFridge,{onCreate:create,busy}):
         h(React.Fragment,null,
+          (screen!=='home'||draft)&&h('div',{className:'page-tools'},btn('+ Add food',addFood,{className:'btn primary',disabled:busy||!!draft}),fridgePicker),
           draft?h(Review,{draft,setDraft,busy,onClose:()=>setDraft(null),onSave:saveReview}):
-          screen==='home'?h(ChillWidgets.Dashboard,{shopping,name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onMode:()=>setDemo(v=>!v),onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
+          screen==='home'?h(ChillWidgets.Dashboard,{fridgePicker,onAdd:addFood,shopping,name:profile.display_name,items,onNavigate:navigate,busy,fridgeId,phone,demo,onFilter:value=>{navigate('eat');setInventoryFilter(value);},onIngredient:name=>{setIngredient(name);navigate('recipes');},onResult:scanned,onScan:()=>scanned({items:ChillData.example(scanCount.current++),type:'fridge',source:'example'})}):
           screen==='eat'?h(Inventory,{items,busy,initialFilter:inventoryFilter,onEdit:setEditor,onFinish:finishItem}):
           screen==='shopping'?h(ChillShopping.Panel,{key:fridgeId+demo,model:shopping,items,demo,onConsume:consume,busy}):screen==='recipes'?h(Recipes,{items,ingredient,onClear:()=>setIngredient('')}):screen==='nutrition'?h(Nutrition,{items,events}):h(History,{events}),
           editor!==undefined&&h(FoodForm,{key:editor?.id||'new',item:editor,onClose:()=>setEditor(undefined),busy,error,onSave:saveItem}))),
