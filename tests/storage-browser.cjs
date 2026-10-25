@@ -1,0 +1,25 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE),path=require('path');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH});try{
+const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.addInitScript(c=>window.testCatalog=c,require('../supabase/mock-catalog.json'));
+await page.addInitScript({path:path.join(__dirname,'mock-backend.js')});
+await page.goto('http://127.0.0.1:8081/');
+await page.getByLabel('Email',{exact:true}).fill('demo@example.invalid');await page.getByLabel('Password',{exact:true}).fill('test-password');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('button',{name:'Create fridge',exact:true}).click();
+await page.getByRole('button',{name:'My fridge',exact:true}).click();
+const zone=page.locator('.shelf-zone').filter({hasText:'Door rack'});
+await zone.locator('.zone').hover();await page.getByRole('tooltip').filter({hasText:'Condiments'}).waitFor();
+await zone.locator('.zone').focus();await page.keyboard.press('Escape');if(await page.getByRole('tooltip').count())throw Error('Escape failed');
+await page.getByRole('button',{name:'Update shelf for Milk 3.6%',exact:true}).click();
+await page.getByRole('dialog').waitFor();const shelf=page.getByRole('dialog').locator('select').nth(2);
+if(await shelf.inputValue()!=='Middle shelf')throw Error('Suggested shelf not prefilled');
+await page.getByRole('button',{name:'Save food',exact:true}).click();
+const milk=page.locator('article.erow').filter({hasText:'Milk 3.6%'});await milk.getByText('A good spot',{exact:true}).waitFor();
+const suggestions=await page.evaluate(()=>({unknown:ChillStorage.suggest({name:'Unknown container',kind:'cooked'}),peppers:ChillStorage.suggest({name:'Rice-stuffed peppers',kind:'cooked',container:'Ice cream tub'}),eggs:ChillStorage.suggest({name:'Eggs',kind:'fresh'})}));
+if(suggestions.unknown.shelf!==null||suggestions.peppers.shelf!=='Top shelf'||suggestions.eggs.shelf!=='Middle shelf')throw Error('Incorrect food classification');
+await page.setViewportSize({width:390,height:850});
+await page.getByRole('button',{name:'Storage tips for Bottom shelf',exact:true}).tap({force:true}).catch(()=>page.getByRole('button',{name:'Storage tips for Bottom shelf',exact:true}).click());
+await page.getByRole('tooltip').filter({hasText:'leakproof'}).waitFor();
+for(const width of [320,390,768,1280,1440]){await page.setViewportSize({width,height:900});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Overflow '+width);}
+await page.screenshot({path:'/tmp/chill-storage-desktop.png',fullPage:true});
+if(errors.length)throw Error(errors.join(';'));console.log('PASS shelf hover, keyboard dismissal, mobile tips, suggested edit/save, classification and responsive widths');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});

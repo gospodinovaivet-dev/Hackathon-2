@@ -86,6 +86,22 @@
         field('Notes',{value:form.note||'',onChange:e=>change('note',e.target.value)}),
         h('div',{className:'btn-row'},h('button',{className:'btn primary',disabled:busy||labelBusy||!form.name.trim()},busy?'Saving…':'Save food'),btn('Cancel',onClose,{disabled:busy}))));
   }
+  function ShelfZone({shelf,list,selected,onSelect}) {
+    const [open,setOpen]=useState(false);
+    const count=Food.counts(list),tone=count.expired?'expired':count.soon?'soon':count.unknown?'unknown':'safe';
+    const id='shelf-tip-'+SHELVES.indexOf(shelf);
+    return h('div',{className:'shelf-zone',onMouseEnter:()=>setOpen(true),onMouseLeave:()=>setOpen(false),onBlur:e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);},onKeyDown:e=>{if(e.key==='Escape'){setOpen(false);e.stopPropagation();}}},
+      h('button',{type:'button',className:'zone '+tone,'aria-pressed':selected,'aria-describedby':open?id:undefined,onFocus:()=>setOpen(true),onClick:onSelect},h('span',{className:'zone-name'},shelf),h('span',{className:'zone-count'},plural(list.length,'item'))),
+      btn('i',()=>setOpen(v=>!v),{className:'shelf-help','aria-label':'Storage tips for '+shelf,'aria-expanded':open,'aria-controls':id}),
+      open&&h('div',{id,role:'tooltip',className:'shelf-tooltip'},h('strong',null,'At home here'),h('p',null,ChillStorage.tips[shelf])));
+  }
+  function Placement({item,onEdit,busy}) {
+    const suggestion=ChillStorage.suggest(item);
+    const fits=suggestion.shelf&&(suggestion.allowed||[suggestion.shelf]).includes(item.shelf);
+    return h('div',{className:'placement-tip'},h('strong',null,suggestion.shelf?(fits?'A good spot':'Suggested spot: '+suggestion.shelf):'Find its happy place'),h('p',null,suggestion.reason),
+      suggestion.shelf&&!fits&&btn('Update shelf →',()=>onEdit({...item,shelf:suggestion.shelf}),{className:'link',disabled:busy,'aria-label':'Update shelf for '+item.name}),
+      suggestion.shelf&&!fits&&h('small',null,'Move the food, then save its new shelf.'));
+  }
   function Inventory({items,onEdit,onFinish,busy,initialFilter=''}) {
     const [filter,setFilter]=useState(initialFilter),[shelf,setShelf]=useState('');
     useEffect(()=>{setFilter(initialFilter);setShelf('');},[initialFilter]);
@@ -99,11 +115,7 @@
             return h('button',{key:c.id,id:'type-'+c.id,type:'button',className:'type-btn'+(!n?' empty':''),'aria-pressed':filter===c.id||(c.id==='unknown'&&filter==='unrecognized'),onClick:()=>{setFilter(filter===c.id?'':c.id);setShelf('');}},
               h('span',{className:'type-icon'},c.icon,h('span',{className:'type-n'},n)),h('span',{className:'type-label'},c.label));
           })),
-          h('div',{className:'fridge-map card'},h('h2',null,'Where is it?'),SHELVES.map(s=>{
-            const list=items.filter(i=>i.shelf===s),count=Food.counts(list),tone=count.expired?'expired':count.soon?'soon':count.unknown?'unknown':'safe';
-            return h('button',{key:s,type:'button',className:'zone '+tone,'aria-pressed':shelf===s,onClick:()=>{setShelf(shelf===s?'':s);setFilter('');}},
-              h('span',{className:'zone-name'},s),h('span',{className:'zone-count'},plural(list.length,'item')));
-          }))),
+          h('div',{className:'fridge-map card'},h('h2',null,'Where is it?'),SHELVES.map(s=>h(ShelfZone,{key:s,shelf:s,list:items.filter(i=>i.shelf===s),selected:shelf===s,onSelect:()=>{setShelf(shelf===s?'':s);setFilter('');}})),h('p',{className:'note storage-guide'},'Hover or tap ⓘ for shelf tips. Follow your fridge manual and food labels. ',h('a',{href:'https://www.safefood.net/food-safety/storing-food-safely/storing-food-fridge',target:'_blank',rel:'noreferrer'},'Storage guide')))),
         h('div',{className:'eat-list'},filter==='balkan'&&h('p',{className:'notice'},'Balkan packaging: familiar tubs, unexpected contents. Check what is inside, not the original label.'),filter==='unrecognized'&&h('p',{className:'notice'},'What’s in this box? Open it, identify the contents, then edit the item.'),(filter||shelf)&&btn('Clear filter',()=>{setFilter('');setShelf('');},{className:'link'}),
           !shown.length&&h('div',{className:'empty'},items.length?'Nothing in this category yet.':'Your fridge is ready for its first ingredients.'),
           STATUS_ORDER.map(status=>{
@@ -112,7 +124,7 @@
               group.map(item=>h('article',{key:item.id,className:'erow '+status},h('span',{className:'bar'}),
                 h('div',{className:'product-info'},h(Picture,{name:item.name,photoKey:item.photoKey}),h('div',{className:'product-copy'},
                   h('h3',{className:'name'},item.name),h('p',{className:'meta'},[item.qty,item.shelf].filter(Boolean).join(' · ')),
-                  item.container&&h('p',{className:'meta'},item.container),h('p',{className:'source'},Food.sourceText(item)),item.note&&h('p',{className:'warn-note'},item.note))),
+                  item.container&&h('p',{className:'meta'},item.container),h('p',{className:'source'},Food.sourceText(item)),item.note&&h('p',{className:'warn-note'},item.note),h(Placement,{item,onEdit,busy}))),
                 h('div',{className:'right'},h(Status,{item}),h('div',{className:'actions'},btn('Edit',()=>onEdit(item),{className:'btn small',disabled:busy}),
                   btn(status==='expired'?'Discard':'Eaten',()=>onFinish(item,status==='expired'?'discarded':'eaten'),{className:'btn small',disabled:busy}))))));
           }))));
