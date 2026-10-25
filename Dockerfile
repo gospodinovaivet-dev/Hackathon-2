@@ -13,4 +13,4 @@ EXPOSE 8080
 # needs only a restart. Only public/index.html is served.
 CMD python3 scripts/setup.py && node build.js --configured && mkdir -p public \
  && cp dist/chillcheck.local.html public/index.html \
- && exec python3 -m http.server "$PORT" --bind 0.0.0.0 --directory public
+ && exec python3 scripts/serve.py
