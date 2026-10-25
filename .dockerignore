@@ -1,0 +1,11 @@
+# Never put local secrets or generated files into the image
+.env
+.env.*
+.git
+node_modules
+vendor
+public
+index.local.html
+supabase.config.local.json
+dist/chillcheck.local.html
+__pycache__
